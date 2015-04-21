@@ -1,0 +1,382 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>nlid_toolbox_Demo</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-02-17"><meta name="DC.source" content="nlid_toolbox_Demo.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Display a list of all the classess defined in the nlid_toolbox'</a></li><li><a href="#3">show all defined methods for class nldat</a></li><li><a href="#4">Show help for one methods for a class</a></li><li><a href="#5">Show help summary for all methods for a class nldat</a></li><li><a href="#6">nldat class - data class</a></li><li><a href="#7">compute and plot probabilty distribution</a></li><li><a href="#8">compute and plot spectrum</a></li><li><a href="#9">Compute and plot autospectrum</a></li><li><a href="#10">Simulate a second order low pass system</a></li><li><a href="#11">Correlation properties</a></li><li><a href="#12">Spectral  properties</a></li><li><a href="#13">Impulse Response function</a></li><li><a href="#14">Simulate response</a></li><li><a href="#15">Frequency Response</a></li><li><a href="#16">Predict response</a></li><li><a href="#17">Convert IRf to frequency response</a></li><li><a href="#18">Convert  frequency response to IRF</a></li></ul></div><pre class="codeinput"><span class="comment">%%nlid_toolbox_demo</span>
+<span class="comment">%</span>
+<span class="comment">% Script to demosntrate basic functionality of nlid_tools</span>
+<span class="comment">%</span>
+<span class="comment">%</span>
+<span class="comment">% Enable cell mode and go through one cell at a time</span>
+<span class="comment">% 29 March 2007</span>
+<span class="comment">%$ Getting Help</span>
+<span class="comment">% Show  Westick &amp; Kearney Paper as an introduction</span>
+w=which(<span class="string">'nlid_demo'</span>);
+[d,f]=fileparts(w);
+paperFile=[d <span class="string">'\docs\Westwick_Kearney_2004.pdf'</span>];
+web(paperFile)
+</pre><h2>Display a list of all the classess defined in the nlid_toolbox'<a name="2"></a></h2><pre class="codeinput">nlid_help (<span class="string">'classList'</span>);
+</pre><pre class="codeoutput">nlid_tools. Defined classes
+  @cor:  cor - correlation class for NLID toolbox
+  @fresp:  frequency response class for NLID toolbox   
+  @irf:  irf - impulse response function class for NLID toolboc.
+  @kern:  kern - kernel class for NLID toolbox 
+  @lnbl:  lnbl - linear-nonlinear block model class for NLID toolbox
+  @lnlbl:  lnlbl - linear-nonlinear-linear block model class for NLID toolbox.
+  @nlbl:  nlbl - nonlinear-linear block model class for NLID toolbox.
+  @nldat: nldat - data  class  for NLID toolbox
+  @nlm:  nlm - nonlinear model parent class for NLID toolbox.
+  @nltop:  nltop - parent class for all NLID classes
+  @param:  param - parameter class for NLID toolbox
+  @pcascade:  pcascade - parallel cascade model class for NLID toolbox.
+  @pdf:  pdf - probabilty distribution function class for NLID toolbox
+  @polynom:  polynom - polynomial class for NLID toolbox.
+  @randvar:  randvar - random variate class for NLID toolbox
+  @spect:  spect - power spectrum class for NLID toolbox. 
+  @ssm: State-space model for NLID toolbox
+  @vkern:  vkern - Volterra kernel class for NLID toolbox
+  @vseries:  vseries - Volterra series model class for NLID toolbox
+  @waveform:  waveform - waveform class for NLID toolbox
+  @wkern:  wkern - Wiener kernel class for nLID toolbox
+  @wseries:  wseries - Wiener series model class for NLID toolbox
+</pre><h2>show all defined methods for class nldat<a name="3"></a></h2><pre class="codeinput">methods(nldat)
+</pre><pre class="codeoutput">
+Methods for class nldat:
+
+abs         domain      fitdist     mean        random_pdf  std         
+angle       double      fkbi        min         random_sig  subsasgn    
+cat         emean       get         minus       rdivide     subsref     
+chop        end         hwrect      mtimes      real        sum         
+cumsum      errorPlot   iddata      nldat       reshape     uminus      
+ddt         ext         isnan       nlmtst      set         uplus       
+decimate    extract     length      phase       size        vaf         
+delay       fft         line        plot        smo         var         
+detrend     fgzw        log         plus        squeeze     
+disp        filter      max         prt         stairs      
+
+</pre><h2>Show help for one methods for a class<a name="4"></a></h2><pre class="codeinput">help <span class="string">nldat/plot</span>
+</pre><pre class="codeoutput">  nldat/plt - overloaded plot function for "nldat" class
+  plot (d, varagin);
+  options= 'plotmode' [line] 'plot type (line/xy/Super)
+          'help_flag' 0 'display help (0=No/1=yes)
+           nh - number of horizontal plots'
+           nv - number of vertical plots' 
+           nplt - plot number' 
+           xmode
+           y mode
+
+</pre><h2>Show help summary for all methods for a class nldat<a name="5"></a></h2><pre class="codeinput">disp(<span class="string">'Display help on all methods for a class'</span>)
+nlid_help(<span class="string">'nldat'</span>);
+</pre><pre class="codeoutput">Display help on all methods for a class
+nlid_tools. Methods for class: nldat
+  nldat/fgzw:  fgzw(t,params)  - compute 2-nd order IRF for k,z,w
+  nldat/fkbi:   [y,dyda]=fkbi(x,a) - compute second-order IRF for K,B,I
+  nldat/nldat: nldat - data  class  for NLID toolbox
+  nldat/nlmtst: UNTITLED Test opweration of nldat objects 
+  nldat/plot:  nldat/plt - overloaded plot function for "nldat" class
+  nldat/random_pdf:  usage: y = random_pdf ( type, x, varargin) 
+  nldat/random_sig:  X     - seed signal 
+  nldat/vaf:  VAF function for nldat sets vf = vaf (x,y, DIM)
+</pre><h2>nldat class - data class<a name="6"></a></h2><pre class="codeinput">x=randn(5000,1);
+X=nldat(x); <span class="comment">% Convert real to nldat</span>
+set(X,<span class="string">'domainIncr'</span>,.01,<span class="string">'chanNames'</span>,{<span class="string">'testSignal'</span>}, <span class="string">'comment'</span>,<span class="string">'Test signal for demosntration purposes'</span>, <span class="keyword">...</span>
+<span class="string">'chanUnits'</span>,{<span class="string">'V'</span>} ) <span class="comment">% set domain increment</span>
+disp(X) <span class="comment">% Show properties</span>
+clf
+plot(X)
+</pre><pre class="codeoutput">
+ans = 
+
+  5000x1x1 nldat array with properties:
+
+       chanNames: {'testSignal'}
+       chanUnits: {'V'}
+      domainIncr: 0.0100
+      domainName: 'Time (s)'
+     domainStart: 0
+    domainValues: NaN
+         dataSet: [5000x1 double]
+        dataSize: [5000 1]
+         comment: 'Test signal for demosntration purposes'
+         version: '2.01'
+
+  5000x1x1 nldat array with properties:
+
+       chanNames: {'testSignal'}
+       chanUnits: {'V'}
+      domainIncr: 0.0100
+      domainName: 'Time (s)'
+     domainStart: 0
+    domainValues: NaN
+         dataSet: [5000x1 double]
+        dataSize: [5000 1]
+         comment: 'Test signal for demosntration purposes'
+         version: '2.01'
+
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_01.png" alt=""> <h2>compute and plot probabilty distribution<a name="7"></a></h2><pre class="codeinput">plot(pdf(X));
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_02.png" alt=""> <h2>compute and plot spectrum<a name="8"></a></h2><pre class="codeinput">plot(spect(X))
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_03.png" alt=""> <h2>Compute and plot autospectrum<a name="9"></a></h2><p>Default parameters</p><pre class="codeinput">C=cor(X);
+subplot (3,1,1);
+plot(C);
+<span class="comment">% Nsides =2 ;</span>
+subplot(3,1,2);
+plot(cor(X,<span class="string">'nSides'</span>,2));
+<span class="comment">% Nsides =2 nlags=50;;</span>
+subplot(3,1,3);
+plot(cor(X,<span class="string">'nSides'</span>,2,<span class="string">'nLags'</span>,50));
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_04.png" alt=""> <h2>Simulate a second order low pass system<a name="10"></a></h2><pre class="codeinput">Z = nlid_sim(<span class="string">'L1'</span>,X);
+plot(Z)
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_05.png" alt=""> <h2>Correlation properties<a name="11"></a></h2><p>Note that nldat objects are indexed in the same way as matlab variables Input Autocorrelation</p><pre class="codeinput">nLags=30;
+subplot(3,1,1);
+cX = cor(Z(:,1),<span class="string">'nLags'</span>,nLags,<span class="string">'comment'</span>,<span class="string">'Input autocorrelation'</span>);
+plot(cX);
+<span class="comment">% output autocorrelation</span>
+subplot (3,1,2);
+cY = cor(Z(:,2),<span class="string">'nLags'</span>,nLags, <span class="string">'comment'</span>,<span class="string">'Output autocorrelation'</span>);
+plot(cY);
+<span class="comment">% Input/output cross correlation</span>
+subplot(3,1,3);
+cXY = cor (Z,<span class="string">'nLags'</span>,nLags,<span class="string">'comment'</span>,<span class="string">'Input-output cross-correlation'</span>);
+plot (cXY);
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_06.png" alt=""> <h2>Spectral  properties<a name="12"></a></h2><p>Input spectrum</p><pre class="codeinput">nFFT=200;
+subplot(3,1,1);
+sX = spect(Z(:,1),<span class="string">'nFFT'</span>,nFFT,<span class="string">'comment'</span>,<span class="string">'Input Spectrum'</span>);
+plot(sX);
+<span class="comment">% output autocorrelation</span>
+subplot (3,1,2);
+sY = spect(Z(:,2),<span class="string">'nFFT'</span>,nFFT, <span class="string">'comment'</span>,<span class="string">'Output spectrum'</span>);
+plot(sY);
+<span class="comment">% Input/output cross correlation</span>
+subplot(3,1,3);
+sXY = spect (Z,<span class="string">'nFFT'</span>,nFFT,<span class="string">'comment'</span>,<span class="string">'Input-output cross-sprectrum'</span>);
+plot (sXY);
+</pre><pre class="codeoutput">Warning: Imaginary parts of complex X and/or Y arguments ignored 
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_07.png" alt=""> <h2>Impulse Response function<a name="13"></a></h2><pre class="codeinput">I=irf(Z,<span class="string">'nLags'</span>,51);
+plot(I);
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_08.png" alt=""> <h2>Simulate response<a name="14"></a></h2><pre class="codeinput">xIn=Z(:,1);
+yOut=Z(:,2);
+yPre = nlsim(I,xIn);
+plot(yPre);
+yResid = yOut - yPre;
+set(yResid,<span class="string">'chanNames'</span>,<span class="string">'Residual'</span>);
+
+V=vaf(yOut,yPre);
+disp([<span class="string">'Variance accounted for:'</span> num2str(double(V))])
+Zp=cat(2,yOut, yPre);
+Zp=cat(2,Zp, yResid);
+plot(Zp,<span class="string">'nv'</span>,3)
+</pre><pre class="codeoutput">Variance accounted for:99.9841
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_09.png" alt=""> <h2>Frequency Response<a name="15"></a></h2><pre class="codeinput">F=fresp(Z, <span class="string">'nFFT'</span>,50);
+plot(F)
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_10.png" alt=""> <h2>Predict response<a name="16"></a></h2><pre class="codeinput">yPre = nlsim(F,xIn);
+plot(yPre);
+yResid = yOut - yPre;
+set(yResid,<span class="string">'chanNames'</span>,<span class="string">'Residual'</span>);
+
+V=vaf(yOut,yPre);
+disp([<span class="string">'Variance accounted for:'</span> num2str(double(V))])
+Zp=cat(2,yOut, yPre);
+Zp=cat(2,Zp, yResid);
+plot(Zp,<span class="string">'nv'</span>,3)
+</pre><pre class="codeoutput">Variance accounted for:98.7332
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_11.png" alt=""> <h2>Convert IRf to frequency response<a name="17"></a></h2><pre class="codeinput">fI = fresp(I);
+plot(fI);
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_12.png" alt=""> <h2>Convert  frequency response to IRF<a name="18"></a></h2><pre class="codeinput">iFreq = irf(F);
+plot(iFreq);
+</pre><img vspace="5" hspace="5" src="nlid_toolbox_Demo_13.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%%nlid_toolbox_demo
+%
+% Script to demosntrate basic functionality of nlid_tools
+%
+%
+% Enable cell mode and go through one cell at a time
+% 29 March 2007 
+%$ Getting Help 
+% Show  Westick & Kearney Paper as an introduction
+w=which('nlid_demo');
+[d,f]=fileparts(w);
+paperFile=[d '\docs\Westwick_Kearney_2004.pdf'];
+web(paperFile)
+
+
+%% Display a list of all the classess defined in the nlid_toolbox' 
+nlid_help ('classList');
+%% show all defined methods for class nldat
+methods(nldat)
+%% Show help for one methods for a class
+help nldat/plot
+%% Show help summary for all methods for a class nldat
+disp('Display help on all methods for a class') 
+nlid_help('nldat');
+%% nldat class - data class
+x=randn(5000,1);
+X=nldat(x); % Convert real to nldat
+set(X,'domainIncr',.01,'chanNames',{'testSignal'}, 'comment','Test signal for demosntration purposes', ...
+'chanUnits',{'V'} ) % set domain increment
+disp(X) % Show properties
+clf
+plot(X)
+%% compute and plot probabilty distribution
+plot(pdf(X));
+%% compute and plot spectrum
+plot(spect(X))
+%% Compute and plot autospectrum 
+% Default parameters
+C=cor(X);
+subplot (3,1,1);
+plot(C);
+% Nsides =2 ;
+subplot(3,1,2);
+plot(cor(X,'nSides',2));
+% Nsides =2 nlags=50;;
+subplot(3,1,3);
+plot(cor(X,'nSides',2,'nLags',50));
+
+%% Simulate a second order low pass system
+Z = nlid_sim('L1',X);
+plot(Z)
+%% Correlation properties
+% Note that nldat objects are indexed in the same way as matlab variables
+% Input Autocorrelation
+nLags=30;
+subplot(3,1,1);
+cX = cor(Z(:,1),'nLags',nLags,'comment','Input autocorrelation');
+plot(cX); 
+% output autocorrelation
+subplot (3,1,2);
+cY = cor(Z(:,2),'nLags',nLags, 'comment','Output autocorrelation');
+plot(cY);
+% Input/output cross correlation
+subplot(3,1,3);
+cXY = cor (Z,'nLags',nLags,'comment','Input-output cross-correlation'); 
+plot (cXY);
+
+%% Spectral  properties
+% 
+% Input spectrum 
+nFFT=200;
+subplot(3,1,1);
+sX = spect(Z(:,1),'nFFT',nFFT,'comment','Input Spectrum');
+plot(sX); 
+% output autocorrelation
+subplot (3,1,2);
+sY = spect(Z(:,2),'nFFT',nFFT, 'comment','Output spectrum');
+plot(sY);
+% Input/output cross correlation
+subplot(3,1,3);
+sXY = spect (Z,'nFFT',nFFT,'comment','Input-output cross-sprectrum'); 
+plot (sXY);
+
+%% Impulse Response function
+I=irf(Z,'nLags',51);
+plot(I);
+%% Simulate response
+xIn=Z(:,1);
+yOut=Z(:,2);
+yPre = nlsim(I,xIn);
+plot(yPre);
+yResid = yOut - yPre;
+set(yResid,'chanNames','Residual'); 
+
+V=vaf(yOut,yPre); 
+disp(['Variance accounted for:' num2str(double(V))])
+Zp=cat(2,yOut, yPre);
+Zp=cat(2,Zp, yResid);
+plot(Zp,'nv',3)
+
+%% Frequency Response
+F=fresp(Z, 'nFFT',50);
+plot(F)
+%% Predict response
+yPre = nlsim(F,xIn);
+plot(yPre);
+yResid = yOut - yPre;
+set(yResid,'chanNames','Residual'); 
+
+V=vaf(yOut,yPre); 
+disp(['Variance accounted for:' num2str(double(V))])
+Zp=cat(2,yOut, yPre);
+Zp=cat(2,Zp, yResid);
+plot(Zp,'nv',3)
+
+%% Convert IRf to frequency response
+fI = fresp(I);
+plot(fI);
+
+%% Convert  frequency response to IRF 
+iFreq = irf(F);
+plot(iFreq);
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

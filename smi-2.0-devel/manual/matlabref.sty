@@ -1,0 +1,159 @@
+%% matlabref.sty
+%% 1997/12/04 v1.1
+%% 
+%% R. Babuska, V. Verdult, B. Haverkamp
+%% Definition for matlab style reference manual.
+%%
+%% Usage
+%%  In preamble include the line:
+%% \usepackage{matlabref}
+%%
+%% Use \renewcommand{\foot}{...} to define a foot heading
+%%
+%% In the text use:
+%% \begin{reftable}
+%%    {function name} & {Short description of function}\\
+%% \end{reftable}
+%%
+%% \begin{command}{function name}
+%%    \begin{purpose}
+%%
+%%    \end{purpose}
+%%    \begin{syntax}
+%%        ... 
+%%    \end{syntax}
+%%    \begin{inputs}
+%%        \item[input name] {explanation of input}
+%%        etc...
+%%    \end{inputs} 
+%%    \begin{outputs}
+%%       \item[output name] {explanation of output}
+%%       etc...
+%%    \end{outputs}
+%%    \begin{descr}
+%%        ...
+%%    \end{descr}
+%%    \begin{algorithm}
+%%        ...
+%%    \end{algorithm}
+%%    \begin{example}
+%%        ... 
+%%    \end{example}
+%%    \begin{seealso}
+%%        ...
+%%    \end{seealso}
+%%  \end{command}
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{matlabref}[1997/12/04 v1.1  Matlab Manual Style]
+\RequirePackage{fancyheadings}
+\RequirePackage{ifthen}
+
+\newboolean{MR@hyper}
+\DeclareOption{hyper}{\setboolean{MR@hyper}{true}}
+\DeclareOption*{\setboolean{MR@hyper}{false}}
+\ProcessOptions*
+
+%\ifthenelse{\boolean{MR@hyper}}{\usepackage[dvips]{hyperref}}{}
+%\ifthenelse{\boolean{MR@hyper}}{%
+%\pdfcompresslevel=9 
+%\pdfoutput=1
+%\usepackage[pdftex]{hyperref} }{}
+
+%%% Redefine Headings %%%
+\newcommand{\foot}{}%add what you want here
+\pagestyle{fancy}
+\addtolength{\headheight}{2.5pt}
+\renewcommand{\chaptermark}[1]{\markright{}}
+\lhead[\rightmark]{} \rhead[]{\rightmark} \chead{} \cfoot{}
+\lfoot[\thepage]{\textsl{\footnotesize\foot}}
+\rfoot[\textsl{\footnotesize\foot}]{\thepage} 
+\setlength{\headrulewidth}{0pt}
+\setlength{\footrulewidth}{0pt}
+
+%%% New Commands and Environments %%%
+\newlength{\@tablength}
+\setlength{\@tablength}{.85\textwidth}
+\addtolength{\@tablength}{-2cm}
+
+\newcommand{\@deflengths}{%
+    \setlength{\topsep}{0pt}\setlength{\partopsep}{0pt}
+    \setlength{\leftmargin}{1cm}\setlength{\itemindent}{0pt}
+    \setlength{\parsep}{2ex}\setlength{\itemsep}{0pt}}
+
+\newenvironment{@iolist}[1]
+ {\begin{list}{}
+       {\setlength{\labelwidth}{2cm}\setlength{\labelsep}{5mm}
+        \setlength{\itemsep}{0ex plus 0.2 ex}
+        \setlength{\parsep}{0pt}
+        \setlength{\leftmargin}{1.5cm}
+        \setlength{\itemindent}{0pt}
+        \renewcommand{\makelabel}[1]{\texttt{##1\hfill}}}}
+ {\end{list}}
+
+\newenvironment{reftable}[1]{\begin{center}%
+  \begin{tabular}{|p{2cm}@{\hspace*{.5cm}}p{\@tablength}|}\hline
+  \multicolumn{2}{|c|}{\rule[-3mm]{0mm}{9mm}\large\textsf{\textbf{#1}}}\\
+  \hline}{\hline\end{tabular}\end{center}}
+
+\newenvironment{command}[1]{%
+   \newpage \vspace*{.5cm}{\LARGE\bf #1}%
+   %\ifthenelse{\boolean{MR@hyper}}{\pdfbookmark{#1}{#1}}{}%
+   \hfill\vspace*{1mm}%
+   \hrule\vspace*{3mm}%
+   \def\thecommand{#1}%
+   \begin{description}%
+   \addcontentsline{toc}{subsection}{#1}%
+   \lhead[\small{\textsl{#1}}]{}%
+   \rhead[]{\small{\textsl{#1}}}}{%
+   \end{description}}
+      
+\newenvironment{purpose}{%
+  \begin{list}{}{%
+   \@deflengths
+   \item {\large\textsf{\textbf{Purpose}}}\vspace*{-\parsep}}}
+  {\end{list}\vspace{2ex}\par}
+
+\newenvironment{syntax}{%
+  \begin{list}{}{%
+   \@deflengths
+   \item {\large\textsf{\textbf{Syntax}}}\vspace*{-\parsep}\ttfamily}}
+  {\end{list}\vspace{2ex}\par}
+
+\newenvironment{inputs}
+  {\begin{list}{}{%
+   \@deflengths  \item {\large\textsf{\textbf{Inputs}}}}
+   \item \begin{@iolist}{}}
+  {\end{@iolist}\end{list}\par}
+
+\newenvironment{outputs}
+  {\begin{list}{}{%
+   \@deflengths  \item {\large\textsf{\textbf{Outputs}}}}
+   \item \begin{@iolist}{}}
+  {\end{@iolist}\end{list}\par}
+
+\newenvironment{descr}{%
+  \begin{list}{}{%
+   \@deflengths
+   \item {\large\textsf{\textbf{Description}}}\vspace*{-\parsep}}}
+  {\end{list}\vspace{2ex}\par}  
+
+\newenvironment{mrexample}{%
+  \begin{list}{}{%
+   \@deflengths
+   \item {\large\textsf{\textbf{Example}}}\vspace*{-\parsep}}}
+  {\end{list}\vspace{2ex}\par}
+
+\newenvironment{mralgorithm}{%
+  \begin{list}{}{%
+   \@deflengths
+   \item {\large\textsf{\textbf{Algorithm}}}\vspace*{-\parsep}}}
+  {\end{list}\vspace{2ex}\par}
+
+\newenvironment{seealso}{%
+  \begin{list}{}{%
+   \@deflengths
+   \item {\large\textsf{\textbf{See also}}}\vspace*{-\parsep}\ttfamily}}
+  {\end{list}\vspace{2ex}\par}
+
+%%%  End of matlabref.sty  %%%

@@ -1,0 +1,22 @@
+Notes for HammerSLS.m
+
+The main routine is in HammerSLS.m
+
+the two other files, 
+  poly_rescale.m
+  lm_sls_parameters.m
+should go somewhere that HammerSLS can see.  They will also be called
+  by the SLS toolbox routines for Wiener and LNL systems (and parallel
+  cascade reflex model, and...)
+
+In addition, HammerSLS must be able to see the following nlid_toolbox
+routines.
+  multi_pwr.m
+  multi_herm.m
+  multi_tcheb.m
+
+The routine still needs some work -- especially in finding suitable
+stopping conditions.  An interface for manipulating the training 
+parameters might be helpful.
+
+

@@ -1,0 +1,1714 @@
+\documentclass{book}
+\usepackage{matlabref}
+
+%\setlength{\oddsidemargin}{1cm}
+%\setlength{\evensidemargin}{1cm}
+%\setlength{\textwidth}{16cm}
+
+\newcommand{\vc}[1]{\left[\begin{array}{c}#1\end{array}\right]}
+\newcommand{\mat}[2]{\left[\begin{array}{#1}#2\end{array}\right]}
+
+% standard commands
+\newcommand{\lsim}{\texttt{lsim}}
+\newcommand{\dlsim}{\texttt{dlsim}}
+\newcommand{\foptions}{\texttt{foptions}}
+\newcommand{\detrend}{\texttt{detrend}}
+\newcommand{\leastsq}{\texttt{leastsq}}
+
+% algorithms and trademarks
+\newcommand{\smi}{\textsc{smi}}
+\newcommand{\matlab}{\textsc{matlab}}
+\newcommand{\scilab}{\textsc{scilab}}
+\newcommand{\nfoursid}{\textsc{n4sid}} 
+\newcommand{\cva}{\textsc{cva}} 
+\newcommand{\moesp}{\textsc{moesp}}
+% toolbox functions
+\newcommand{\moespf}{\texttt{moesp}}% function
+\newcommand{\destbd}{\texttt{destbd}} 
+\newcommand{\destk}{\texttt{destk}} 
+\newcommand{\destx}{\texttt{destx}} 
+
+\newcommand{\dordxx}{\texttt{dordxx}}% denotes general dord-function
+\newcommand{\dordom}{\texttt{dordom}}
+\newcommand{\dordpo}{\texttt{dordpo}} 
+\newcommand{\dordpi}{\texttt{dordpi}} 
+\newcommand{\dordrs}{\texttt{dordrs}} 
+\newcommand{\dordeiv}{\texttt{dordeiv}}
+\newcommand{\orderselect}{\texttt{orderselect}}
+\newcommand{\destac}{\texttt{destac}} 
+\newcommand{\chebest}{\texttt{chebest}} 
+\newcommand{\chebsim}{\texttt{chebsim}}
+% continuous time commands
+\newcommand{\cordxx}{\texttt{cordxx}} 
+\newcommand{\cordom}{\texttt{cordom}} 
+\newcommand{\cordpo}{\texttt{cordpo}} 
+\newcommand{\cordpi}{\texttt{cordpi}} 
+\newcommand{\cestac}{\texttt{cestac}} 
+\newcommand{\cestbd}{\texttt{cestbd}} 
+\newcommand{\cestx}{\texttt{cestx}} 
+% non-causal commands
+\newcommand{\ncdestac}{\texttt{ncdestac}} % denotes general ncdord-function
+\newcommand{\ncdestbd}{\texttt{ncdestbd}}
+\newcommand{\ncdlsim}{\texttt{ncdlsim}}
+% recursive moesp
+\newcommand{\drpo}{\texttt{drpo}}
+\newcommand{\drpi}{\texttt{drpi}}
+
+% sls commands
+\newcommand{\dslslin}{\texttt{dslslin}}
+\newcommand{\dslswie}{\texttt{dslswie}}
+\newcommand{\dfunlin}{\texttt{dfunlin}}
+\newcommand{\dfunwie}{\texttt{dfunwie}}
+\newcommand{\cslslin}{\texttt{cslslin}}
+\newcommand{\drslslin}{\texttt{drslslin}}
+
+\newcommand{\dsstoth}{\texttt{dss2th}}
+\newcommand{\dthtoss}{\texttt{dth2ss}}
+\newcommand{\csstoth}{\texttt{css2th}}
+\newcommand{\cthtoss}{\texttt{cth2ss}}
+
+
+% demos
+\newcommand{\smidemoone}{\texttt{smidemo1}}
+\newcommand{\smidemotwo}{\texttt{smidemo2}}
+\newcommand{\smidemothree}{\texttt{smidemo3}}
+\newcommand{\smidemofour}{\texttt{smidemo4}}
+\newcommand{\smidemofive}{\texttt{smidemo5}}
+
+\begin{document}
+
+\tableofcontents  
+\chapter{User guide to SMI 2.0}
+
+\section{List of functions in SMI 2.0}
+The following table gives an overview of the functions in the SMI
+toolbox. Some function are new to this toolbox. Others appeared in the
+previous version of the toolbox under an other name. These names have
+been changed to prevent conflicts with other toolboxes and to provide
+a more consistent naming. This makes the functions easier to recognize
+and remember.
+
+\label{app:smi} \begin{tabular}{|l|l|l|}
+ \hline
+ \textbf{function}&\textbf{description}& \textbf{old name}\\\hline
+ \multicolumn{3}{|c|}{\textbf{Discrete time moesp}}\\\hline
+ dordom&Ordinary moesp preprocessor&dordom\\\hline 
+ dordpi&Ppast input moesp preprocessor&dordpi\\\hline
+ dordpo&Past output moesp preprocessor&dordpo\\\hline
+ dordeiv&Eiv moesp preprocessor&-\\\hline
+ dordrs&Reconstructed state moesp preprocessor&dordrs\\\hline
+ destac&Estimate A,C&dmodpi,dmodpo\\\hline 
+ destbd&Estimate B,D&dac2bd,destb\\\hline
+ destk&Estimate Kalman gain&dmodpo\\\hline
+ destx &Estimate initial state &dinit \\\hline
+ dmoesp&Frontend for DT moesp&-\\\hline
+ \multicolumn{3}{|c|}{\textbf{Continuous time moesp}}\\\hline
+ cordom&Ordinary moesp preprocessor&-\\\hline 
+ cordpi&Past input moesp preprocessor&-\\\hline
+ cordpo&Past output moesp preprocessor&-\\\hline
+ cestac&Estimate A,C&-\\\hline 
+ cestbd&Estimate B,D&-\\\hline
+ cestx &Estimate initial state &- \\\hline
+ \multicolumn{3}{|c|}{\textbf{Recursive moesp}}\\\hline
+ drpi&Recursive PI moesp&-\\\hline
+ drpo&Recursive PO moesp&-\\\hline
+ \multicolumn{3}{|c|}{\textbf{SLS optimization}}\\\hline
+ dss2th&Parameterization of state space system &ss2thon\\\hline
+ dth2ss&Reconstruction of state space system & th2sson\\\hline
+ dslslin&Optimize DT linear model using SLS&gnlisls\\\hline 
+ dslswie&Optimize DT wiener model using SLS&gnwisls\\\hline 
+ dfunlin&Cost-function for dslslin&-\\\hline 
+ dfunwie&Cost-function for dslswie&-\\\hline 
+ drslslin&Recursive optimization of DT model using SLS&-\\\hline 
+ clslin&Optimize CT linear model using SLS&-\\\hline 
+ cfunlin&Cost-function for dslslin&-\\\hline 
+ crslslin&Recursive optimization of CT model using SLS&-\\\hline 
+ \multicolumn{3}{|c|}{\textbf{Non causal models}}\\\hline
+ ncdlsim &Simulate non causal model&-\\\hline
+ ncdestac&Estimate A and C for non-causal model&-\\\hline
+ ncdestbd&Estimate B and D for non-causal model&-\\\hline
+ kroneckf&Calculate Kronecker canonical form&-\\\hline
+ \multicolumn{3}{|c|}{\textbf{Nonlinear models}}\\\hline
+ chebest&Estimate MIMO nonlinear model &tchebest \\\hline
+ chebsim&Simulate MIMO nonlinear model &tchebest \\\hline
+\multicolumn{3}{|c|}{\textbf{Miscellaneous}}\\\hline
+prbn&Pseudo random binary sequence &prbn\\\hline
+vaf&Variance accounted for&vaf\\\hline
+shave& Remove peaks and outliers&shave\\\hline
+\end{tabular}
+
+\section{Function descriptions}
+
+
+\begin{command}{cestac}
+\begin{purpose}
+  Estimates the matrices $A$ and $C$ of a LTI state space model using the
+  result of the preprocessor routines {\cordxx} ({\cordom}, {\cordpo}, etc.).
+  General model structure:
+  \begin{eqnarray*}
+    \dot{x}(t) &=&  A x(t) + B u(t) +w(t)\\
+    y(t) &=& C x(t) + Du(t) + v(t)
+  \end{eqnarray*}
+  For more information about the disturbance properties see
+  the help pages for the preprocessor {\cordxx} functions.
+\end{purpose}
+\begin{syntax}
+  [A,C]=cestac(R,n);
+\end{syntax}
+\begin{inputs}
+\item[R] Data structure obtained from {\cordxx}, containing the
+  triangular factor and additional information (such as i/o dimension
+  etc.).
+\item[n] Order of system to be estimated.
+\end{inputs}
+\begin{outputs}
+\item[A,C] Estimated system matrices.
+\end{outputs}
+\begin{seealso}
+ {\cordom}, {\cordpi}, {\cordpo}, {\cestbd}
+\end{seealso}
+\end{command}%cestac
+ 
+\begin{command}{cestbd}
+   \begin{purpose}
+    Estimates the matrices $B$ and $D$ of the state space model
+    \begin{eqnarray*}
+      \dot{x}(t) &=&  A x(t) + B u(t) +w(t)\\
+      y(t) &=& C x(t) + D u(t) + v(t)\\
+      x(0) &=& x_0
+    \end{eqnarray*}
+    using the knowledge of the pair $A$, $C$. This function can
+    concatenate different input-output data batches, through the
+    matrix R and Rold).  $B$ and $D$ and $x_0$ are calculated by
+    solving a linear least squares problem.
+  \end{purpose}
+  \begin{syntax} 
+    [B,D,x0,R]=cestbd(u,y,A,C,[fB fD fx],Rold);\\[0pt]
+    [B,D]=cestbd(u,y,A,C);
+  \end{syntax}
+  \begin{inputs}
+\item[u,y] The input and output data of the system to be identified.
+\item[A,C] The estimated system matrices  $A$ and $C$.
+\item[model] Three element flag vector $\mat{ccc}{fB& fD& fx}$ indicating whether 
+  $B$, $D$ and $x_0$ should be estimated. The default value is $\mat{ccc}{1&1&0}$.
+  The matrix $B$ or $D$  can be assumed zero by setting
+  $fB$ or $fD$ to zero. The calculation of $x_0$ can be omitted by 
+  setting $fx$ to zero. However $x_0$ will not be assumed zero then.
+  It's influence will still be taken into account for the
+  computation  of $B$ and $D$.
+\item[Rold] $R$ matrix obtained from previous data batch. This variable
+  can be used to process data in batches, or to combine data from
+  different experiments.
+  \end{inputs}
+  \begin{outputs}
+  \item[B,D]   The estimated system matrices $B$ and $D$.
+  \item[x0]   The estimated initial state of the system.
+  \item[R] Compressed data matrix,  storing information on the calculation of
+    the  matrices $B$ and $D$ in following {\cestbd}. Used when analyzing
+    multiple input-output data sequences.
+  \end{outputs}
+  \begin{seealso}
+    {\cordxx}, {\cestac}, {\cestx}
+  \end{seealso}
+\end{command}%cestbd
+
+\begin{command}{cestx}
+\begin{purpose}
+  Estimate the initial state, given the estimated system matrices and
+  a set of input/output data.
+\end{purpose}
+\begin{syntax}
+  x0=cestx(u,y,Ts,A,B,C,D);
+\end{syntax}
+\begin{inputs}
+\item[u,y] The input and output data of the system to be
+  identified.
+\item[Ts] Sampling period of the measured data.
+\item[A,B,C,D] System matrices. 
+\end{inputs}
+\begin{outputs}
+\item[x0] Estimated initial state.
+\end{outputs}
+\begin{seealso}
+{\cestbd}
+\end{seealso}
+\end{command}%cestx
+
+\begin{command}{chebest}
+
+\begin{purpose}
+This function estimates a MIMO static nonlinear function
+between the signals $y$ and $z$. The function is
+estimated on the basis of Chebychev polynomials.
+Before estimating the coefficients of the polynomials
+the input signal is shifted and scaled to fall within the
+region [-1,1]. The shifting and scaling factors are
+included in the parameter vector.
+\end{purpose}
+
+\begin{syntax}
+[thl,ze,Phi]=chebest(y,z,nn);
+\end{syntax}
+
+\begin{inputs}
+\item[y,z] Input and output of the nonlinearity.
+\item[nn] Order of the Chebychev polynomials in the nonlinear
+  function.
+\end{inputs}
+
+\begin{outputs}
+\item[thl] Vector with the parameters of the static nonlinearity.
+\item[ze] Estimated output, on basis of the model that is obtained.
+\item[Phi] matrix with the Chebychev functions of y, such that\\
+  $\mbox{ze}=\mbox{Phi}\times\mbox{thl}$.
+\end{outputs}
+
+\begin{seealso}
+{\chebsim}, {\dslswie}
+\end{seealso}
+\end{command}%chebest
+
+\begin{command}{chebsim}
+\begin{purpose}
+  Simulates a static nonlinear function on the basis of Chebychev
+  polynomials with input $y$. The coefficients of the Chebychev
+  polynomials are given with the vector thl, and commonly estimated
+  with either {\dslswie} or {\chebest}.
+\end{purpose}
+
+\begin{syntax}
+[ze,Phi]=chebsim(y,thl)
+\end{syntax}
+\begin{inputs}
+\item[y] The input to the nonlinearity.
+\item[thl] Parameter matrix, with coefficients of the nonlinear
+  function.
+\end{inputs}
+
+\begin{outputs}
+\item[ze] Estimated output.
+\item[Phi] matrix with the Chebychev functions of y, such that\\
+ $\mbox{ze}=\mbox{Phi}\times\mbox{thl}$.
+\end{outputs}
+
+\begin{seealso}
+  {\chebest}, {\dslswie}
+\end{seealso}
+\end{command}%chebsim
+
+
+\begin{command}{cordom}
+  \begin{purpose}
+    This function is a preprocessor function that extracts the
+    column-space of the extended observability matrix of a continuous
+    time LTI system from input/output data. The estimated column-space
+    is used in the function {\cestac} to extract the matrices A and C.
+    Model structure:
+    \begin{eqnarray*}
+      \dot{x}(t) &=&  A x(t) + B u(t)\\
+      y(t) &=& C x(t) + Du(t)
+    \end{eqnarray*}
+    This function does not use an instrumental variable and is comparable
+    to {\dordom} for the discrete time case.
+  \end{purpose}
+  
+  \begin{syntax}
+    [Sn,R]=cordpo(u,y,t,a,i);\\[0pt]
+    [Sn,R]=cordpo(u,y,t,a,i,Rold);
+  \end{syntax}
+
+  \begin{inputs}
+  \item[u,y] The input and output data of the system to be identified.
+  \item[t] Sampling time or time-vector for the sampled data.
+  \item[a] Filter coefficient of the Laguerre filters that are used in the
+    algorithm. When $a$ is negative, the anti-causal instrumental variable
+    method is used. Otherwise the causal instrumental variable method is
+    chosen.
+  \item[i] The dimension parameter that determines the number of block
+    rows in the processed Hankel matrices. This parameter should be
+    chosen larger than the expected system order. The optimal value has
+    to be found by trial and error. Generally twice as large is a good
+    starting value.
+\item[Rold] Data structure obtained from processing a previous
+  data-batch with {\cordom} containing the same items as $R$.
+\end{inputs}
+
+\begin{outputs}
+\item[Sn] Singular values bearing information on the order of the  system.
+\item[R] Data structure used by {\cestac} for the estimation of $A$
+  and $C$ or by a next call to {\cordom}. This matrix contains the
+  triangular factor, estimated column-space and additional information
+  (such as i/o dimension etc.).
+\end{outputs}
+         
+\begin{seealso}
+  {\cordpi}, {\cordpo}, {\cestac}, {\cestbd}.
+\end{seealso}
+\end{command}%cordom
+
+\begin{command}{cordpi}
+\begin{purpose}
+    This function is a preprocessor function that extracts the
+    column-space of the extended observability matrix of a continuous
+    time LTI system from input/output data. The estimated column-space
+    is used in the function {\cestac} to extract the matrices A and C.
+  Model structure:
+  \begin{eqnarray*}
+    \dot{x}(t) &=&  A x(t) + B u(t)\\
+    y(t) &=& C x(t) + Du(t) + v(t)
+  \end{eqnarray*}
+  where $v(t)$ is a finite variance disturbance on the output and is
+  independent of the noise-free input $u(t)$. This function uses the
+  past input instrumental variable and is comparable to {\dordpi} for
+  the discrete time case.
+\end{purpose}
+  
+\begin{syntax}
+[Sn,R]=cordpi(u,y,t,a,i);\\[0pt]
+[Sn,R]=cordpi(u,y,t,a,i,Rold);
+\end{syntax}
+
+\begin{inputs}
+\item[u,y] The input and output data of the system to be identified.
+\item[t] Sampling time or time-vector for the sampled data. 
+\item[a] Filter coefficient of the Laguerre filters that are used in
+  the algorithm. When $a$ is negative, the anti-causal instrumental
+  variable method is used. Otherwise the causal instrumental variable
+  method is chosen.
+\item[i] The dimension parameter that determines the number of block
+  rows in the processed Hankel matrices. This parameter should be
+  chosen larger than the expected system order. The optimal value has
+  to be found by trial and error. Generally twice as large is a good
+  starting value.
+\item[Rold] Data structure obtained from processing a previous
+  data-batch with {\cordpi} containing the same items as $R$.
+\end{inputs}
+
+\begin{outputs}
+\item[Sn] Singular values bearing information on the order of the
+  system.
+\item[R] Data structure used by {\cestac} for the estimation of $A$
+  and $C$ or by a next call to {\cordpi}. This matrix contains the
+  triangular factor, estimated column-space and additional information
+  (such as i/o dimension etc.).
+\end{outputs}
+         
+\begin{seealso}
+{\cordom}, {\cordpo}, {\cestac}, {\cestbd}.
+\end{seealso}
+\end{command}%cordpi
+
+\begin{command}{cordpo}
+\begin{purpose}
+    This function is a preprocessor function that extracts the
+    column-space of the extended observability matrix of a continuous
+    time LTI system from input/output data. The estimated column-space
+    is used in the function {\cestac} to extract the matrices A and C.
+  Model structure: 
+  \begin{eqnarray*}
+    \dot{x}(t) &=&  A x(t) + B u(t) +w(t)\\
+    y(t) &=& C x(t) + Du(t) + v(t)
+  \end{eqnarray*}
+  where $w(t)$ is a Wiener noise signal and $v(t)$ a finite variance
+  disturbance on the output, independent of the noise-free input
+  $u(t)$.
+  
+  This function uses the past output instrumental variable and is comparable
+  to {\dordpo} for the discrete time case.
+\end{purpose}
+  
+\begin{syntax}
+[Sn,R]=cordpo(u,y,t,a,i);\\[0pt]
+[Sn,R]=cordpo(u,y,t,a,i,Rold);
+\end{syntax}
+
+\begin{inputs}
+\item[u,y] The input and output data of the system to be identified.
+\item[t] Sampling time or time-vector for the sampled data.
+\item[a] Filter coefficient of the Laguerre filters that are used in
+  the algorithm. When $a$ is negative, the anti-causal instrumental
+  variable method is used. Otherwise the causal instrumental
+  variable method is chosen.
+\item[i] The dimension parameter that determines the number of block
+  rows in the processed Hankel matrices. This parameter should be
+  chosen larger than the expected system order. The optimal value
+  has to be found by trial and error. Generally twice as large is a
+  good starting value.
+\item[Rold] Data structure obtained from processing a previous
+  data-batch with {\cordpo} containing the same items as $R$.
+\end{inputs}
+
+\begin{outputs}
+\item[Sn] Singular values bearing information on the order of the
+  system.
+\item[R] Data structure used by {\cestac} for the estimation of $A$
+  and $C$ or by a next call to {\cordpo}. This matrix contains the
+  triangular factor, estimated column-space and additional information
+  (such as i/o dimension etc.).
+\end{outputs}
+         
+\begin{seealso}
+{\cordom}, {\cordpi}, {\cestac}, {\cestbd}.
+\end{seealso}
+\end{command}%cordpo
+
+
+\begin{command}{css2th}
+  \begin{purpose}
+    This function converts a continuous time state space model to a
+    parameter vector that describes the model.\\  Model structure:
+   \begin{eqnarray*}
+      \dot{x}(t) &=&  A x(t) + B u(t) +Ke(t)\\
+      y(t) &=& C x(t) + Du(t) + e(t)\\
+      x(0)&=&x_0
+    \end{eqnarray*}
+  \end{purpose}
+  \begin{syntax}
+    [theta,params] = css2th(A,B,C,D,x0,K,partype);\\[0pt]
+    [theta,params] = css2th(A,B,C,D);\\[0pt]
+    [theta,params] = css2th(A,C);
+  \end{syntax}
+  \begin{inputs}
+  \item[A,B,C,D] System matrices describing the state space system.
+    The $B$ and $D$ matrices are optional. An optional element can be left
+    out or given as an empty matrix to indicate it is not part of the
+    model.
+  \item[x0] Initial condition, This is optional.
+  \item[K] Kalman gain. Also this matrix is optional.
+  \item[partype] This parameter specifies the type of parameterization 
+    that is used to parameterize the state space model.
+    Two types of parameterization are supported:
+    'on'= Output Normal and 'tr'=TRidiagonal.
+  \end{inputs}
+  \begin{outputs}
+  \item[theta] Parameters vector describing the system.
+  \item[params] A structure that contains the dimension parameters of
+    the system, such as the order, the number of inputs, whether $B$,
+    $D$, $x_0$ or $K$ are present, etc.
+  \item[T] Transformation matrix between the input state space system
+    and the state space system in the form described by theta (output
+    normal or tridiagonal).
+  \end{outputs}
+  \begin{seealso}
+    \cthtoss, \cslslin
+  \end{seealso}
+\end{command}%css2th
+
+\begin{command}{cth2ss}
+  \begin{purpose}
+    This function converts a parameter vector that describes a
+    continuous time state space model in output normal form to the
+    state space matrices of that model.\\  Model structure:
+   \begin{eqnarray*}
+      \dot{x}(t) &=&  A x(t) + B u(t) +Ke(t)\\
+      y(t) &=& C x(t) + Du(t) + e(t)\\
+      x(0)&=&x_0
+    \end{eqnarray*}
+  \end{purpose}
+  \begin{syntax}
+    [A,B,C,D,x0,K] = cth2ss(theta,params)\\[0pt]
+    [A,C] = cth2ss(theta,params)
+  \end{syntax}
+  \begin{inputs}
+  \item[theta] Parameter vector describing the system.  
+  \item[params] A structure that contains the dimension parameters of
+    the system, such as the order, the number of inputs, whether $D$, $x_0$
+    or $K$ are present, etc.
+  \end{inputs}
+  \begin{outputs} 
+  \item[A,B,C,D] System matrices describing the state space system in
+    output normal form. If theta does not contain parameters for $D$,
+    this matrix will be returned as an empty matrix.
+  \item[x0] Initial condition. If theta does not contain parameters
+    for $x_0$ this vector will be returned as an empty matrix.
+  \item[K] Kalman gain. Same here.
+  \end{outputs}
+  \begin{seealso}
+    {\cthtoss}, {\cslslin}
+  \end{seealso}
+\end{command}%cth2ss
+ 
+\begin{command}{destac}
+
+\begin{purpose}
+  Estimates the A and C matrices of a LTI state space model form using
+  the result of the preprocessor routines {\dordxx}. ({\dordom},
+    {\dordpo}, etc.)
+
+General model structure:
+\begin{eqnarray*}
+x(k+1) &=&Ax(k) + Bu(k)\\
+y(k)   &=&Cx(k) + Du(k)
+\end{eqnarray*}  
+For information about the possible disturbance signals see the help
+pages for the preprocessor {\dordxx} functions.
+\end{purpose}
+
+\begin{syntax}
+[A,C]=destac(R,n);
+\end{syntax}
+
+\begin{inputs}
+\item[R] Data structure obtained from a {\dordxx} function, containing the
+  triangular factor, estimated column-space and additional information
+  (such as i/o dimension etc.).
+\item[n] Order of system to be estimated.
+\end{inputs}
+
+\begin{outputs}
+\item[A,C] Estimated system matrices.
+\end{outputs}
+
+\begin{seealso}
+ \dordom, \dordpi, \dordpo, \dordeiv, \dordrs, \destbd
+\end{seealso}
+\end{command}%destac
+
+\begin{command}{destbd}
+  \begin{purpose}
+    Estimates the matrices $B$ and $D$ of the state space model
+    \begin{eqnarray*}
+      x(k+1) & = &  A x(k) + B u(k) +w(k)\\
+      y(k) & = & C x(k) + D u(k) + v(k)
+    \end{eqnarray*}
+    using the knowledge of the pair $A$, $C$. This function can
+    concatenate different input-output data batches, through the
+    matrix $R$ and $R_{\mbox{old}}$. $B$ and $D$ are calculated by
+    solving a linear least squares problem. The function can handle
+    errors-in-variables models by using a instrumental variable.
+  \end{purpose}
+  \begin{syntax}
+    [B,D]=destbd(u,y,A,C);\\[0pt]
+    [B,D,x0,R,Phi]=destbd(u,y,A,C,[fB fD fx],Rold,iv,niv);
+  \end{syntax}
+
+  \begin{inputs}
+\item[u,y] The input, and output data of the system to be identified.
+\item[A,C] The state space matrices $A$ and $C$.
+\item[model] Three element flag vector $\mat{ccc}{fB& fD& fx}$
+  indicating whether $B$, $D$ and $x_0$ should be estimated. The
+  default value is $\mat{ccc}{1&1&0}$.  The matrix $B$ or $D$ can
+  be assumed zero by setting $fB$ or $fD$ to zero. The calculation of
+  $x_0$ can be omitted by setting $fx$ to zero. However $x_0$ will not
+  be assumed zero.  It's influence will still be taken into account
+  for the computation of $B$ and $D$. Variables that are not asked
+  for will be returned as empty matrices.
+\item[Rold] $R$ matrix obtained from previous data batch. This variable
+  can be used to process data in batches, or to combine data from
+  different experiments.
+\item[iv] Instrumental variable. For instance, for the errors-in-
+  variables case the iv can be the past output or for closed loop
+  data, the reference input.
+\item[niv] Three element vector describing the number of lagged IVs
+  used. niv(1) is the number of lagged IVs, niv(2) the number
+  of lagged past outputs, and niv(3) the number of lagged past
+  inputs. If only one element is present, no past data is
+  used. If not given or empty appropriate default values are used.
+  When past data is used as instrumental variable, about half
+  of the input/output data is used for the instrument.
+\end{inputs}
+\begin{outputs}
+\item[B,D] The estimated system matrices $B$ and $D$.
+\item[x0] The estimated initial state of the system.
+\item[R] Compressed data matrix,  storing information on the calculation of
+  the  matrices $B$ and $D$ in following {\destbd}. Used when analyzing
+  multiple input-output data sequences.  
+\item[Phi] Regressors matrix that was used for the Least squares estimate.
+\end{outputs}
+\begin{seealso}
+  {\destac} {\destx}
+\end{seealso}
+\end{command}%destbd
+\begin{command}{destk}
+  \begin{purpose}
+    Estimates the Kalman gain of a innovations model, when the matrices $A$
+    and $C$ are known. They can be estimated with the
+    functions {\dordpo} and {\destac}. 
+    Model structure:
+    \begin{eqnarray*}
+      x(k+1) & = &  A x(k) + B u(k)+ w(k)\\
+      y(k) & = & C x(k) + D u(k) + v(k)
+    \end{eqnarray*}
+    where $w(k)$, $v(k)$ are zero-mean white noise sequences,
+    independent of the noise-free input $u(k)$. 
+  \end{purpose}   
+  \begin{syntax}
+           K=destk(A,B,C,D,R)\\
+           K=destk(A,C,R)
+  \end{syntax}
+  \begin{inputs}
+  \item[A,B,C,D] State space matrices (B and D are optional).
+  \item[R] Data structure that is obtained from {\dordpo}. This matrix
+    contains compressed data needed to estimate the Kalman gain. This
+    includes the lower triangular factor and additional information
+    (such as i/o dimension etc.).
+   
+  \end{inputs}
+\begin{outputs}  
+\item[K] Estimated Kalman gain.
+\end{outputs}
+  \begin{seealso}
+    See also:  {\dordpo}, {\destac}, {\destbd}
+  \end{seealso}
+\end{command}%destk
+
+\begin{command}{destx}
+\begin{purpose}
+  Estimates the initial state of a state space system on the basis of
+  the system matrices and a set of input/output data.
+\end{purpose}
+\begin{syntax}
+  x0=destx(u,y,A,B,C,D);
+\end{syntax}
+\begin{inputs}
+\item[u,y] The input and output data of the system to be identified.
+\item[A,B,C,D] System matrices.
+\end{inputs}
+\begin{outputs}
+\item[x0] Estimated initial state.
+\end{outputs}
+\begin{seealso}
+{\destbd}
+\end{seealso}
+\end{command}%destx
+
+\begin{command}{dfunlin}
+\begin{purpose}This function implements the cost-function for dslslin
+  It is not meant for stand-alone use. 
+\end{purpose}
+\begin{syntax}
+epsilon=dfunlin(thn,u,y,params)
+\end{syntax}
+\begin{inputs}
+\item[thn] Parameter vector describing the system matrices $A$ and $C$.
+\item[u,y] The input and output data of the system to be optimized.
+\item[params] A structure that contains the dimension parameters of
+  the system, such as the order, the number of inputs, whether $D$, $x_0$
+  or $K$ is present in the model, etc.
+\end{inputs}
+\begin{outputs}
+\item[epsilon] Output of the cost-function, which is the square of the
+  error between the output and the estimated output, divided by the
+  number of samples.
+\end{outputs}
+
+\begin{seealso}
+{\dslslin}, {\dslswie}, {\dfunwie}
+\end{seealso}
+\end{command}%dfunlin
+
+\begin{command}{dfunwie}
+\begin{purpose}This function implements the cost-function for dslswie
+  It is not meant for stand-alone use. 
+\end{purpose}
+\begin{syntax}
+epsilon=dfunwie(thn,u,y,params)
+\end{syntax}
+\begin{inputs}
+\item[thn] Parameter vector describing the system matrices $A$, $B$,
+  $C$ and $D$.
+\item[u,z] The input and output data of the system to be optimized.
+\item[params] A structure that contains the dimension parameters of
+  the system, such as the order, the number of inputs, whether $D$ or
+  $x_0$ is present in the model, etc.
+\end{inputs}
+\begin{outputs}
+\item[epsilon] Output of the cost-function, which is the square of the
+  error between the output and the estimated output, divided by the
+  number of samples.
+\end{outputs}
+
+\begin{seealso}
+{\dslswie}, {\dslslin}, {\dfunlin}
+\end{seealso}
+\end{command}%dfunwie
+
+
+\begin{command}{dmoesp}
+\begin{purpose}
+  High level function for the discrete time moesp that gives the user a
+  simple interface to the lower level {\moesp} functions such as
+  {\dordxx} and {\destac}.  This function calculates the system
+  matrices $A$, $B$, $C$ and $D$ from the given input and output data
+  sequences $u$ and $y$.\\ Model structure:
+  \begin{eqnarray*}
+    x(k+1) & = &  A x(k) + B u(k)\\
+    y(k) & = & C x(k) + D u(k)
+  \end{eqnarray*}
+  For information about the possible disturbance signals see the help
+  pages for the preprocessor {\dordxx} functions.
+  
+  The user only needs to specify the input and output data. If the order
+  is not given, a order selection dialog is shown where the user can
+  select the order by examining the singular value plot.
+\end{purpose}
+\begin{syntax}
+  [A,B,C,D]=dmoesp(u,y,maxorder)\\[0pt]  
+  [A,B,C,D,K]=dmoesp(u,y,maxorder,order,method)
+\end{syntax}
+\begin{inputs}
+\item[u,y] Input and Output data sequence.
+\item[maxorder] Maximum expected order of the system, this value is 
+  used as the Hankel dimension parameter in the underlying
+  identification routines.
+\item[order] Order of the system to be estimated, if not specified a 
+  dialog will be presented which allows the user to choose the
+  order.
+\item[method] Method used for identification.
+  possible options: 
+  \begin{description}
+  \item[``om'']ordinary moesp
+  \item[``pi'']past input moesp 
+  \item[``po'']past output moesp 
+  \end{description}               
+  The default value is past output moesp.
+\end{inputs}
+\begin{outputs}
+\item[A,B,C,D] State space matrices describing the estimated model.
+\item[K] Estimated Kalman gain, only available for past output moesp.
+\end{outputs}
+\begin{seealso}
+{\destac}, {\dordpo}, \texttt{etc}
+\end{seealso}
+\end{command}%dmoesp
+
+
+
+\begin{command}{dordeiv}
+\begin{purpose}
+  \dordeiv\ is a preprocessor function that extracts the column-space of
+  the extended observability matrix from input/output data. Data from
+  different experiments can be concatenated using the extra input
+  argument $Z$. The estimated column-space is used in the function {\destac} 
+  to extract the matrices $A$ and $C$. This function implements the
+  errors-in-variables {\moesp} algorithm which can be used for the
+  errors-in-variables identification problem.\\
+  Model structure:
+  \begin{eqnarray*}                  
+    x(k+1) & = & Ax(k) + B\tilde{u}(k) + w(k) \\
+    y(k) & = & Cx(k) + D\tilde{u}(k) +v(k)\\
+  \end{eqnarray*}
+  with measurements 
+  \begin{displaymath}             
+    u(k)  =  \tilde{u}(k) + f(k)\quad \mbox{and}\quad y(k)
+  \end{displaymath}
+  where $f(k), w(k)$ and $v(k)$ are zero-mean white noise sequences
+  independent of the input $\tilde{u}(j)$ for $k \geq j$.
+         
+  The system can be operated under either open-loop or closed-loop.
+  For closed-loop operation, $r(k)$ is an external reference input.
+  For open-loop operation, where $\tilde{u}(k)$ is white noise,
+  {\dordpo} will give better results.
+\end{purpose}
+\begin{syntax}
+  [Sn,R,Z]=dordeiv(u,y,r,i,Zold)\\[0pt]
+  [Sn,R,Z]=dordeiv(u,y,[],i,Zold)\\
+\end{syntax}
+\begin{inputs}
+\item[u,y] The input and output data of the system to be identified.
+\item[r]  Closed-loop reference input. 
+\item[i] The dimension parameter that determines the number of block
+  rows in the processed Hankel matrices. This parameter should be
+  chosen larger than the expected system order. The optimal value has
+  to be found by trial and error. Generally twice as large is a good
+  starting value.
+\item[Zold] Matrix obtained from processing a previous
+  data-batch with {\dordrs}.
+\end{inputs}
+\begin{outputs}
+\item[Sn] Singular values bearing information on the order
+  of the system \\
+\item[R] Data structure used by {\destac} for the estimation of $A$
+  and $C$. This matrix contains the triangular factor, estimated
+  column-space and additional information (such as i/o dimension
+  etc.).
+\item[Z] Matrix containing information on system which can be used by 
+  future calls of {\dordeiv}.
+\end{outputs}
+\begin{seealso}
+\dordom, \dordpi, \dordpo, \dordrs, \destac, \destbd.
+
+\end{seealso}
+\end{command}%dordeiv
+
+\begin{command}{dordom}
+\begin{purpose}
+  \dordom\ is a preprocessor function that extracts the column-space of
+  the extended observability matrix from input/output data. Data from
+  different experiments can be concatenated using the extra input
+  argument $R$. The estimated column-space is used in the function {\destac} 
+  to extract the matrices $A$ and $C$.\\ This function implements the
+  ordinary {\moesp} algorithm which can only be used for the noise free
+  identification problem.\\
+ Model structure:
+  \begin{eqnarray*}
+    x(k+1) &=& Ax(k) + Bu(k)\\
+    y(k)   &=& Cx(k) + Du(k)
+  \end{eqnarray*}
+\end{purpose}
+
+\begin{syntax}
+[Sn,R]=dordom(u,y,i);\\[0pt]
+[Sn,R]=dordom(u,y,i,Rold);
+\end{syntax}
+
+\begin{inputs}
+\item[u,y] The input and output data of the system to be identified.
+\item[i] The dimension parameter that determines the number of block
+  rows in the processed Hankel matrices. This parameter should be
+  chosen larger than the expected system order. The optimal value has
+  to be found by trial and error. Generally twice as large is a good
+  starting value.
+\item[Rold] Data structure obtained from processing a previous
+  data-batch with {\dordom} containing the same items as $R$.
+\end{inputs}
+
+\begin{outputs}
+\item[Sn] Singular values bearing information on the order of the
+  system.
+\item[R] Data structure used by {\destac} for the estimation of $A$
+  and $C$ or by a next call to {\dordom}. This matrix contains the
+  triangular factor, estimated column-space and additional information
+  (such as i/o dimension etc.).
+\end{outputs}
+
+\begin{seealso}
+\dordpi, \dordpo, \dordrs, \dordeiv, \destac, \destbd.
+\end{seealso}
+\end{command}%dordom
+
+\begin{command}{dordpi}
+\begin{purpose}
+  \dordpi\ is a preprocessor function that extracts the column-space of
+  the extended observability matrix from input/output data. Data from
+  different experiments can be concatenated using the extra input
+  argument $R$. The estimated column-space is used in the function {\destac} 
+  to extract the matrices $A$ and $C$.  This function implements the
+  past input {\moesp} algorithm which can be used for the output error
+  identification problem.\\
+  Model structure: 
+  \begin{eqnarray*}
+    x(k+1) &=& Ax(k) + Bu(k)\\
+    y(k)   &=& Cx(k) + Du(k) + v(k)
+  \end{eqnarray*}
+  where $v(k)$ is zero-mean noise of arbitrary color, 
+  independent of the noise-free input $u(k)$.
+\end{purpose}
+
+\begin{syntax}
+[Sn,R]=dordpi(u,y,i);\\[0pt]
+[Sn,R]=dordpi(u,y,i,Rold);
+\end{syntax}
+
+\begin{inputs}
+\item[u, y] The input and output data of the system to be
+  identified.
+\item[i] The dimension parameter that determines the number of block
+  rows in the processed Hankel matrices. This parameter should be
+  chosen larger than the expected system order. The optimal value has
+  to be found by trial and error. Generally twice as large is a good
+  starting value.
+\item[Rold] Data structure obtained from processing a previous
+  data-batch with {\dordpi} containing the same items as $R$.
+\end{inputs}
+
+\begin{outputs}
+\item[Sn] Singular values bearing information on the order of the
+  system.
+\item[R] Data structure used by {\destac} for the estimation of $A$
+  and $C$ or by a next call to {\dordpi}. This matrix contains the
+  triangular factor, estimated column-space and additional information
+  (such as i/o dimension etc.).
+\end{outputs}
+
+\begin{seealso}
+\dordom, \dordpo, \dordrs, \dordeiv, \destac, \destbd.
+\end{seealso}
+\end{command}%dordpi
+
+\begin{command}{dordpo}
+\begin{purpose}
+  {\dordpo} is a preprocessor function that extracts the column-space of
+  the extended observability matrix from input/output data. Data from
+  different experiments can be concatenated using the extra input
+  argument $R$. The estimated column-space is used in the function {\destac}
+  to extract the matrices $A$ and $C$. This function implements the
+  past output {\moesp} algorithm which can be used for the innovations model
+  identification problem.\\
+  Model structure:
+  \begin{eqnarray*} 
+    x(k+1) &=& Ax(k) + Bu(k) + w(k)\\
+    y(k)   &=& Cx(k) + Du(k) + v(k)
+  \end{eqnarray*}
+  where $w(k)$, $v(k)$ are zero-mean white noise sequences,
+  independent of the noise-free input $u(k)$.
+\end{purpose}
+
+\begin{syntax}
+[Sn,R]=dordpo(u,y,i);\\[0pt]
+[Sn,R]=dordpo(u,y,i,Rold);
+\end{syntax}
+
+\begin{inputs}
+\item[u, y] The input and output data of the system to be
+  identified.
+\item[i] The dimension parameter that determines the number of block
+  rows in the processed Hankel matrices. This parameter should be
+  chosen larger than the expected system order. The optimal value has
+  to be found by trial and error. Generally twice as large is a good
+  starting value.
+\item[Rold] Data structure obtained from processing a previous
+  data-batch with {\dordpo} containing the same items as $R$.
+\end{inputs}
+
+\begin{outputs}
+\item[Sn] Singular values bearing information on the order of the
+  system.
+\item[R] Data structure used by {\destac} for the estimation of $A$
+  and $C$ or by a next call to {\dordpo}. This matrix contains the
+  triangular factor, estimated column-space and additional information
+  (such as i/o dimension etc.).
+\end{outputs}
+         
+\begin{seealso}
+\dordom, \dordpi, \dordrs, \dordeiv, \destac, \destbd.
+\end{seealso}
+\end{command}%dordpo
+
+\begin{command}{dordrs}
+\begin{purpose} 
+  {\dordrs} is a preprocessor function that extracts the column-space of
+  the extended observability matrix from input/output data.  Data from
+  different experiments can be concatenated using the extra input
+  argument $R$. The estimated column-space is used in the function {\destac}
+  to extract the matrices $A$ and $C$. This function implements the
+  reconstructed state {\moesp} algorithm which can be used for the
+  output error identification problem.\\
+  Model structure:
+  \begin{eqnarray*} 
+    x(k+1) &=& Ax(k) + Bu(k) \\
+    y(k)   &=& Cx(k) + Du(k) + v(k)
+  \end{eqnarray*}
+  where $v(k)$ is zero-mean noise of arbitrary color, independent
+  of the noise-free input $u(k)$.
+\end{purpose}
+
+\begin{syntax}
+[Sn,R]=dordrs(u,y,x,i);\\[0pt]
+[Sn,R]=dordrs(u,y,x,i,Rold);
+\end{syntax}
+
+\begin{inputs}
+\item[u, y] The input and output data of the system to be identified.
+\item[x] Reconstructed state.
+\item[i] The dimension parameter that determines the number of block
+  rows in the processed Hankel matrices. This parameter should be
+  chosen larger than the expected system order. The optimal value has
+  to be found by trial and error. Generally twice as large is a good
+  starting value.
+\item[Rold] Data structure obtained from processing a previous
+  data-batch with {\dordrs} containing the same items as $R$.
+\end{inputs}
+         
+\begin{outputs}
+\item[Sn] Singular values bearing information on the order of the
+  system
+\item[R] Data structure used by {\destac} for the estimation of $A$
+  and $C$ or by a next call to {\dordrs}. This matrix contains the
+  triangular factor, estimated column-space and additional information
+  (such as i/o dimension etc.).
+\end{outputs}
+\begin{seealso}
+\dordom, \dordpi, \dordpo, \dordeiv, \destac, \destbd.
+\end{seealso}
+\end{command}%dordrs
+
+
+\begin{command}{drpi}
+\begin{purpose}
+  Estimates in a recursive way the matrices of an LTI state space
+  model in innovation form using the output of the dordpi, destac
+  and destbd routines as initial guess.
+
+  Model structure:
+  \begin{eqnarray*}
+    x(k+1) & = &  A x(k) + B u(k)\\
+    y(k) & = & C x(k) + D u(k) + v(k)
+  \end{eqnarray*}
+  where $v(k)$ is zero-mean white noise sequence, independent of the
+  noise-free input $u(k)$.
+\end{purpose}
+
+\begin{syntax}
+[A,B,C,D]= drpi(u,y,i,n,beta,Ai,Bi,Ci,Di,Ri)
+\end{syntax}
+
+\begin{inputs}
+\item[u,y] The input and output data of the system to be identified.
+  \item[i] The dimension parameter that determines the number of block
+    rows in the processed Hankel matrices such as ws used in {\dordpi}
+    for the creation of $R_i$
+  \item[n] Order of system to be estimated.
+  \item[beta] Forgetting parameter for recursive algorithm ($0 < \beta < 1$).
+  \item[Ai,Bi,Ci,Di] Initial estimate of state space matrices.  These
+    matrices can for instance be obtained by using
+    {\dordpi}/{\destac}/{\destbd} on the first few samples.
+  \item[Ri] Triangular factor from {\dordpi}.
+ \end{inputs}
+
+\begin{outputs}
+\item[A,B,C,D] The estimated system matrices.
+\end{outputs}
+          
+\begin{seealso}
+{\drpo}, {\dordpi}, {\destac}, {\destbd}
+\end{seealso}
+\end{command}%drpi
+
+\begin{command}{drpo}
+\begin{purpose}
+  Estimates in a recursive way the matrices of an LTI state space
+  model in innovation form using the output of the dordpo and dmodpo
+  routines as initial guess.
+  Model structure:
+  \begin{eqnarray*}
+    x(k+1) & = &  A x(k) + B u(k) +w(k)\\
+    y(k) & = & C x(k) + D u(k) + v(k)
+  \end{eqnarray*}
+  where $w(k)$, $v(k)$ is zero-mean white noise sequences, independent
+  of the noise-free input $u(k)$.
+\end{purpose}
+
+\begin{syntax}
+[A,B,C,D]= drpo(u,y,i,n,beta,Ai,Bi,Ci,Di,Ri)
+\end{syntax}
+
+\begin{inputs}
+  \item[u,y] The input and output data of the system to be identified.
+  \item[i] The dimension parameter that determines the number of block
+    rows in the processed Hankel matrices such as ws used in {\dordpo}
+    for the creation of $R_i$
+  \item[n] Order of system to be estimated.
+  \item[beta] Forgetting parameter for recursive algorithm ($0 < \beta < 1$).
+  \item[Ai,Bi,Ci,Di] Initial estimate of state space matrices.  These
+    matrices can for instance be obtained by using
+    {\dordpo}/{\destac}/{\destbd} on the first few samples.
+  \item[Ri] Triangular factor from {\dordpo}.
+ \end{inputs}
+
+\begin{outputs}
+  \item[A,B,C,D] The estimated system matrices\\
+\end{outputs}
+          
+\begin{seealso}
+{\drpi}, {\dordpo}, {\destac}, {\destbd}
+\end{seealso}
+\end{command}%drpo
+
+
+\begin{command}{drslslin}
+\begin{purpose}
+  This function performs a recursive update of a discrete time
+  state space system,
+  \begin{eqnarray*}
+    x(k+1) & = &  A x(k) + B u(k)\\
+    y(k) & = & C x(k) + D u(k) + v(k)
+  \end{eqnarray*}
+   using the Separable Least Squares technique.
+  For this, only the initial estimates of $A$ and $C$ are needed.  
+  The same function can also be used to initialize the matrices
+  needed to start up the recursion.
+ \end{purpose}
+\begin{syntax}
+  [A,B,C,D,hist] = drslslin(u,y,A,C)\\[0pt]
+  [A,B,C,D,hist] = drslslin(u,y,A,C,K,model,partype,options,slsstate)\\[0pt]
+  [slsstate] = drslslin(u,y,A,C,K,model,partype,'init')
+\end{syntax}
+\begin{inputs}
+\item[A,C] Initial estimate of the state space matrices A and C
+\item[u,y] The input and output data of the system to be optimized.
+\item[model] Vector [fB,fD,fx,fK] specifying whether the matrix $B$,
+  $D$, the initial state $x_0$ and the Kalman filter gain $K$ should
+  be estimated.  Default is $\mat{cccc}{1& 1&0& 0}$. It is recommended only
+  to estimate the initial state if the data length is short compared
+  to the largest time constant of the system.
+\item[options] This vector consists of parameters that can be used to
+  influence the optimization process.  options(1) Display parameter
+  (Default:0). 1 displays some results.  options(2) is the step size
+  parameter.  options(3) is a forgetting factor of the nonlinear
+  param.  options(4) is a forgetting factor of the linear param.
+\end{inputs}
+\begin{outputs} 
+\item[A,B,C,D] Estimated state space matrices.
+\item[x0] Initial state. If it is not estimated, this vector will be
+  returned as an empty matrix.
+\item[K] Kalman gain. Same here.
+\item[hist] History of the recursion the first column is the value of
+  the cost-function at every step.  the other columns are the estimated
+  parameters at every step.
+\end{outputs}
+\begin{seealso}
+\ dslslin
+\end{seealso}
+\end{command}%drslslin
+ 
+
+\begin{command}{dslslin}
+  \begin{purpose}
+    Performs a Least Squares optimization of a discrete time linear
+    state space system system with model structure:    
+    \begin{eqnarray*}
+      x(k+1) & = &  A x(k) + B u(k)+ Ke(k)\\
+      y(k) & = & C x(k) + D u(k)+ e(k)
+    \end{eqnarray*}
+    First, the state space matrices are parameterized.  In order to
+    minimize the number of parameters, the Separable Least Squares
+    technique is used. This allows the cancellation of the parameters
+    of B and D, such that only the parameters that describe A and C
+    need to be optimized. The parameterized model is optimized with
+    the leastsq function from the MATLAB optimization toolbox. If
+    needed also the initial state and a Kalman gain can be optimized.
+  \end{purpose}   
+  \begin{syntax}
+    [A,B,C,D]=dslslin(u,y,A,C)\\[0pt]
+    [A,B,C,D,x0,K,options] = dslslin(u,y,A,C,K,model,partype,options)
+  \end{syntax}
+  \begin{inputs}
+  \item[u,y] The input and output data of the system to be optimized.
+  \item[A,C] Initial estimates of the system matrices A, and C.
+  \item[model] Vector with flags that specify the kind of model to use.
+    model(1) specifies if matrix $B$ should be estimated.
+    model(2) specifies if matrix $D$ should be estimated.
+    model(3) specifies if the initial state $x_0$ should be estimated.
+    model(4) specifies if the Kalman filter gain $K$ is estimated.
+    Default is $\mat{cccc}{1&1&0&0}$. It is recommended only to 
+    estimate the initial state if the data length is 
+    short compared to the largest time constant of the system.
+  \item[partype] This parameter specifies the type of parameterization 
+    that is used to parameterize the state space model.
+    Two types of parameterization are supported:
+    'on'= Output Normal and 'tr'=TRidiagonal.
+  \item[options] Input parameters that are passed on directly to the
+    optimization function from the Optimization Toolbox.
+    See foptions for more information.
+  \end{inputs}
+  \begin{outputs}
+  \item[A,B,C,D] System matrices of the optimized linear model.
+    If B or D is not estimated, it will be returned as an empty matrix.
+  \item[x0] Estimate of the initial state.
+    If the $x_0$ matrix is not estimated, it will be returned empty.
+  \item[K] Estimate of the initial state. Same here.
+  \item[options] Output parameters from the Optimization Toolbox.  See
+    foptions.
+  \end{outputs}
+  
+  \begin{seealso}
+    See also:   {\leastsq}, {\foptions}
+  \end{seealso}
+\end{command}%dslslin
+
+\begin{command}{dslswie}
+\begin{purpose}
+  Separable Least Squares optimization of a wiener model.  
+  Model structure:
+  \begin{eqnarray*}
+    x(k+1) & = &  A x(k) + B u(k)\\
+    y(k) & = & C x(k) + D u(k) + v(k)\\
+    z(k) &=& f(y(k))
+  \end{eqnarray*}
+  First, the state space matrices are parameterized.  In order to
+  minimize the number of parameters, the Separable Least Squares
+  technique is used. This allows the cancellation of the parameters of
+  the nonlinearity, such that only the parameters that describe the
+  linear part need to be optimized. The parameterized model is
+  optimized with the leastsq function from the MATLAB optimization
+  toolbox.
+\end{purpose}
+
+\begin{syntax} 
+[A,B,C,D,x0,thl,options] = dslswie(u,z,A,B,C,D,x0,nn,model,options)
+\end{syntax}
+\begin{inputs}
+\item[u,z] The input and output data of the system to be optimized.
+\item[A,B,C,D] Initial estimates of the linear part of the wiener
+  model.
+\item[x0] Initial condition, This is optional.
+\item[nn] The order of the Chebychev polynomials in the static
+  nonlinearity.
+\item[model] Vector with flags that specify the kind of model to use.
+  model(1) specifies if  $B$ should be estimated.  model(2)
+  specifies if  $D$ should be estimated.  model(3) specifies if
+  the initial state $x_0$ should be estimated.  Default is
+  $\mat{cccc}{1&1&0}$. It is recommended only to estimate the initial
+  state if the data length is short compared to the largest time
+  constant of the system.
+\item[partype] This parameter specifies the type of parameterization 
+  that is used to parameterize the state space model.
+  Two types of parameterization are supported:
+  'on'= Output Normal and 'tr'=TRidiagonal.
+\item[options] Input parameters that are passed on directly to the
+  optimization function from the Optimization Toolbox.
+  See foptions for more information.
+\end{inputs}
+\begin{outputs}
+\item[A,B,C,D] System matrices of the optimized linear model.  If the
+  B or D matrix is not estimated, it will be zero.
+\item[x0] Estimated initial state. If $x_0$ is not estimated it will be
+  returned as an empty matrix.
+\item[options] Output parameters from the Optimization Toolbox.  See
+  foptions.
+\end{outputs}
+\begin{seealso}
+{\foptions}, {\dslslin}
+\end{seealso}
+\end{command}%dslswie
+
+
+\begin{command}{dss2th}
+\begin{purpose}
+  This function converts a discrete time state space 
+  model to a parameter vector that describes the model
+  Model structure: 
+  \begin{eqnarray*}
+    x(k+1) & = &  A x(k) + B u(k)+ Ke(k)\\
+    y(k) & = & C x(k) + D u(k) +e(k)
+  \end{eqnarray*}
+\end{purpose}
+
+\begin{syntax}
+  [theta,T,params] = dss2th(A,C,partype)\\[0pt]
+  [theta,T,params] = dss2th(A,B,C,D,partype)\\[0pt]
+  [theta,T,params] = dss2th(A,B,C,D,x0,K,partype)
+\end{syntax}
+
+\begin{inputs}
+\item[A,B,C,D] System matrices describing the state space system.
+  The $B$ and $D$ matrices are optional and can be left out or given
+  as an empty matrix to indicate it is not part of the model.
+\item[x0] Initial condition, This is optional.
+\item[K] Kalman gain. Also this matrix is optional.
+\item[partype] This parameter specifies the type of parameterization 
+  that is used to parameterize the state space model.
+  Two types of parameterization are supported:
+  'on'= Output Normal and 'tr'=TRidiagonal. 
+\end{inputs}
+\begin{outputs}
+\item[theta] Parameters vector describing the system.
+\item[params] A structure that contains the dimension of
+  the system, such as the order, the number of inputs, 
+  whether $D$, $x_0$ or $K$ is present, etc.
+\item[T] Transformation matrix between the input state space system
+  and the state space system in the form described by theta.
+  (the one that is constructed by {\dthtoss}
+\end{outputs}
+\begin{seealso}
+  {\dthtoss}
+\end{seealso}
+\end{command}%dss2th
+  
+\begin{command}{dth2ss}
+  \begin{purpose}
+    This function converts a parameter vector that describes a
+    discrete time state space model in output normal form to the state
+    space matrix of that model.  Model structure:
+    \begin{eqnarray*}
+      x(k+1) & = &  A x(k) + B u(k)+Ke(k)\\
+      y(k) & = & C x(k) + D u(k)+e(k)
+    \end{eqnarray*}
+  \end{purpose}
+  \begin{syntax}  
+    [A,B,C,D,x0,K] = dth2ss(theta,params)\\[0pt]
+    [A,C] = dth2ss(theta,params)
+  \end{syntax}
+\begin{inputs}
+\item[theta] Parameter vector describing the system.
+\item[params] A structure that contains the dimension parameters of
+  the system, such as the order, the number of inputs,
+  whether D, x0 or K is present in the model, etc.
+\item[T] Transformation matrix to be applied to the state space system
+  that is constructed from theta. This transformation might come from
+  the function {\dsstoth} and can be used to reconstruct the original state
+  space matrices that were given to {\dsstoth}.
+\end{inputs}
+\begin{outputs}
+\item[A,B,C,D] System matrices describing the state space system in
+  output normal form. If theta does not contain the parameters for a
+  matrix, this matrix will be returned as an empty matrix.
+\item[x0] Initial state. If theta does not contain parameters for
+  $x_0$, this vector will be returned as an empty matrix.
+\item[K] Kalman gain. Same here.
+\end{outputs}
+\begin{seealso}
+{\dsstoth} 
+\end{seealso}
+\end{command}%dth2ss
+
+\begin{command}{kronekf}
+\begin{purpose}
+  Calculates the Kronecker canonical form from a regular pencil A,B
+  such that
+  \begin{eqnarray*}
+    A_a&=&QAZ=\mat{cc}{A_k&0\\ 0& I}\\
+    B_b&=&QBZ=\mat{cc}{I&0\\ 0& B_k}
+  \end{eqnarray*}
+  where the eigenvalues of As and Bs are split according to alpha and option
+\end{purpose}
+\begin{syntax}
+ [AA,BB,Q,Z,na,nb]=kronekf(A,B,alpha,option)
+\end{syntax}
+\begin{inputs}
+\item[A,B] The given matrix pencil.
+\item[alpha] The value used to split the eigenvalues of the pencil
+  $A$ and $B$. Default value is 1.  
+\item[option] This parameter can be either 'circle' or 'halfplane'.
+  'circle' sorts the eigenvalues in $A_k$ to be absolutely smaller
+  than alpha, and those in $B_k$ to be larger than alpha. 'halfplane'
+  sorts the eigenvalues in $A_k$ to have smaller real part than alpha,
+  and those in $B_k$ to have larger real part. Default is 'circle'.
+\end{inputs}
+\begin{outputs}  
+\item[AA,BB] The pencil in canonical form.
+\item[Q] The required left transformations.
+\item[Z] The required right transformations.
+\item[na] Dimension of the matrix $A_k$.
+\item[nb] Dimension of the matrix $B_k$.
+\end{outputs}
+\begin{seealso}
+{\ncdestac}
+\end{seealso}
+\end{command}%kronekf
+
+\begin{command}{ncdestac}
+\begin{purpose}
+  Estimates the system matrices $A_c$, $A_a$, $C_c$ and $C_a$ of a
+  non-causal LTI state space model using the output of one of the
+  {\dordxx} preprocessor routines. The model is divided in a causal
+  part and an anti-causal part.  The causal part is stable and can be
+  simulated forward in time. The anti-causal part can only be
+  simulated stably backward in time. The other matrices are estimated
+  with {\ncdestbd}. The model can be simulated with {\ncdlsim}.
+
+  Model structure:
+  \begin{eqnarray*}
+    x_c(k+1) &=& A_c x_c(k) + B_c u(k)\quad\mbox{(causal part)}\\
+    x_a(k-1) &=& A_a x_a(k) + B_a u(k)\quad\mbox{(anti-causal part)}\\
+    y(k)   &=& C_c x_a(k) + C_a x_a(k) + D u(k)
+  \end{eqnarray*}
+All preprocessor functions can be used for the causal case as well
+as the non-causal case. For information about the possible disturbance
+signals see the help pages for the preprocessor {\dordxx} functions.
+\end{purpose}
+
+\begin{syntax}
+  [Ac,Aa,Cc,Ca]=ncdmod(R,n)
+\end{syntax}
+
+\begin{inputs}
+\item[R] Data structure obtained from a {\dordxx} function, containing
+  the triangular factor and additional information (such as i/o
+  dimension etc.).
+\item[n] Order of system to be estimated. 
+\end{inputs}
+\begin{outputs}
+  \item[Ac,Aa,Cc,Ca]  Estimated system matrices.
+\end{outputs}
+\begin{seealso}
+{\ncdestbd}, {\ncdlsim}
+\end{seealso}
+\end{command}%ncdestac
+
+
+\begin{command}{ncdestbd}
+\begin{purpose}
+  Estimates the matrices $B_c$, $B_a$ and $D$ of a non-causal state
+  space model, using the knowledge of the matrices $A_c$, $A_a$, $C_c$
+  and $C_a$. This function is able to concatenate different data
+  batches, through the matrices $R$, $R_{\mbox{old}}$.\\
+  Model structure:
+  \begin{eqnarray*}
+    x_c(k+1) &=& A_c x_c(k) + B_c u(k)\quad\mbox{(causal part)}\\
+    x_a(k-1) &=& A_a x_a(k) + B_a u(k)\quad\mbox{(anti-causal part)}\\
+    y(k)   &=& C_c x_a(k) + C_a x_a(k) + D u(k)
+  \end{eqnarray*}
+ 
+  $B_c$, $B_a$ and $D$ are calculated by solving a linear least
+  squares problem. The influence of the initial state $x_0$ in the
+  data batches is compensated for in the solution.  $x_{0_c}$ and
+  $x_{0_a}$ can also be estimated.
+\end{purpose}
+\begin{syntax}
+  [Bc,Ba,D,x0c,x0a,R]=ncdestbd(u,y,Ac,Aa,Cc,Ca,model,Rold,iv,niv);
+  [Bc,Ba,D]=ncdestbd(u,y,Ac,Aa,Cc,Ca);
+\end{syntax}
+\begin{inputs}
+\item[u,y] The input and output data of the system to be
+  identified.
+\item[Ac,Ae] The estimated system matrices $A_c$, $A_e$, $C_c$ and
+  $C_a$ of the
+\item[Cc,Ca] non-causal state space system matrices.
+\item[model] Two element vector $\mat{ccc}{fB&fD&fx}$ indicating
+  whether $B_c$, $B_a$, $D$ and $x_{0_c}$, $x_{0_a}$ should be
+  estimated. Default value is $\mat{ccc}{1&1&0}$.
+\item[Rold] $R$ matrix obtained from previous data batch. This variable
+  can be used to process data in batches, or to combine data from
+  different experiments. 
+\item[iv] Instrumental variable. For instance, for the errors-in-
+  variables case the iv can be the past output or for closed loop
+  data, the reference input.
+\item[niv] Three element vector describing the number of lagged IVs
+  used. niv(1) is the number of lagged IVs, niv(2) the number
+  of lagged past outputs, and niv(3) the number of lagged past
+  inputs. If only one element is present, no past data is
+  used. If not given or empty appropriate default values are used.
+  When past data is used as instrumental variable, about half
+  of the input/output data is used for the instrument.
+\end{inputs}
+\begin{outputs}
+\item[Bc,Ba,D] The estimated system matrices $B_c$, $B_a$ and $D$.
+\item[x0c,x0c] The estimated initial state of the system.
+\item[R] Compressed data matrix, storing information on the
+  calculation of the matrices $B_c$, $B_a$ and $D$ in a following
+  {\ncdestbd}. Used when analyzing multiple input-output data
+  sequences.
+\end{outputs}
+\begin{seealso}
+{\ncdlsim}, {\ncdestac}
+\end{seealso}
+\end{command}%ncdestbd
+
+\begin{command}{ncdlsim}
+\begin{purpose}
+  This function simulates a non-causal, unstable or unproper system.
+  The model is divided in a causal part, and an anti-causal part. The
+  causal part is stable and can be simulated forward in time. The
+  anti-causal part can only be simulated stably backward in time.
+  The system can be given in the following forms
+  Non causal state space form:
+  \begin{eqnarray*}
+    x_c(k+1) & = &  A_c x_c(k) + B_c u(k)\mbox{(causal part)}\\
+    x_a(k+1) & = &  A_a x_a(k) + B_a u(k)\mbox{(anti-causal part)}\\
+    y(k) & = & C_c x_c(k) +C_a x_a(k)+ D u(k)
+  \end{eqnarray*}
+  Unstable state space form:
+  \begin{eqnarray*}
+    x(k+1) & = &  A x(k) + B u(k) + w(k)\\
+    y(k) & = & C x(k) + D u(k) + v(k)
+  \end{eqnarray*}
+  Non-proper transfer function:
+\begin{eqnarray*}
+  a_n y(k+n)+ ... +a_0y(k) = b_mu(k+m)+ ... +b_1u(k+1)+ b_0u(k)
+\end{eqnarray*}
+\end{purpose}
+\begin{syntax}
+  [y,x]=ncdlsim(Ac,Aa,Bc,Ba,Cc,Ca,D,u,xc0,xa0)\\[0pt]
+  [y,x]=ncdlsim(A,B,C,D,u,x0)\\[0pt]
+  [y,x]=ncdlsim(num,den,u)
+\end{syntax}
+\begin{inputs}
+\item[Ac,Aa,Bc,Ba] State space matrices representing a non-causal
+\item[Cc,Ca,D]   state space model.
+\item[A,B,C,D] State space matrices representing a possibly unstable
+  state space model.
+\item[num,den] Numerator and denominator of possibly non-proper
+  transfer function.
+\item[u] Input to the system.
+\item[xc0,xa0] Initial states of causal and anti-causal part of the
+  non-causal state space model.
+\item[x0] Initial state of the state space model.
+\end{inputs}
+\begin{outputs}  
+\item[y] Simulated output.
+\item[x] Simulated state of the state space model.  The first $n_c$
+  columns are the states of the causal part, the rest are the states
+  of the anti-causal part.
+\end{outputs}
+\begin{seealso}
+{\ncdestac}, {\ncdestbd}, {\dlsim}
+\end{seealso}
+\end{command}%ncdlsim
+
+\begin{command}{orderselect}
+\begin{purpose}
+  Gives an estimate of the order of a system based on the singular
+  values. Two methods are available: ``manual'' and ``largest-gap''.
+  The manual method shows a semi-logarithmic plot of the singular
+  values and lets the user manually choose the order by inspection.
+  The largest-gap method simply selects the order to be the one after
+  which the largest gap occurs in the semi-logarithmic plot.
+\end{purpose}
+\begin{syntax}
+  order=orderselect(S,method)
+\end{syntax}
+\begin{inputs}
+\item[S] Vector with singular values, obtained from one of the
+  preprocessor functions {\dordxx}({\dordom}, {\dordpi}, etc).
+\item[ method] Method for selecting the order.  Possible methods are:
+  ``manual'' and ``largest-gap''.  Default is ``manual''.
+\end{inputs}
+\begin{outputs}
+\item[order]  Selected model order.
+\end{outputs}
+\begin{seealso}
+ {\moespf}, {\dordpo}, {\dordpi}
+\end{seealso}
+\end{command}%orderselect
+ 
+\begin{command}{prbn}
+\begin{purpose}
+Produces a binary sequence, with values 0 and 1.  The chance
+of switching from level is given by the parameter
+'rate'. Rate=0 gives a constant value 0. Rate=1 gives
+a signal that changes constantly between 0 and 1. Any
+value in between results in a random binary sequence.
+This kind of test signal has been described in \cite{Tulleken90}
+\end{purpose}
+
+\begin{syntax}
+ y=prbn(N,rate);
+\end{syntax}
+
+\begin{inputs}
+\item[N] Number of points.
+\item[rate] Chance of the signal changing level at every sample.
+  Default is 0.5.
+\end{inputs}
+         
+\begin{outputs}
+\item[y] Random binary noise.
+\end{outputs}
+
+\begin{seealso}
+\mbox{}
+\end{seealso}
+\end{command}%prbn
+
+\begin{command}{shave}
+\begin{purpose}
+  This function is used for reducing spikes from a measured signal.
+  The spikes of the signal are 'shaved' as follows:
+\begin{itemize}
+\item From the signal a trend is computed using a fourth-order
+  Butterworth filter.
+\item The standard deviation of the trend-corrected, clipped signal is
+  computed.
+\item Detection band is defined by the trend plus and minus a certain
+  factor times the standard deviation. All samples that are outside
+  this band are replaced using linear interpolation.  This 'shaving'
+  method has been described in \cite{Backx87}.
+\end{itemize}
+\end{purpose}
+
+\begin{syntax} 
+shave(Signal);\\
+Shaved\_signal=shave(Signal);\\
+Shaved\_signal=shave(Signal,factor,Wn,lo\_lim,up\_lim);
+\end{syntax}
+
+\begin{inputs}
+\item[Signal] Signal to be 'shaved' (column vector)
+\item[factor] Multiplication factor which determines the width of the
+  detection band. When the detection is poor, you should change this
+  factor. This argument is optional.  Its default value is 2.
+\item[Wn] Cut-off frequency of the low-pass filter used for trend
+  determination.  It must be in the range $0.0 < $ \verb+Wn+ $< 1.0$,
+  with 1.0 corresponding to half the sample rate. This argument is
+  optional. Its default value is 0.01.
+\item[lo\_lim, up\_lim] If these arguments are present, the signal is
+  clipped to a minimum value of \verb+lo_lim+ and a maximum value of
+  \verb+up_lim+ before the 'shaving' starts.
+
+\end{inputs}
+\begin{outputs}
+\item[Shaved\_signal] 'Shaved' signal.
+\end{outputs}
+
+\begin{seealso}
+\mbox{}
+\end{seealso}
+\end{command}%shave
+
+\begin{command}{tlsim}
+\begin{purpose}
+  Simulation of the time response of LTI continuous-time systems to
+  arbitrary inputs.  The input and simulated output are represented by
+  sampled signals. Unlike lsim, where the sampling is assumed to be
+  zero order or first order hold, the sampling in tlsim is assumed to
+  be trapezoidal or Tustin's (hence the t in tlsim).
+\end{purpose}
+\begin{syntax}
+  [y,x]=tlsim(A,B,C,D,u,Ts,x0)
+\end{syntax}
+\begin{inputs}
+\item[A,B,C,D] State space matrices of the LTI system.
+\item[u] Input signal.
+\item[Ts] Sampling time.
+\item[x0] Initial state of the system.
+\end{inputs}
+\begin{outputs}
+\item[y] Output of the LTI system.
+\item[x] State of the LTI system.
+\end{outputs}
+\begin{seealso}
+{\lsim}, {\dlsim}
+\end{seealso}
+\end{command}%tlsim
+
+
+\begin{command}{vaf}
+
+\begin{purpose}
+Compute the percentage Variance Accounted For (VAF) between
+two signals. the VAF is calculated as:
+\begin{eqnarray*} 
+1-\frac{\mbox{variance}(y-y_{est})}{\mbox{variance}(y)} \times 100\%
+\end{eqnarray*}
+The VAF of two signals that are the same is 100\%. If they differ,
+the VAF will be lower.  When $y$ and $y_{est}$ are matrices, the
+VAF is calculated for every column in $y$ and $y_{est}$.  The VAF
+is often used to verify the correctness of a model, by comparing the
+real output with the estimated output of the model.
+\end{purpose}
+
+\begin{syntax}
+v= vaf(y, ye)
+\end{syntax}
+
+\begin{inputs}
+\item[y] Reference signal, often the real output
+\item[ye] Second signal, often the estimated output of a model
+\end{inputs}
+
+\begin{outputs}
+\item[v] VAF, computed for the two signals
+\end{outputs}
+
+\begin{seealso}
+\mbox{}
+\end{seealso}
+\end{command}%vaf
+
+\end{document}
+% LocalWords:  SMI SMi dordpi dordpo dordeiv eiv dordrs destac dmodxx destbd DT
+% LocalWords:  destb destk Kalman dmodpo destx dinit dmoesp SLS dslslin todo Sn
+% LocalWords:  prbn vaf observability pt Rold Zold LTI fB fD
+% LocalWords:  fx niv IVs toolbox partype tr TRidiagonal foptions maxorder om
+% LocalWords:  po Butterworth Wn lo Schur params dth ss moesp dordom drpi drpo
+
+\begin{command}{example}
+\begin{purpose}
+\end{purpose}
+\begin{syntax}
+\end{syntax}
+\begin{inputs}
+\end{inputs}
+\begin{outputs}
+\end{outputs}
+\begin{seealso}
+\end{seealso}
+\end{command}
+ 
+
+% LocalWords:  gnlisls dslswie gnwisls dfunlin drslslin ncdlsim chebest MIMO NN
+% LocalWords:  tchebest chebsim iv's leastsq MATLAB thn dfunwie Ai Bi Ci Di Ri
+% LocalWords:  dmod Chebychev thl unproper ncdestac Bc Ba tlsim lsim Tustin's
+% LocalWords:  cestbd cestx Ts cordom cordpi cestac orderselect

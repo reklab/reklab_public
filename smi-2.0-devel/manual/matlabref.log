@@ -1,0 +1,240 @@
+This is TeX, Version 3.14159 (Web2C 7.3.1) (format=latex 2000.3.7)  29 AUG 2000 22:24
+**\nonstopmode\input{matlabref.sty}
+(matlabref.sty
+
+LaTeX Warning: You have requested package `',
+               but the package provides `matlabref'.
+
+Package: matlabref 1997/12/04 v1.1 Matlab Manual Style
+(/usr/share/texmf/tex/latex/fancyheadings/fancyheadings.sty
+\headrulewidth=\dimen102
+\footrulewidth=\dimen103
+\plainheadrulewidth=\dimen104
+\plainfootrulewidth=\dimen105
+\headwidth=\dimen106
+\footruleskip=\dimen107
+)
+(/usr/share/texmf/tex/latex/base/ifthen.sty
+Package: ifthen 1999/01/07 v1.1a Standard LaTeX ifthen package (DPC)
+)
+
+! LaTeX Error: \chaptermark undefined.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.67 \renewcommand{\chaptermark}
+                                [1]{\markright{}}
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+! LaTeX Error: Command \@ already defined.
+               Or name \end... illegal, see p.192 of the manual.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.75 \newlength{\@tablength}
+                            
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+
+! LaTeX Error: Missing \begin{document}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.75 \newlength{\@tablength}
+                            
+You're in trouble here.  Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+Missing character: There is no a in font nullfont!
+Missing character: There is no b in font nullfont!
+Missing character: There is no l in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no g in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no h in font nullfont!
+\@=\skip41
+Missing character: There is no t in font nullfont!
+Missing character: There is no a in font nullfont!
+Missing character: There is no b in font nullfont!
+Missing character: There is no l in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no g in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no h in font nullfont!
+! Missing number, treated as zero.
+<to be read again> 
+                   t
+l.76 \setlength{\@tablength}{.85\textwidth}
+                                           
+A number should have been here; I inserted `0'.
+(If you can't figure out why I needed to see a number,
+look up `weird error' in the index to The TeXbook.)
+
+! Illegal unit of measure (pt inserted).
+<to be read again> 
+                   t
+l.76 \setlength{\@tablength}{.85\textwidth}
+                                           
+Dimensions can be in units of em, ex, in, pt, pc,
+cm, mm, dd, cc, bp, or sp; but yours is a new one!
+I'll assume that you meant to say pt, for printer's points.
+To recover gracefully from this error, it's best to
+delete the erroneous units; e.g., type `2' to delete
+two letters. (See Chapter 27 of The TeXbook.)
+
+Missing character: There is no t in font nullfont!
+Missing character: There is no a in font nullfont!
+Missing character: There is no b in font nullfont!
+Missing character: There is no l in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no g in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no h in font nullfont!
+Missing character: There is no . in font nullfont!
+Missing character: There is no 8 in font nullfont!
+Missing character: There is no 5 in font nullfont!
+! Missing number, treated as zero.
+<to be read again> 
+                   \relax 
+l.76 \setlength{\@tablength}{.85\textwidth}
+                                           
+A number should have been here; I inserted `0'.
+(If you can't figure out why I needed to see a number,
+look up `weird error' in the index to The TeXbook.)
+
+! Illegal unit of measure (pt inserted).
+<to be read again> 
+                   \relax 
+l.76 \setlength{\@tablength}{.85\textwidth}
+                                           
+Dimensions can be in units of em, ex, in, pt, pc,
+cm, mm, dd, cc, bp, or sp; but yours is a new one!
+I'll assume that you meant to say pt, for printer's points.
+To recover gracefully from this error, it's best to
+delete the erroneous units; e.g., type `2' to delete
+two letters. (See Chapter 27 of The TeXbook.)
+
+! Missing number, treated as zero.
+<to be read again> 
+                   t
+l.77 \addtolength{\@tablength}{-2cm}
+                                    
+A number should have been here; I inserted `0'.
+(If you can't figure out why I needed to see a number,
+look up `weird error' in the index to The TeXbook.)
+
+! Illegal unit of measure (pt inserted).
+<to be read again> 
+                   t
+l.77 \addtolength{\@tablength}{-2cm}
+                                    
+Dimensions can be in units of em, ex, in, pt, pc,
+cm, mm, dd, cc, bp, or sp; but yours is a new one!
+I'll assume that you meant to say pt, for printer's points.
+To recover gracefully from this error, it's best to
+delete the erroneous units; e.g., type `2' to delete
+two letters. (See Chapter 27 of The TeXbook.)
+
+Missing character: There is no t in font nullfont!
+Missing character: There is no a in font nullfont!
+Missing character: There is no b in font nullfont!
+Missing character: There is no l in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no g in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no h in font nullfont!
+Missing character: There is no - in font nullfont!
+Missing character: There is no 2 in font nullfont!
+Missing character: There is no c in font nullfont!
+Missing character: There is no m in font nullfont!
+
+Overfull \hbox (20.0pt too wide) in paragraph at lines 75--78
+[]
+ []
+
+
+! LaTeX Error: Command \@ already defined.
+               Or name \end... illegal, see p.192 of the manual.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.82 ...th{\parsep}{2ex}\setlength{\itemsep}{0pt}}
+                                                  
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+
+! LaTeX Error: Missing \begin{document}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.82 ...th{\parsep}{2ex}\setlength{\itemsep}{0pt}}
+                                                  
+You're in trouble here.  Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+Missing character: There is no e in font nullfont!
+Missing character: There is no f in font nullfont!
+Missing character: There is no l in font nullfont!
+Missing character: There is no e in font nullfont!
+Missing character: There is no n in font nullfont!
+Missing character: There is no g in font nullfont!
+Missing character: There is no t in font nullfont!
+Missing character: There is no h in font nullfont!
+Missing character: There is no s in font nullfont!
+! Missing number, treated as zero.
+<to be read again> 
+                   e
+l.82 ...th{\parsep}{2ex}\setlength{\itemsep}{0pt}}
+                                                  
+A number should have been here; I inserted `0'.
+(If you can't figure out why I needed to see a number,
+look up `weird error' in the index to The TeXbook.)
+
+! You already have nine parameters.
+\reserved@a ...\def \expandafter \@\reserved@b #10
+                                                  e{
+l.82 ...th{\parsep}{2ex}\setlength{\itemsep}{0pt}}
+                                                  
+I'm going to ignore the # sign you just used.
+
+
+Overfull \hbox (20.0pt too wide) in paragraph at lines 82--83
+[]
+ []
+
+)
+! Emergency stop.
+<*> \nonstopmode\input{matlabref.sty}
+                                     
+*** (job aborted, no legal \end found)
+
+ 
+Here is how much of TeX's memory you used:
+ 161 strings out of 10898
+ 1599 string characters out of 96882
+ 43974 words of memory out of 263001
+ 3168 multiletter control sequences out of 10000+0
+ 3640 words of font info for 14 fonts, out of 400000 for 1000
+ 14 hyphenation exceptions out of 1000
+ 15i,0n,12p,137b,24s stack positions out of 300i,100n,500p,50000b,4000s
+No pages of output.

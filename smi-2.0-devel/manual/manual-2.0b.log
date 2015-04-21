@@ -1,0 +1,212 @@
+This is TeX, Version 3.14159 (Web2C 7.3.1) (format=latex 2000.3.7)  9 NOV 2000 07:54
+**\nonstopmode\input{manual-2.0b.tex}
+(manual-2.0b.tex (/usr/share/texmf/tex/latex/base/book.cls
+Document Class: book 1999/01/07 v1.4a Standard LaTeX document class
+(/usr/share/texmf/tex/latex/base/bk10.clo
+File: bk10.clo 1999/01/07 v1.4a Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@chapter=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+) (matlabref.sty
+Package: matlabref 1997/12/04 v1.1 Matlab Manual Style
+
+(/usr/share/texmf/tex/latex/fancyheadings/fancyheadings.sty
+\headrulewidth=\dimen103
+\footrulewidth=\dimen104
+\plainheadrulewidth=\dimen105
+\plainfootrulewidth=\dimen106
+\headwidth=\dimen107
+\footruleskip=\dimen108
+)
+(/usr/share/texmf/tex/latex/base/ifthen.sty
+Package: ifthen 1999/01/07 v1.1a Standard LaTeX ifthen package (DPC)
+)
+\@tablength=\skip43
+) (manual-2.0b.aux)
+\openout1 = `manual-2.0b.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 77.
+LaTeX Font Info:    ... okay on input line 77.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 77.
+LaTeX Font Info:    ... okay on input line 77.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 77.
+LaTeX Font Info:    ... okay on input line 77.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 77.
+LaTeX Font Info:    ... okay on input line 77.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 77.
+LaTeX Font Info:    ... okay on input line 77.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 77.
+LaTeX Font Info:    ... okay on input line 77.
+
+(manual-2.0b.toc
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 2.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 2.
+ [1
+
+
+])
+\tf@toc=\write3
+\openout3 = `manual-2.0b.toc'.
+
+ [2]
+Chapter 1.
+
+Overfull \hbox (74.70105pt too wide) in paragraph at lines 83--119
+[] 
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [3
+
+]
+Overfull \vbox (48.10255pt too high) has occurred while \output is active []
+
+
+[4] [5] [6] [7] [8] [9] [10]
+Underfull \hbox (badness 10000) in paragraph at lines 345--347
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 360--362
+
+ []
+
+[11] [12] [13]
+Overfull \hbox (7.70016pt too wide) in paragraph at lines 435--437
+\OT1/cmtt/m/n/10 [B,D,x0,R,Phi]=destbd(u,y,A,C,[fB fD fx fK],Rold,iv,niv); 
+ []
+
+[14]
+Overfull \hbox (30.90108pt too wide) in paragraph at lines 463--467
+[]\OT1/cmr/m/n/10 Number of lagged iv'sused. op-ti-mally length(iv)=lenght(u)+N
+N-
+ []
+
+
+Overfull \hbox (6.29904pt too wide) in paragraph at lines 473--476
+\OT1/cmr/m/n/10 Used when an-a-lyz-ing mul-ti-ple input-output data se-quences.
+ 
+ []
+
+[15]
+Overfull \hbox (49.6998pt too wide) in paragraph at lines 501--503
+\OT1/cmtt/m/n/10 [A,B,C,D,x0,K,options] = dslslin(u,y,A,C,K,model,partype,optio
+ns) 
+ []
+
+
+Overfull \hbox (11.32108pt too wide) in paragraph at lines 507--515
+\OT1/cmr/m/n/10 model(1) spec-i-fies if ma-trix $\OML/cmm/m/it/10 B$ \OT1/cmr/m
+/n/10 should be es-ti-mated. model(2)
+ []
+
+[16] [17] [18] [19]
+
+LaTeX Warning: Citation `Tulleken90' on page 20 undefined on input line 627.
+
+[20] [21]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 687.
+
+ (/usr/share/texmf/tex/latex/base/omscmr.fd
+File: omscmr.fd 1998/03/27 v2.5g Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 687.
+
+
+LaTeX Warning: Citation `Backx87' on page 22 undefined on input line 694.
+
+[22] [23] [24] [25] [26] [27] [28]
+Overfull \hbox (4.12015pt too wide) in paragraph at lines 909--913
+\OT1/cmr/m/n/10 model in in-no-va-tion form us-ing the out-put of the dordpo an
+d dmodpo
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 941--942
+
+ []
+
+[29] [30]
+Overfull \hbox (0.71571pt too wide) in paragraph at lines 1012--1014
+[]\OT1/cmr/m/n/10 Order of the Cheby-chev poly-no-mi-als in the non-lin-ear fun
+c-
+ []
+
+[31] [32]
+Overfull \hbox (60.1997pt too wide) in paragraph at lines 1072--1073
+[]\OT1/cmtt/m/n/10 [A,B,C,D,x0,thl,options] = dslswie(u,z,A,B,C,D,x0,nn,model,o
+ptions) 
+ []
+
+[33] [34]
+Overfull \hbox (60.1997pt too wide) in paragraph at lines 1123--1126
+\OT1/cmtt/m/n/10 [A,B,C,D,hist] = drslslin(u,y,A,C,K,model,partype,options,slss
+tate) 
+ []
+
+[35]
+Overfull \hbox (20.14705pt too wide) in alignment at lines 1175--1177
+ [][][] []
+ []
+
+
+Overfull \hbox (0.77118pt too wide) in paragraph at lines 1187--1189
+[]\OT1/cmr/m/n/10 State space ma-tri-ces rep-re-sent-ing a pos-si-bly un-sta-bl
+e state
+ []
+
+
+Overfull \hbox (0.3824pt too wide) in paragraph at lines 1189--1191
+[]\OT1/cmr/m/n/10 Numerator and de-nu-mer-a-tor of pos-si-bly non-proper trans-
+
+ []
+
+[36] [37] [38] [39]
+Overfull \hbox (65.44966pt too wide) in paragraph at lines 1302--1304
+[]\OT1/cmtt/m/n/10 [Bc,Ba,D,x0c,x0a,R]=ncdestbd(u,y,Ac,Aa,Cc,Ca,[fB,fD,fx],Rnew
+,iv,NN);
+ []
+
+
+Overfull \hbox (30.90108pt too wide) in paragraph at lines 1327--1331
+[]\OT1/cmr/m/n/10 Number of lagged iv'sused. op-ti-mally length(iv)=lenght(u)+N
+N-
+ []
+
+[40] [41] [42]
+Overfull \hbox (6.29904pt too wide) in paragraph at lines 1406--1409
+\OT1/cmr/m/n/10 Used when an-a-lyz-ing mul-ti-ple input-output data se-quences.
+ 
+ []
+
+[43] [44] [45] [46] [47] [48] [49] [50] [51] [52] [53] (manual-2.0b.aux)
+
+LaTeX Warning: There were undefined references.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 475 strings out of 10898
+ 4720 string characters out of 96882
+ 55685 words of memory out of 263001
+ 3455 multiletter control sequences out of 10000+0
+ 9265 words of font info for 33 fonts, out of 400000 for 1000
+ 14 hyphenation exceptions out of 1000
+ 29i,12n,29p,173b,625s stack positions out of 300i,100n,500p,50000b,4000s
+
+Output written on manual-2.0b.dvi (53 pages, 98040 bytes).

@@ -1,0 +1,41 @@
+\contentsline {chapter}{\numberline {1}User guide to SMI 2.0}{5}
+\contentsline {section}{\numberline {1.1}List of functions in SMI 2.0}{5}
+\contentsline {section}{\numberline {1.2}Function descriptions}{7}
+\contentsline {subsection}{cestac}{8}
+\contentsline {subsection}{cestbd}{9}
+\contentsline {subsection}{cestx}{10}
+\contentsline {subsection}{chebest}{11}
+\contentsline {subsection}{chebsim}{12}
+\contentsline {subsection}{cordom}{13}
+\contentsline {subsection}{cordpi}{14}
+\contentsline {subsection}{cordpo}{16}
+\contentsline {subsection}{css2th}{18}
+\contentsline {subsection}{cth2ss}{19}
+\contentsline {subsection}{destac}{20}
+\contentsline {subsection}{destbd}{21}
+\contentsline {subsection}{destk}{23}
+\contentsline {subsection}{destx}{24}
+\contentsline {subsection}{dfunlin}{25}
+\contentsline {subsection}{dfunwie}{26}
+\contentsline {subsection}{dmoesp}{27}
+\contentsline {subsection}{dordeiv}{28}
+\contentsline {subsection}{dordom}{30}
+\contentsline {subsection}{dordpi}{31}
+\contentsline {subsection}{dordpo}{32}
+\contentsline {subsection}{dordrs}{33}
+\contentsline {subsection}{drpi}{34}
+\contentsline {subsection}{drpo}{35}
+\contentsline {subsection}{drslslin}{36}
+\contentsline {subsection}{dslslin}{37}
+\contentsline {subsection}{dslswie}{39}
+\contentsline {subsection}{dss2th}{41}
+\contentsline {subsection}{dth2ss}{42}
+\contentsline {subsection}{kronekf}{43}
+\contentsline {subsection}{ncdestac}{44}
+\contentsline {subsection}{ncdestbd}{45}
+\contentsline {subsection}{ncdlsim}{47}
+\contentsline {subsection}{orderselect}{49}
+\contentsline {subsection}{prbn}{50}
+\contentsline {subsection}{shave}{51}
+\contentsline {subsection}{tlsim}{52}
+\contentsline {subsection}{vaf}{53}

@@ -1,0 +1,682 @@
+<html><title>nlid_tools.html generated from help2doc</title><p><a href="#Index">[Go To Alphabetical Index]</a></p><a name=Contents></a><p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td align=center>&nbsp;<b>Contents</b></td></tr></table><p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new</b></td></tr></table><p><a href="#b1">[    1]                                                                  nlid_help</a></p><p><a href="#b2">[    2]                                                                 nlid_resid</a></p><p><a href="#b3">[    3]                                                                   nlid_sim</a></p><p><a href="#b4">[    4]                                                                    nlmkobj</a></p><p><a href="#b5">[    5]                                                                        smo</a></p><p><a href="#b6">[    6]                                                                        vaf</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@cor</b></td></tr></table><p><a href="#b7">[    7]                                                                        cor</a></p><p><a href="#b8">[    8]                                                                    nlident</a></p><p><a href="#b9">[    9]                                                                     nlmtst</a></p><p><a href="#b10">[   10]                                                                      nlsim</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@cor\private</b></td></tr></table><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@fresp</b></td></tr></table><p><a href="#b11">[   11]                                                                      delay</a></p><p><a href="#b12">[   12]                                                                      fresp</a></p><p><a href="#b13">[   13]                                                                    nlident</a></p><p><a href="#b14">[   14]                                                                     nlmtst</a></p><p><a href="#b15">[   15]                                                                      nlsim</a></p><p><a href="#b16">[   16]                                                                       plot</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@irf</b></td></tr></table><p><a href="#b17">[   17]                                                                    hessian</a></p><p><a href="#b18">[   18]                                                                        irf</a></p><p><a href="#b19">[   19]                                                                    nlident</a></p><p><a href="#b20">[   20]                                                                     nlmtst</a></p><p><a href="#b21">[   21]                                                                      nlsim</a></p><p><a href="#b22">[   22]                                                                 plotBounds</a></p><p><a href="#b23">[   23]                                                                   zero_pad</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@irf\private</b></td></tr></table><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@kern</b></td></tr></table><p><a href="#b24">[   24]                                                                       kern</a></p><p><a href="#b25">[   25]                                                                       plot</a></p><p><a href="#b26">[   26]                                                                        smo</a></p><p><a href="#b27">[   27]                                                                subsref_old</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl</b></td></tr></table><p><a href="#b28">[   28]                                                                   hk_ident</a></p><p><a href="#b29">[   29]                                                                   lm_ident</a></p><p><a href="#b30">[   30]                                                                      ln2vs</a></p><p><a href="#b31">[   31]                                                                      ln2ws</a></p><p><a href="#b32">[   32]                                                                       lnbl</a></p><p><a href="#b33">[   33]                                                                    nlident</a></p><p><a href="#b34">[   34]                                                                     nlmtst</a></p><p><a href="#b35">[   35]                                                                   pdefault</a></p><p><a href="#b36">[   36]                                                                  phk_ident</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl\private</b></td></tr></table><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat</b></td></tr></table><p><a href="#b37">[   37]                                                                   ac_types</a></p><p><a href="#b38">[   38]                                                                      angle</a></p><p><a href="#b39">[   39]                                                                        cat</a></p><p><a href="#b40">[   40]                                                                       chop</a></p><p><a href="#b41">[   41]                                                                     cumsum</a></p><p><a href="#b42">[   42]                                                                        ddt</a></p><p><a href="#b43">[   43]                                                                   decimate</a></p><p><a href="#b44">[   44]                                                                    detrend</a></p><p><a href="#b45">[   45]                                                                     domain</a></p><p><a href="#b46">[   46]                                                                     double</a></p><p><a href="#b47">[   47]                                                                      emean</a></p><p><a href="#b48">[   48]                                                                        ext</a></p><p><a href="#b49">[   49]                                                                    extract</a></p><p><a href="#b50">[   50]                                                                        fft</a></p><p><a href="#b51">[   51]                                                                       fgzw</a></p><p><a href="#b52">[   52]                                                                       fkbi</a></p><p><a href="#b53">[   53]                                                                     iddata</a></p><p><a href="#b54">[   54]                                                                     length</a></p><p><a href="#b55">[   55]                                                                      minus</a></p><p><a href="#b56">[   56]                                                                     mtimes</a></p><p><a href="#b57">[   57]                                                                      nldat</a></p><p><a href="#b58">[   58]                                                                      phase</a></p><p><a href="#b59">[   59]                                                                       plot</a></p><p><a href="#b60">[   60]                                                                       plus</a></p><p><a href="#b61">[   61]                                                                        pnv</a></p><p><a href="#b62">[   62]                                                                 random_pdf</a></p><p><a href="#b63">[   63]                                                                 random_sig</a></p><p><a href="#b64">[   64]                                                                    rdivide</a></p><p><a href="#b65">[   65]                                                                       real</a></p><p><a href="#b66">[   66]                                                                    reshape</a></p><p><a href="#b67">[   67]                                                                        seg</a></p><p><a href="#b68">[   68]                                                                       size</a></p><p><a href="#b69">[   69]                                                                        smo</a></p><p><a href="#b70">[   70]                                                                    squeeze</a></p><p><a href="#b71">[   71]                                                                     stairs</a></p><p><a href="#b72">[   72]                                                                   subsasgn</a></p><p><a href="#b73">[   73]                                                                subsref_old</a></p><p><a href="#b74">[   74]                                                                     uminus</a></p><p><a href="#b75">[   75]                                                                      uplus</a></p><p><a href="#b76">[   76]                                                                        vaf</a></p><p><a href="#b77">[   77]                                                                      xcorr</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\private</b></td></tr></table><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nlm</b></td></tr></table><p><a href="#b78">[   78]                                                                        nlm</a></p><p><a href="#b79">[   79]                                                                     nlm2vs</a></p><p><a href="#b80">[   80]                                                                     nlm2ws</a></p><p><a href="#b81">[   81]                                                                      nlsim</a></p><p><a href="#b82">[   82]                                                                       plot</a></p><p><a href="#b83">[   83]                                                                       size</a></p><p><a href="#b84">[   84]                                                                   subsasgn</a></p><p><a href="#b85">[   85]                                                                subsref_old</a></p><p><a href="#b86">[   86]                                                                        vaf</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nltop</b></td></tr></table><p><a href="#b87">[   87]                                                                      nltop</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nltop\private</b></td></tr></table><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@param</b></td></tr></table><p><a href="#b88">[   88]                                                                      param</a></p><p><a href="#b89">[   89]                                                                     setdef</a></p><p><a href="#b90">[   90]                                                                 setdefault</a></p><p><a href="#b91">[   91]                                                                     setval</a></p><p><a href="#b92">[   92]                                                                      value</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@pdf</b></td></tr></table><p><a href="#b93">[   93]                                                                    nlident</a></p><p><a href="#b94">[   94]                                                                     nlmtst</a></p><p><a href="#b95">[   95]                                                                        pdf</a></p><p><a href="#b96">[   96]                                                                       plot</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@pdf\private</b></td></tr></table><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom</b></td></tr></table><p><a href="#b97">[   97]                                                                        ddx</a></p><p><a href="#b98">[   98]                                                                    hessian</a></p><p><a href="#b99">[   99]                                                                   jacobian</a></p><p><a href="#b100">[  100]                                                                    nlident</a></p><p><a href="#b101">[  101]                                                                     nlmtst</a></p><p><a href="#b102">[  102]                                                                      nlsim</a></p><p><a href="#b103">[  103]                                                                       plot</a></p><p><a href="#b104">[  104]                                                                    polynom</a></p><p><a href="#b105">[  105]                                                                        vaf</a></p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom\private</b></td></tr></table><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@spect</b></td></tr></table><p><a href="#b106">[  106]                                                                    nlident</a></p><p><a href="#b107">[  107]                                                                     nlmtst</a></p><p><a href="#b108">[  108]                                                                      spect</a></p><html><code><pre><body><a name=Index></a><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td align=center>&nbsp;<b>Alphabetical Index of Functions</b></td></tr></table><p><a href="#b37">ac_types                                                              </a>        37</a></p><p><a href="#b38">angle                                                                 </a>        38</a></p><p><a href="#b39">cat                                                                   </a>        39</a></p><p><a href="#b40">chop                                                                  </a>        40</a></p><p><a href="#b7">cor                                                                   </a>         7</a></p><p><a href="#b41">cumsum                                                                </a>        41</a></p><p><a href="#b42">ddt                                                                   </a>        42</a></p><p><a href="#b97">ddx                                                                   </a>        97</a></p><p><a href="#b43">decimate                                                              </a>        43</a></p><p><a href="#b11">delay                                                                 </a>        11</a></p><p><a href="#b44">detrend                                                               </a>        44</a></p><p><a href="#b45">domain                                                                </a>        45</a></p><p><a href="#b46">double                                                                </a>        46</a></p><p><a href="#b47">emean                                                                 </a>        47</a></p><p><a href="#b48">ext                                                                   </a>        48</a></p><p><a href="#b49">extract                                                               </a>        49</a></p><p><a href="#b50">fft                                                                   </a>        50</a></p><p><a href="#b51">fgzw                                                                  </a>        51</a></p><p><a href="#b52">fkbi                                                                  </a>        52</a></p><p><a href="#b12">fresp                                                                 </a>        12</a></p><p><a href="#b17">hessian                                                               </a>        17</a></p><p><a href="#b98">hessian                                                               </a>        98</a></p><p><a href="#b28">hk_ident                                                              </a>        28</a></p><p><a href="#b53">iddata                                                                </a>        53</a></p><p><a href="#b18">irf                                                                   </a>        18</a></p><p><a href="#b99">jacobian                                                              </a>        99</a></p><p><a href="#b24">kern                                                                  </a>        24</a></p><p><a href="#b54">length                                                                </a>        54</a></p><p><a href="#b29">lm_ident                                                              </a>        29</a></p><p><a href="#b30">ln2vs                                                                 </a>        30</a></p><p><a href="#b31">ln2ws                                                                 </a>        31</a></p><p><a href="#b32">lnbl                                                                  </a>        32</a></p><p><a href="#b55">minus                                                                 </a>        55</a></p><p><a href="#b56">mtimes                                                                </a>        56</a></p><p><a href="#b57">nldat                                                                 </a>        57</a></p><p><a href="#b1">nlid_help                                                             </a>         1</a></p><p><a href="#b2">nlid_resid                                                            </a>         2</a></p><p><a href="#b3">nlid_sim                                                              </a>         3</a></p><p><a href="#b8">nlident                                                               </a>         8</a></p><p><a href="#b13">nlident                                                               </a>        13</a></p><p><a href="#b19">nlident                                                               </a>        19</a></p><p><a href="#b33">nlident                                                               </a>        33</a></p><p><a href="#b93">nlident                                                               </a>        93</a></p><p><a href="#b100">nlident                                                               </a>       100</a></p><p><a href="#b106">nlident                                                               </a>       106</a></p><p><a href="#b78">nlm                                                                   </a>        78</a></p><p><a href="#b79">nlm2vs                                                                </a>        79</a></p><p><a href="#b80">nlm2ws                                                                </a>        80</a></p><p><a href="#b4">nlmkobj                                                               </a>         4</a></p><p><a href="#b9">nlmtst                                                                </a>         9</a></p><p><a href="#b14">nlmtst                                                                </a>        14</a></p><p><a href="#b20">nlmtst                                                                </a>        20</a></p><p><a href="#b34">nlmtst                                                                </a>        34</a></p><p><a href="#b94">nlmtst                                                                </a>        94</a></p><p><a href="#b101">nlmtst                                                                </a>       101</a></p><p><a href="#b107">nlmtst                                                                </a>       107</a></p><p><a href="#b10">nlsim                                                                 </a>        10</a></p><p><a href="#b15">nlsim                                                                 </a>        15</a></p><p><a href="#b21">nlsim                                                                 </a>        21</a></p><p><a href="#b81">nlsim                                                                 </a>        81</a></p><p><a href="#b102">nlsim                                                                 </a>       102</a></p><p><a href="#b87">nltop                                                                 </a>        87</a></p><p><a href="#b88">param                                                                 </a>        88</a></p><p><a href="#b35">pdefault                                                              </a>        35</a></p><p><a href="#b95">pdf                                                                   </a>        95</a></p><p><a href="#b58">phase                                                                 </a>        58</a></p><p><a href="#b36">phk_ident                                                             </a>        36</a></p><p><a href="#b16">plot                                                                  </a>        16</a></p><p><a href="#b25">plot                                                                  </a>        25</a></p><p><a href="#b59">plot                                                                  </a>        59</a></p><p><a href="#b82">plot                                                                  </a>        82</a></p><p><a href="#b96">plot                                                                  </a>        96</a></p><p><a href="#b103">plot                                                                  </a>       103</a></p><p><a href="#b22">plotBounds                                                            </a>        22</a></p><p><a href="#b60">plus                                                                  </a>        60</a></p><p><a href="#b61">pnv                                                                   </a>        61</a></p><p><a href="#b104">polynom                                                               </a>       104</a></p><p><a href="#b62">random_pdf                                                            </a>        62</a></p><p><a href="#b63">random_sig                                                            </a>        63</a></p><p><a href="#b64">rdivide                                                               </a>        64</a></p><p><a href="#b65">real                                                                  </a>        65</a></p><p><a href="#b66">reshape                                                               </a>        66</a></p><p><a href="#b67">seg                                                                   </a>        67</a></p><p><a href="#b89">setdef                                                                </a>        89</a></p><p><a href="#b90">setdefault                                                            </a>        90</a></p><p><a href="#b91">setval                                                                </a>        91</a></p><p><a href="#b68">size                                                                  </a>        68</a></p><p><a href="#b83">size                                                                  </a>        83</a></p><p><a href="#b5">smo                                                                   </a>         5</a></p><p><a href="#b26">smo                                                                   </a>        26</a></p><p><a href="#b69">smo                                                                   </a>        69</a></p><p><a href="#b108">spect                                                                 </a>       108</a></p><p><a href="#b70">squeeze                                                               </a>        70</a></p><p><a href="#b71">stairs                                                                </a>        71</a></p><p><a href="#b72">subsasgn                                                              </a>        72</a></p><p><a href="#b84">subsasgn                                                              </a>        84</a></p><p><a href="#b27">subsref_old                                                           </a>        27</a></p><p><a href="#b73">subsref_old                                                           </a>        73</a></p><p><a href="#b85">subsref_old                                                           </a>        85</a></p><p><a href="#b74">uminus                                                                </a>        74</a></p><p><a href="#b75">uplus                                                                 </a>        75</a></p><p><a href="#b6">vaf                                                                   </a>         6</a></p><p><a href="#b76">vaf                                                                   </a>        76</a></p><p><a href="#b86">vaf                                                                   </a>        86</a></p><p><a href="#b105">vaf                                                                   </a>       105</a></p><p><a href="#b92">value                                                                 </a>        92</a></p><p><a href="#b77">xcorr                                                                 </a>        77</a></p><p><a href="#b23">zero_pad                                                              </a>        23</a></p><p><table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td align=center>&nbsp;<b>Function Help</b></td></tr></table><p><p><a name=b1></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlid_help</b></td><td valign="left"></td><td align=right><b>1</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\nlid_help.m</b><br> <br>
+  <b>nlid_help</b> - generate help on the classes for nlid_tools
+  option
+   '  buildHelp - build extended html help file' ...
+     classList - list of all classes for nlid_tools' ...
+      help = display detailed help file' ...
+      classname - help on methods for class' ... 
+   
+  Usage
+   nlid_help(option)
+  
+  Example
+  list all calss for nlid_tools
+    nlid_help ('classList');
+  
+  display extend web hep on nlid_tools
+    nlid_help('help');
+ 
+  help on methods for nldat 
+ 
+    nlid_help ('nldat'); 
+ 
+  See also
+
+ 
+ % AUTHOR: Robert Kearney
+ % $DATE: 22-Mar-2007 11:45:06 $
+ % $Revision: 1.2 $
+ % DEVELOPED: 7.3.0.267 (R2006b)
+ % FILENAME: nlid_help.m
+ Copyright 2002-2005 McGill University This file is part of the CMB
+ Proteomics PipeLine
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b2></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlid_resid</b></td><td valign="left"></td><td align=right><b>2</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\nlid_resid.m</b><br> <br>
+  <b>nlid_resid</b> - compute and display prediction error in model output.
+  Usage:
+    [R, V, yp] = nlid_resid( M, z, plotFlag);
+        R - residuals
+        V - variance accoutned for
+       yp - pedicted otuput
+ 
+  M - model
+  z - innout output dats
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b3></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlid_sim</b></td><td valign="left"></td><td align=right><b>3</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\nlid_sim.m</b><br> <br>
+  <b>nlid_sim</b> - simulate various nonlinear systems
+  usage:
+ 			z = nlid_sim (option,u, pltflg)
+  where
+ 	u 			= input signal
+ 	option 	= system type
+        LP1 - firat order  low pass
+        HP1 - first order high pass
+        L1 - one-sided low pass filter
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b4></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlmkobj</b></td><td valign="left"></td><td align=right><b>4</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\nlmkobj.m</b><br> <br>
+  <b>nlmkobj</b> - Standard call for NLID objects
+  Parse input
+ 
+  $Revision: 1.5 $
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b5></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>smo</b></td><td valign="left"></td><td align=right><b>5</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\smo.m</b><br> <br>
+  <b>smo</b> - smooth with a 3-point, zero-phase,  moving average filter 
+ 
+ 	y(i) = x(i-1)/4 + x(i)/2 + x(i+1)/4
+ 
+ 	USAGE	: y = smo(x,numtimes)
+ 
+ 	x	: input vector
+ 	numtimes: number of times x should be smoothed
+ 
+  if x is a matrix, smo(x,numtimes) will smooth each
+  column of x numtimes
+  $Revision: 1.5 $
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b6></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>vaf</b></td><td valign="left"></td><td align=right><b>6</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\vaf.m</b><br> <br>
+  <b>vaf</b> - compute variance accounted for between two signals
+  v = vaf(x,y)
+  using cov.
+ 
+  $Revision: 1.3 $
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b7></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>cor</b></td><td valign="left"></td><td align=right><b>7</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@cor\cor.m</b><br> <br>
+ correlation function object
+  Parent: kern
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b8></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlident</b></td><td valign="left"></td><td align=right><b>8</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@cor\nlident.m</b><br> <br>
+  cor/nlident - identify correlation objects
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b9></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlmtst</b></td><td valign="left"></td><td align=right><b>9</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@cor\nlmtst.m</b><br> <br>
+  cor/nlmtst - Test of cor objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b10></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlsim</b></td><td valign="left"></td><td align=right><b>10</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@cor\nlsim.m</b><br> <br>
+  Simulate response of IRF to input data set
+  input options not fully defined as yet
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b11></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>delay</b></td><td valign="left"></td><td align=right><b>11</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@fresp\delay.m</b><br> <br>
+  fresp/dealy  Add a delay to a fresp object
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b12></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>fresp</b></td><td valign="left"></td><td align=right><b>12</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@fresp\fresp.m</b><br> <br>
+  Add object  specific parameters
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b13></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlident</b></td><td valign="left"></td><td align=right><b>13</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@fresp\nlident.m</b><br> <br>
+  fresp/nlident
+  CONSTRUCT an fresp ( frequency response function object
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b14></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlmtst</b></td><td valign="left"></td><td align=right><b>14</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@fresp\nlmtst.m</b><br> <br>
+  fresp/nlmtst
+ 
+ fs=nlmtst(fresp) test identification from data
+  $Revision: 1.5 $
+  Copyright 2003, Robert E Kearney and David T Westwick
+  This file is part of the nlid toolbox, and is released under the GNU 
+  General Public License For details, see ../copying.txt and ../gpl.txt 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b15></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlsim</b></td><td valign="left"></td><td align=right><b>15</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@fresp\nlsim.m</b><br> <br>
+  Simulate response of fresp  to input data set
+  input options not fill defined as yet
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b16></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>plot</b></td><td valign="left"></td><td align=right><b>16</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@fresp\plot.m</b><br> <br>
+  plot a frequency response object
+   xmode [linear/log] determines mode for plotting frequency axis
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b17></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>hessian</b></td><td valign="left"></td><td align=right><b>17</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@irf\hessian.m</b><br> <br>
+  irf/hessian
+  compute the hessian for a pseudo-inverse based IRF estimate.
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b18></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>irf</b></td><td valign="left"></td><td align=right><b>18</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@irf\irf.m</b><br> <br>
+  Add <b>irf</b> specific parameters
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b19></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlident</b></td><td valign="left"></td><td align=right><b>19</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@irf\nlident.m</b><br> <br>
+  CONSTRUCT an irf (impulse response function object
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b20></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlmtst</b></td><td valign="left"></td><td align=right><b>20</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@irf\nlmtst.m</b><br> <br>
+  irf/nlmtst
+  test IRfs
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b21></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlsim</b></td><td valign="left"></td><td align=right><b>21</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@irf\nlsim.m</b><br> <br>
+  irf/nlsim Simulate response of IRF to input data set
+  input options not fill defined as yet
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b22></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>plotBounds</b></td><td valign="left"></td><td align=right><b>22</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@irf\plotBounds.m</b><br> <br>
+  <b>plotBounds</b> - plot IRF with error bounds 
+   
+    ... 
+  Usage 
+  
+  Example 
+    <b>plotBounds</b>(I)
+  See also 
+
+  
+ % AUTHOR: Robert Kearney 
+ % $DATE: 26-Mar-2007 18:18:31 $ 
+ % $Revision: 1.1 $ 
+ % DEVELOPED: 7.3.0.267 (R2006b) 
+ % FILENAME: plotBounds.m 
+ Copyright 2002-2005 McGill University This file is part of the CMB Proteomics PipeLine 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b23></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>zero_pad</b></td><td valign="left"></td><td align=right><b>23</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@irf\zero_pad.m</b><br> <br>
+  new_IRF_obj = zero_pad(IRF_obj)
+ 
+  IRF_obj: tv_IRF object
+ 
+  Pad a TV IRF matrix(and corresponding bounds matrix if not empty) 
+  with M2 rows of zeros at the top and -M1 rows of zeros at the bottom.
+  so that it can be used efficiently for simulation
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b24></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>kern</b></td><td valign="left"></td><td align=right><b>24</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@kern\kern.m</b><br> <br>
+  kernel object
+   Parent: nldat
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b25></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>plot</b></td><td valign="left"></td><td align=right><b>25</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@kern\plot.m</b><br> <br>
+  Overloaded plot function for kernel objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b26></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>smo</b></td><td valign="left"></td><td align=right><b>26</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@kern\smo.m</b><br> <br>
+  overloaded smooth function for kern objects
+ 
+  syntax ks = smo(k,n);
+  n is the number of passes (default 1).
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b27></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>subsref_old</b></td><td valign="left"></td><td align=right><b>27</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@kern\subsref_old.m</b><br> <br>
+  syntax  b = subsref (A,S);
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b28></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>hk_ident</b></td><td valign="left"></td><td align=right><b>28</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl\hk_ident.m</b><br> <br>
+  implements Hunter-Korenberg interation for Wiener cascade models.
+  
+  See: I.W. Hunter and M.J. Korenberg, The identification of nonlinear 
+       biological systems: Wiener and Hammerstein cascade models.
+       Biological Cybernetics, 55:135-144, 1986.
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b29></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>lm_ident</b></td><td valign="left"></td><td align=right><b>29</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl\lm_ident.m</b><br> <br>
+  nonlinear optimization method for Wiener cascade fitting.
+  uses a Levenberg-Marquardt second-order gradient descent search.
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b30></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>ln2vs</b></td><td valign="left"></td><td align=right><b>30</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl\ln2vs.m</b><br> <br>
+  generate Volterra kernels for Wiener cascade model
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b31></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>ln2ws</b></td><td valign="left"></td><td align=right><b>31</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl\ln2ws.m</b><br> <br>
+  generate Wiener kernels for Wiener cascade model
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b32></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>lnbl</b></td><td valign="left"></td><td align=right><b>32</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl\lnbl.m</b><br> <br>
+  Add object  specific parameters
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b33></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlident</b></td><td valign="left"></td><td align=right><b>33</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl\nlident.m</b><br> <br>
+  Identify a lnbl
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b34></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlmtst</b></td><td valign="left"></td><td align=right><b>34</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl\nlmtst.m</b><br> <br>
+  lnlbl/nlbl
+  test of lnbl identification
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b35></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>pdefault</b></td><td valign="left"></td><td align=right><b>35</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl\pdefault.m</b><br> <br>
+  set default parameters for lnbl
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b36></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>phk_ident</b></td><td valign="left"></td><td align=right><b>36</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@lnbl\phk_ident.m</b><br> <br>
+  implements Paulin-Hunter-Korenberg interation for Wiener cascade models.
+  
+  See M.G. Paulin, A method for constructing data-based models of spiking 
+      neurons using a dynamic linear-static nonlinear cascade.
+      Biological Cybernetics, 69:67-76, 1993.
+ 
+      M.J. Korenberg and I.W. Hunter,  Two methods for identifying Wiener 
+      cascades having noninvertible static nonlinearities.
+      Annals of Biomedical Engineering, 27(6):793-804, 1999.
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b37></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>ac_types</b></td><td valign="left"></td><td align=right><b>37</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\ac_types.m</b><br> <br>
+  Copyright 1999-2003, Robert E Kearney
+  This file is part of the nlid toolbox, and is released under the GNU 
+  General Public License For details, see copying.txt and gpl.txt 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b38></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>angle</b></td><td valign="left"></td><td align=right><b>38</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\angle.m</b><br> <br>
+  angle function for nldat variables;
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b39></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>cat</b></td><td valign="left"></td><td align=right><b>39</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\cat.m</b><br> <br>
+  cat function for nldat objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b40></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>chop</b></td><td valign="left"></td><td align=right><b>40</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\chop.m</b><br> <br>
+  nldat/chop - chop data from begining and end of a record 
+  x - input data
+  chop len - length tyo chop off
+  Copyright 1999-2003, Robert E Kearney
+  This file is part of the nlid toolbox, and is released under the GNU 
+  General Public License For details, see copying.txt and gpl.txt 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b41></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>cumsum</b></td><td valign="left"></td><td align=right><b>41</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\cumsum.m</b><br> <br>
+  Copyright 1999-2003, Robert E Kearney
+  This file is part of the nlid toolbox, and is released under the GNU 
+  General Public License For details, see copying.txt and gpl.txt 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b42></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>ddt</b></td><td valign="left"></td><td align=right><b>42</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\ddt.m</b><br> <br>
+  ddt function for nldat sets
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b43></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>decimate</b></td><td valign="left"></td><td align=right><b>43</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\decimate.m</b><br> <br>
+  overloaded decimate fuction for "data" class
+  usage  y = decimate (d, n);
+  or     y = decimate (d, n, 'fir');
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b44></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>detrend</b></td><td valign="left"></td><td align=right><b>44</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\detrend.m</b><br> <br>
+  Detrend wrapper for nldat objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b45></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>domain</b></td><td valign="left"></td><td align=right><b>45</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\domain.m</b><br> <br>
+  returns domain vlaues for nldat object
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b46></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>double</b></td><td valign="left"></td><td align=right><b>46</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\double.m</b><br> <br>
+  double for nldata
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b47></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>emean</b></td><td valign="left"></td><td align=right><b>47</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\emean.m</b><br> <br>
+  emean - ensemble mean for nldat objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b48></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>ext</b></td><td valign="left"></td><td align=right><b>48</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\ext.m</b><br> <br>
+  extract data based on domain values
+  x - input data
+  start - starting domain vlaue 
+  delt  - length of extract. (default is to end of data set);
+  z = x(start:start_delt, :,:);
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b49></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>extract</b></td><td valign="left"></td><td align=right><b>49</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\extract.m</b><br> <br>
+  Extract samples from a channel dropping first n1 and last n2 points
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b50></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>fft</b></td><td valign="left"></td><td align=right><b>50</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\fft.m</b><br> <br>
+  fft function for nldat variables;
+  z = fft(x);
+ 
+  matlab's fft is applied to each realization of all channels in data set
+  $Revision: 1.1 $
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b51></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>fgzw</b></td><td valign="left"></td><td align=right><b>51</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\fgzw.m</b><br> <br>
+  fgzw(t,params)  - compute 2-nd order IRF for k,z,w
+  [c dcda] = fkzw(t,a)
+  t - is a series of time points. 
+  fgzw computes a 2'nd order  impulse response and its partial
+  derivatives at each time t.  The derivatives are computed with respect
+  to gain (g) , natural frequency (Wn), damping factor (zeta), 
+ 
+  t = vector of times at which the irf is to be evaluated
+  param = parameters = [g  zeta Wn]
+              g    = steady state gain
+              zeta = damping parameter
+              Wn   = natural freuqency (rad/s);
+ 
+  Transfer function is:
+ 
+                 g
+           ---------------------
+            
+           s^2     + 2 z     +  1
+           __         __
+           wn^2       wn
+ 
+  nb: partials were computeed using Maple.
+  C =  irf computed at each time T
+  dcda = partial derivatives w.r.t A at each time T
+ 
+  Caveat Emptor:  the special case of zeta=1 is not handle properly yet
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b52></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>fkbi</b></td><td valign="left"></td><td align=right><b>52</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\fkbi.m</b><br> <br>
+   [y,dyda]=fkbi(x,a) - compute second-order IRF for K,B,I
+ 
+   Compute second order  2nd order compliance IRF for K,B,I
+  to an impulse response
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b53></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>iddata</b></td><td valign="left"></td><td align=right><b>53</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\iddata.m</b><br> <br>
+  converts nldata type to iddata type
+  only for single-input singple output
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b54></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>length</b></td><td valign="left"></td><td align=right><b>54</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\length.m</b><br> <br>
+  length functon for nlad objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b55></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>minus</b></td><td valign="left"></td><td align=right><b>55</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\minus.m</b><br> <br>
+  minus function for nldat variables;
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b56></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>mtimes</b></td><td valign="left"></td><td align=right><b>56</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\mtimes.m</b><br> <br>
+  array multiply function for nldat variables;
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b57></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nldat</b></td><td valign="left"></td><td align=right><b>57</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\nldat.m</b><br> <br>
+ nldat  data object for nlid toolboxSummary of this class goes here
+    Detailed explanation goes here
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b58></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>phase</b></td><td valign="left"></td><td align=right><b>58</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\phase.m</b><br> <br>
+  angle function for nldat variables;
+  
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b59></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>plot</b></td><td valign="left"></td><td align=right><b>59</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\plot.m</b><br> <br>
+  nldat/plt - overloaded plot function for "nldat" class
+  plot (d, varagin);
+  options= 'plotmode' [line] 'plot type (line/xy/Super)
+          'help_flag' 0 'display help (0=No/1=yes)
+           nh - number of horizontal plots'
+           nv - number of vertical plots' 
+           nplt - plot number' 
+           xmode
+           y mode
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b60></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>plus</b></td><td valign="left"></td><td align=right><b>60</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\plus.m</b><br> <br>
+  plus function for nldat variables;
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b61></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>pnv</b></td><td valign="left"></td><td align=right><b>61</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\pnv.m</b><br> <br>
+  pnv - returns public properties or vlaues of object sys. 
+  sys - object
+  mode - mode to return [names/values]
+  case - 'lower' returns values as lower case 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b62></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>random_pdf</b></td><td valign="left"></td><td align=right><b>62</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\random_pdf.m</b><br> <br>
+  usage: y = random_pdf ( type, x, varargin) 
+  overlaid random_pdf for nldat objects
+   'normal',            mean     standard-deviation 
+   'chi-square',        dof
+   'student-t',         dof
+   'F-distribution'     dof1     dof2
+   'log-normal',        mean     variance   offset  
+   'rectangular',       xmin     xmax
+   'exponential',       mean
+   'binomial',          n        probabilty
+   'Poisson'            mean 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b63></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>random_sig</b></td><td valign="left"></td><td align=right><b>63</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\random_sig.m</b><br> <br>
+  X     - seed signal 
+  C     - desired autocorelation function
+  NCHANGE= number of interchanges
+  NREPORT -- frequency to report
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b64></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>rdivide</b></td><td valign="left"></td><td align=right><b>64</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\rdivide.m</b><br> <br>
+  array divide function for nldat variables;
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b65></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>real</b></td><td valign="left"></td><td align=right><b>65</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\real.m</b><br> <br>
+  real  function for nldat variables;
+  $Revision: 1.1 $ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b66></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>reshape</b></td><td valign="left"></td><td align=right><b>66</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\reshape.m</b><br> <br>
+  overlaid reshape for nldat objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b67></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>seg</b></td><td valign="left"></td><td align=right><b>67</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\seg.m</b><br> <br>
+  segment a nldat object into a series of relizations N points long
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b68></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>size</b></td><td valign="left"></td><td align=right><b>68</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\size.m</b><br> <br>
+  overloaded size function for nldatclass.
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b69></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>smo</b></td><td valign="left"></td><td align=right><b>69</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\smo.m</b><br> <br>
+  overlaid smooth function for nldat objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b70></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>squeeze</b></td><td valign="left"></td><td align=right><b>70</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\squeeze.m</b><br> <br>
+  squeeze for nldat objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b71></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>stairs</b></td><td valign="left"></td><td align=right><b>71</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\stairs.m</b><br> <br>
+  Overlaiud stairs function for nldat
+  options not yet implements
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b72></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>subsasgn</b></td><td valign="left"></td><td align=right><b>72</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\subsasgn.m</b><br> <br>
+  subsasgn for nldat objects
+  V01-01 12 Nov 98
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b73></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>subsref_old</b></td><td valign="left"></td><td align=right><b>73</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\subsref_old.m</b><br> <br>
+  V01-02 REK 22 Oct 99 Fix problem when domain values are specifed
+  V01-03 REK 20 Dec 02 Add support for '.' format
+  $Revision: 1.3 $
+  Copyright 1999-2003, Robert E Kearney
+  This file is part of the nlid toolbox, and is released under the GNU 
+  General Public License For details, see copying.txt and gpl.txt 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b74></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>uminus</b></td><td valign="left"></td><td align=right><b>74</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\uminus.m</b><br> <br>
+  unary function for nldat variables;
+  
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b75></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>uplus</b></td><td valign="left"></td><td align=right><b>75</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\uplus.m</b><br> <br>
+  unary plus function for nldat variables;
+  
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b76></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>vaf</b></td><td valign="left"></td><td align=right><b>76</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\vaf.m</b><br> <br>
+  <b>vaf</b> function for nldat sets
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b77></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>xcorr</b></td><td valign="left"></td><td align=right><b>77</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nldat\xcorr.m</b><br> <br>
+  overlaid xcorr for nldt objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b78></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlm</b></td><td valign="left"></td><td align=right><b>78</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nlm\nlm.m</b><br> <br>
+  Add object  specific parameters
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b79></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlm2vs</b></td><td valign="left"></td><td align=right><b>79</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nlm\nlm2vs.m</b><br> <br>
+  generate Volterra kernels for a NLM model
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b80></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlm2ws</b></td><td valign="left"></td><td align=right><b>80</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nlm\nlm2ws.m</b><br> <br>
+  generate Wiener kernels for a NLM model
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b81></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlsim</b></td><td valign="left"></td><td align=right><b>81</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nlm\nlsim.m</b><br> <br>
+  Simulate response of nlm object to input data set
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b82></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>plot</b></td><td valign="left"></td><td align=right><b>82</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nlm\plot.m</b><br> <br>
+  Plot a nlm model
+ 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b83></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>size</b></td><td valign="left"></td><td align=right><b>83</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nlm\size.m</b><br> <br>
+  overloaded size function for nlm.
+  npath - number of parallel paths
+  nel - number of elements per path
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b84></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>subsasgn</b></td><td valign="left"></td><td align=right><b>84</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nlm\subsasgn.m</b><br> <br>
+  subsasgn for nlm objects
+  B must be a system or cell array of systems;
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b85></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>subsref_old</b></td><td valign="left"></td><td align=right><b>85</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nlm\subsref_old.m</b><br> <br>
+  overlaid subsref for nlm objects
+  N(i,j) returns system description ith object in jth path
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b86></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>vaf</b></td><td valign="left"></td><td align=right><b>86</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nlm\vaf.m</b><br> <br>
+  <b>vaf</b> function for NLM class models
+ 
+  vf = vaf(model,data)
+ 
+  where model is any model of class nlm
+  and data is an nldat object containing [input,output]
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b87></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nltop</b></td><td valign="left"></td><td align=right><b>87</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@nltop\nltop.m</b><br> <br>
+  nltop  Top level object for nlid
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b88></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>param</b></td><td valign="left"></td><td align=right><b>88</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@param\param.m</b><br> <br>
+  % Parameter object
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b89></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>setdef</b></td><td valign="left"></td><td align=right><b>89</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@param\setdef.m</b><br> <br>
+  set the  default value for elements within a parameter set
+  Pin - input paramter array
+  varagin - name/value pairs to set
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b90></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>setdefault</b></td><td valign="left"></td><td align=right><b>90</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@param\setdefault.m</b><br> <br>
+  set the  default value for elements within a parameter set
+  Pin - input paramter array
+  varagin - name/value pairs to set
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b91></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>setval</b></td><td valign="left"></td><td align=right><b>91</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@param\setval.m</b><br> <br>
+  set the value for a parameter set
+  Pin - input paramter array
+  varagin - name/value pairs to set
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b92></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>value</b></td><td valign="left"></td><td align=right><b>92</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@param\value.m</b><br> <br>
+  Return value of a parameter
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b93></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlident</b></td><td valign="left"></td><td align=right><b>93</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@pdf\nlident.m</b><br> <br>
+  CONSTRUCT an pdf  function object
+ 
+  Setup default values
+ 
+  $Revision: 1.9 $
+  Copyright 1999-2003, Robert E Kearney
+  This file is part of the nlid toolbox, and is released under the GNU 
+  General Public License For details, see ../copying.txt and ../gpl.txt 
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b94></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlmtst</b></td><td valign="left"></td><td align=right><b>94</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@pdf\nlmtst.m</b><br> <br>
+  nltest function for pdf operater
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b95></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>pdf</b></td><td valign="left"></td><td align=right><b>95</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@pdf\pdf.m</b><br> <br>
+  Add object  specific parameters
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b96></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>plot</b></td><td valign="left"></td><td align=right><b>96</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@pdf\plot.m</b><br> <br>
+  pdf/plotOverload plot function for PDF objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b97></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>ddx</b></td><td valign="left"></td><td align=right><b>97</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom\ddx.m</b><br> <br>
+  computes the derivative of the polynomial, m(x), with respect to its
+  argument.
+ 
+  Syntax:  mdot = ddx(m);
+ 
+  where m and mdot are polynom objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b98></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>hessian</b></td><td valign="left"></td><td align=right><b>98</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom\hessian.m</b><br> <br>
+  computes hessian for least squares estimate of a polynomial
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b99></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>jacobian</b></td><td valign="left"></td><td align=right><b>99</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom\jacobian.m</b><br> <br>
+  computes jacobian for least squares estimate of a polynomial
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b100></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlident</b></td><td valign="left"></td><td align=right><b>100</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom\nlident.m</b><br> <br>
+  polynom/nlident - Overlaid nlident for polynom class
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b101></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlmtst</b></td><td valign="left"></td><td align=right><b>101</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom\nlmtst.m</b><br> <br>
+  polynom/nltst for polynom objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b102></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlsim</b></td><td valign="left"></td><td align=right><b>102</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom\nlsim.m</b><br> <br>
+  polynom/nlsim - Simulate response of polynominal series to input data set
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b103></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>plot</b></td><td valign="left"></td><td align=right><b>103</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom\plot.m</b><br> <br>
+  Overload plot function for polynom objects
+  z - optional input showing orginal data set
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b104></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>polynom</b></td><td valign="left"></td><td align=right><b>104</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom\polynom.m</b><br> <br>
+  Add object  specific parameter
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b105></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>vaf</b></td><td valign="left"></td><td align=right><b>105</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@polynom\vaf.m</b><br> <br>
+  <b>vaf</b> function for NLM polynomial models
+ 
+  vf = vaf(model,data)
+ 
+  where model is any model of class polynom
+  and data is an nldat object containing [input,output]
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b106></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlident</b></td><td valign="left"></td><td align=right><b>106</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@spect\nlident.m</b><br> <br>
+  identify spect objects
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b107></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>nlmtst</b></td><td valign="left"></td><td align=right><b>107</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@spect\nlmtst.m</b><br> <br>
+  test routine for Spectrum
+  Automspecrum;
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p><p><a name=b108></a> <table width="100%" border=0 cellspacing=0 bgcolor=d0d0f0><tr><td>&nbsp;<b>spect</b></td><td valign="left"></td><td align=right><b>108</b>&nbsp;</td></tr></table>
+<b>D:\REK_Documents\dropbox\matlab_local\nlid_new\@spect\spect.m</b><br> <br>
+  Add object  specific parameters
+
+</p></b><p><a href="#Contents">[Contents]</a><a href="#Index">[Alphabetical Index]</a></p></body></pre></code></html>
