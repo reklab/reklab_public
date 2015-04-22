@@ -42,6 +42,7 @@ classdef pdf  < nldat
             end
             assign (p.parameterSet);
             tempComment=p.comment;
+            % PDF of data 
             if isa(z,'nldat') | isa (z,'double'),
                 if isa(z,'double'),
                     z=nldat(z);
@@ -51,8 +52,8 @@ classdef pdf  < nldat
                 if ~isnan(p.domainValues)
                     set(p,'nBins',length(p.domainValues));
                 else
-                    xMin=floor(min(x));
-                    xMax=ceil(max(x));
+                    xMin=(min(x));
+                    xMax=(max(x));
                     xRange=xMax-xMin;
                     delX=xRange/(nBins-1);
                     binCenters=(0:delX:xRange)+xMin;
@@ -83,6 +84,7 @@ classdef pdf  < nldat
                 set (p,'domainName',[ 'Value of ' char(z.chanNames)]);
                 set (p,'domainStart',min(dom), 'domainIncr',incr);;
 
+                % pdf of randvar objects 
             elseif isa(z,'randvar'),
                 pList= getParamValCell(z.parameterSet);
                 if isnan(p.domainValues),
@@ -90,13 +92,15 @@ classdef pdf  < nldat
                     xMin=floor(min(x.dataSet));
                     xMax=ceil(max(x.dataSet));
                     xRange=xMax-xMin;
+                    if xRange==0,
+                        xRange=.1;
+                    end
                     delX=xRange/(nBins-1);
                    xTemp=(0:delX:xRange)+xMin;
                    p.domainValues=xTemp(:);
      
                 end
-                
-                
+                     
                 switch lower(pdfType)
                     case 'density'
                         switch lower(z.randvarType)
