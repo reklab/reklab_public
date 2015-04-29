@@ -4,7 +4,7 @@ classdef polynom < nltop
     %       - used with tcheb to scale input to range of tceb polynomials. This must be
     %         set when creating a polynomial apriori
     % polyMean [0] - mean of polynomial
-    % polySTD [1]- standard deviation of polynomial
+    % polyStd[1] - standard deviation of polynomial
     %         - polyMean and polySTD are used with hermite polynomials to scsle the input to
     %          have zero mean and unti variance. These values must be set to the value expected when 
     %          when creating hemrite polynomials a priori.
