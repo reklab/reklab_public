@@ -146,8 +146,9 @@ classdef nldat < nltop
         function [c,p] = corrcoef (x)
             % nldat wrapper for corrcoef function
             [nSamp,nChan,nReal]=size(x);
+            xd=double(x); 
             for i=1:nReal,
-                zTemp=double(x(:,:,i));
+                zTemp=(xd(:,:,i));
                 [cTemp,pTemp]=corrcoef(zTemp);
                 if i==1,
                     c=cTemp;
@@ -1000,7 +1001,13 @@ classdef nldat < nltop
             end
             
             function y = var (x);
-                y=var(double(x));
+                xd=double(x);
+                [nSamp, nChan, nReal]=size(xd);
+                for iChan=1:nChan,
+                    for iReal=1:nReal
+                        y(iChan,iReal) =var(xd(:,iChan, iReal));
+                    end
+                end
             end
             
             function errorPlot (d,e,  varargin)
