@@ -409,12 +409,19 @@ classdef nldat < nltop
             % filter function for nldat variables;
             % z = filter(x, B,A);
             % filter is applied to each realization of all channels in data set
-            [nsamp, nchan, nreal]=size(x);
+           if nargin <2
+               error ('nldat/filt requires 2 or 3 inputs');
+           end
+           [nsamp, nchan, nreal]=size(x);
             z=x;
             set(z,'comment','filtered data ');
             for ichan=1:nchan,
                 for ireal=1:nreal,
-                    z.dataSet(1:end,ichan,ireal)=filter(B,A, x.dataSet(1:end,ichan,ireal));
+                    if nargin==2,
+                    z.dataSet(1:end,ichan,ireal)=filter(B, x.dataSet(1:end,ichan,ireal));
+                    elseif nargin==3,
+                         z.dataSet(1:end,ichan,ireal)=filter(B,A, x.dataSet(1:end,ichan,ireal));
+                    end
                 end
             end
         end
