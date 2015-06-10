@@ -760,6 +760,34 @@ classdef nldat < nltop
                 y.comment = [' RESHAPED ' x.comment];
             end
             
+             function y = reshapeChan (x, nSamp, nReal)
+                %  reshape each channel in a nldat objects
+                if nargin < 3,
+                    error ('3 reshapeChan requires three input parameters');
+                end
+                   y=nldat(x);
+                [nSampIn, nChan, nRealIn]=size(y); 
+                if nSamp*nReal ~= nSampIn*nRealIn
+                    error ('nsamp*nReal must be constant');
+                end
+             
+                y.chanNames={};
+                y.dataSet = []; 
+                y.dataSize=[ nSamp, nChan nReal];
+                
+                for iChan=1:nChan,
+                    yTemp=reshape (x.dataSet(:,iChan,:), nSamp,1,nReal);
+                    if iChan==1,
+                        y.dataSet=yTemp;
+                    else
+                        y.dataSet=cat(2, y.dataSet,yTemp);
+                    end
+                    y.chanNames{iChan}= ['Reshaped channel' num2str(iChan)];
+                end
+                y.comment = [' RESHAPED ' x.comment];
+            end
+            
+            
             
             function z = rdivide(x,y);
                 % array divide function for nldat variables;
