@@ -146,10 +146,10 @@ classdef irf < kern
                 end
             end
             
-         
+            
             
             % Parse options
-            [nsamp,nchan,nr]=size(z);
+            [nsamp,nchan,nReal]=size(z);
             
             assign(i.parameterSet);
             if isnan (nLags)
@@ -206,16 +206,18 @@ classdef irf < kern
                 %   'manual' - determine length interactively
                 %               if 0<mode<numlags+1, then mode is used as the pseudo-inverse
                 %               order.
-                
-                x = double(z(:,1,1));
-                y =double(z(:,2,1));
-                [filt,bounds]= fil_pinv(x,y,numlags,nSides, ...
-                    irfErrorLevel,irfPseudoInvMode);
-                if nr ==1,
-                    dtotal=cat(2, filt/Ts, bounds/Ts);
-                else
-                    dreal=cat(2, filt/Ts, bounds/Ts);
-                    dtotal=cat(3,dtotal,dreal);
+                for iReal=1:nReal,
+                    zd=double(z);
+                    x = double(zd(:,1,iReal));
+                    y =double(zd(:,2,iReal));
+                    [filt,bounds]= fil_pinv(x,y,numlags,nSides, ...
+                        irfErrorLevel,irfPseudoInvMode);
+                    if iReal ==1,
+                        dtotal=cat(2, filt/Ts, bounds/Ts);
+                    else
+                        dreal=cat(2, filt/Ts, bounds/Ts);
+                        dtotal=cat(3,dtotal,dreal);
+                    end
                 end
                 
                 if nSides==1,
