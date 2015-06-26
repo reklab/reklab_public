@@ -50,7 +50,7 @@ classdef irf < kern
             elseif nargin==1,
                 I=nlmkobj(I,a);
             elseif isa(a,'irf')
-                I=nlmkobj(a,varargin{:})
+                I=nlmkobj(a,varargin{:});
             else
                 I=nlmkobj(I,a,varargin{:});
             end
