@@ -15,7 +15,7 @@ options={{'reflex_id_method' 'sls' 'method for identification of reflex pathway 
         {'id_max_iter' 10 'maximum number of iterations for main loop'} ...
  
     };
-keyboard
+
 if arg_parse(options,varargin);
     return
 end
