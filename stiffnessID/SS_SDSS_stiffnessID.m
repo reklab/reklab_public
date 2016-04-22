@@ -1,15 +1,15 @@
 function system = SS_SDSS_stiffnessID (z,varargin)
-% system= pcas_short_segment (z,switch_time,varargin)
-% This function requires NLID toolbox in the MATLAB path
+% system = SS_SDSS_stiffnessID (z)
+% This function requires NLID toolbox in MATLAB path
 % This function estimates parallel-cascade joint stiffness between input and output
-%
+% from short segments of data
 %
 %
 options={{'decimation_ratio' 10 'decimation ratio'} ...
          {'maxordernle' 8 'maximum order for nonlinearity'} ...
-         {'hanklesize' 15 'Size of hankle matrix'} ...
+         {'hanklesize' 20 'Size of hankle matrix'} ...
          {'delayinput' 0.05 'Delay added to the input'} ...
-         {'orderselectmethod','manual'}...
+         {'orderselectmethod','auto'}...
          {'threshold' 10^(-5)}...
          {'plot_mode' 0 '1 to plot and 0 to not plot segments'}...
      };
@@ -24,7 +24,7 @@ if arg_parse(options,varargin);
 % Date: April 29, 2014 Ver 0.5 adding irf for the intrinsic pathway
 % Date: May 12, 2014 Ver. 0.6 correcting issues with input initial conditions
 %%
-condition = 1;
+reflexPathID = 1;
 ts = get(z,'domainIncr');
 in_onsetPointer = get(z,'onsetPointer');
 onsetPointer = in_onsetPointer (:,2);
@@ -63,13 +63,6 @@ velocity = get(velocity,'dataSet');
 positionDelaysegments = zeros(sum(segLength),nLags_i);
 dvelocity = zeros(sum(segLength),1);
 tqT_noisy = zeros(sum(segLength),1);
-% global tqI_all_segments tqR_all_segments
-% tqi = tqI_all_segments.dataSet;
-% tqi = tqi - mean(tqi);
-% tqr = tqR_all_segments.dataSet;
-% tqr = tqr - mean(tqr);
-% tqI_noisy = zeros(sum(segLength),1);
-% tqR_noisy = zeros(sum(segLength),1);
 pointer = 1;
 switch_time = zeros(length(endpointer)-1,1);
 for i = 1 : length(endpointer)
@@ -77,8 +70,6 @@ for i = 1 : length(endpointer)
     dvel_seg = del(vel_seg,delayinput/ts);
     dvelocity(pointer:pointer+segLength(i)-1) = dvel_seg;
     tqT_noisy(pointer:pointer+segLength(i)-1) = output(onsetPointer(i):endpointer(i));
-%     tqI_noisy(pointer:pointer+segLength(i)-1) = tqi(onsetPointer(i):endpointer(i));
-%     tqR_noisy(pointer:pointer+segLength(i)-1) = tqr(onsetPointer(i):endpointer(i));
     positionDelaysegments(pointer:pointer+segLength(i)-1,:) = positionDelay(onsetPointer(i):endpointer(i),:);
     pointer = pointer + segLength(i);
     switch_time(i) = pointer;
@@ -89,11 +80,7 @@ u_i = zeros(size(dvelocity,1),nLags_i);
 for i = 1:nLags_i
     [u_i(:,i),~,~,~] = decimate_segment(positionDelaysegments(:,i),switch_time(1:end-1),decimation_ratio);
 end
-% [tqI_noisy,~,~,~] = decimate_segment(tqI_noisy,switch_time(1:end-1),decimation_ratio);
-% [tqR_noisy,~,~,~] = decimate_segment(tqR_noisy,switch_time(1:end-1),decimation_ratio);
 [tqT_noisy,switch_time,segLength,~] = decimate_segment(tqT_noisy,switch_time(1:end-1),decimation_ratio);
-% tqI_noisy = tqI_noisy - mean(tqI_noisy);
-% tqR_noisy = tqR_noisy - mean(tqR_noisy);
 tqT_noisy = tqT_noisy - mean(tqT_noisy);
 
 N = segLength - 2 * hanklesize + 1;
@@ -131,15 +118,13 @@ if nsamp>2*hanklesize*p-p+2*maxordernle*hanklesize+nLags_i*hanklesize+1
     [~ , R] = qr(data_matrix);
     L = R';
     L32 = L(2*(maxordernle+nLags_i)*hanklesize+1:2*(maxordernle+nLags_i)*hanklesize+hanklesize,(maxordernle+nLags_i)*hanklesize+1:(maxordernle+nLags_i)*hanklesize+maxordernle*hanklesize);
-    [Un,Sn,~] = svd(L32); 
-    Sn = diag(Sn); 
-    Sn = Sn(1:hanklesize); 
+    [Un,~,~] = svd(L32); 
     R = struct('L',L,'Un',Un,'m',1,'l',1,'i',hanklesize);
-%     m = orderselect(Sn,orderselectmethod);
+    %m = orderselect(Sn,orderselectmethod);
     m = 2;
     [AT , CT] = destac(R,m);
     if m==0 
-        condition = 0;
+        reflexPathID = 0;
         warning('Selected reflex system order is set to zero.')
         warning('Only the intrinsic pathway will be identified.')
     end
@@ -147,16 +132,16 @@ if nsamp>2*hanklesize*p-p+2*maxordernle*hanklesize+nLags_i*hanklesize+1
         warning('Reflex linear system is unstable.')
         warning('Attempt to identify a reflex pathway failed.')
         warning('Only the intrinsic pathway will be identified.')
-        condition = 0;
+        reflexPathID = 0;
     end
 else
     warning('Not enough number of samples is available')
     warning('Attempt to identify a reflex pathway failed.')
     warning('Only the intrinsic pathway will be identified.')
-    condition = 0;
+    reflexPathID = 0;
 end
 %Identify the intrinsic pathway independently than estimate of reflexes
-if condition>0
+if reflexPathID>0
 %Defining regressor matrices
 %Gamma is the regressor for the initial conditions
     Gamma_total = zeros(size(tqT_noisy,1),p*m);
@@ -176,7 +161,7 @@ if condition>0
         Phi_total(switch_time(i):switch_time(i+1)-1,:) = Phi;
     end
     Phi = [Gamma_total Phi_total];
-    intrinsic = opt_li_wen_2011 (u_i,Phi,tqT_noisy);
+    intrinsic = intrinsicEstimator(u_i,Phi,tqT_noisy);
     tqI = u_i * intrinsic;
     tqI_res = tqT_noisy - tqI;
     tqI_res = tqI_res - mean(tqI_res);
@@ -204,27 +189,23 @@ if condition>0
     [~ , R] = qr(data_matrix);
     L = R';
     L32 = L(2*maxordernle*hanklesize+1:2*maxordernle*hanklesize+hanklesize,maxordernle*hanklesize+1:2*maxordernle*hanklesize);
-    [Un,Sn,~] = svd(L32); 
-    Sn = diag(Sn); 
-    Sn = Sn(1:hanklesize); 
+    [Un,~,~] = svd(L32); 
     R = struct('L',L,'Un',Un,'m',1,'l',1,'i',hanklesize);
     [AT , CT] = destac(R,m);
     if ~isempty(find(abs(eig(AT))>1, 1))
         warning('Reflex linear system is unstable.')
         warning('Attempt to identify a reflex pathway failed.')
         warning('Only the intrinsic pathway will be identified.')
-        condition = 0;
+        reflexPathID = 0;
     end
-    if condition > 0
+    if reflexPathID > 0
 %Iterative routine for static-nl, B, D and initial conditions estimation
         it=20;
 %b_hat is a vector whose first pm values are initial conditions and the
 %last m+1 values are B and D elements
         bd_hat = zeros(p * m+ m + 1,it);
         omega_hat = zeros(maxordernle+1,it);
-        %omega0 = ones(order+1,1);
         omega0 = [0.01;halfwave_rectifier_tchebychev(min(dvelocity),max(dvelocity),maxordernle-1)];
-        %omega0 = halfwave_rectifier_tchebychev(-1,+1,order);
         omega0 = omega0 / norm(omega0);
         s1 = 10^10;
         s2 = 10^10;
@@ -312,126 +293,6 @@ if condition>0
         vaf_tot = vaf(tqT_noisy,tqT);
         vaf_I = vaf(tqT_noisy,tqI);
         vaf_R = vaf(tqT_noisy,tqR);
-        v = vaf(tqT_noisy-tqI,tqR);
-        v = v.dataSet;
-        %disp(['VAF between intrinsic residual and reflex torque: ',num2str(v)])
-%        tqI_noisy = nldat(tqI_noisy,'domainIncr',ts);
-%        tqR_noisy = nldat(tqR_noisy,'domainIncr',ts);
-%         figure
-%         subplot(4,2,1)
-%         i=2;
-%         predicted_data = u_i(switch_time(i):switch_time(i+1)-1,6);
-%         predicted_data = predicted_data;
-%         predicted_data = predicted_data - mean(predicted_data);
-%         predicted_data = nldat(predicted_data,'domainIncr',ts);
-%         set(predicted_data,'chanNames','Position (rad)');
-%         plot(predicted_data);
-%         title('(A)')
-%         subplot(4,2,2)
-%         i=4;
-%         predicted_data = u_i(switch_time(i):switch_time(i+1)-1,6);
-%         predicted_data = predicted_data;
-%         predicted_data = predicted_data - mean(predicted_data);
-%         predicted_data = nldat(predicted_data,'domainIncr',ts);
-%         set(predicted_data,'chanNames','Position (rad)');
-%         plot(predicted_data);
-%         title('(B)')
-%         subplot(4,2,3)
-%         i=2;
-%         measured_data = tqT_noisy(switch_time(i):switch_time(i+1)-1);
-%         measured_data = measured_data.dataSet;
-%         measured_data = measured_data - mean(measured_data);
-%         predicted_data = tqT(switch_time(i):switch_time(i+1)-1);
-%         predicted_data = predicted_data.dataSet;
-%         predicted_data = predicted_data - mean(predicted_data);
-%         predicted_data = nldat(predicted_data,'domainIncr',ts);
-%         measured_data = nldat(measured_data,'domainIncr',ts);
-%         set(measured_data,'chanNames','Measured torque');
-%         set(predicted_data,'chanNames','Predicted torque');
-%         plot(cat(2,measured_data,predicted_data),'plotmode','super');
-%         hold on
-%         plot(measured_data-predicted_data,'line_color','r')
-%         title('(C)')
-%         subplot(4,2,4)
-%         i=4;
-%         measured_data = tqT_noisy(switch_time(i):switch_time(i+1)-1);
-%         measured_data = measured_data.dataSet;
-%         measured_data = measured_data - mean(measured_data);
-%         predicted_data = tqT(switch_time(i):switch_time(i+1)-1);
-%         predicted_data = predicted_data.dataSet;
-%         predicted_data = predicted_data - mean(predicted_data);
-%         predicted_data = nldat(predicted_data,'domainIncr',ts);
-%         measured_data = nldat(measured_data,'domainIncr',ts);
-%         set(measured_data,'chanNames','Measured torque');
-%         set(predicted_data,'chanNames','Predicted torque');
-%         plot(cat(2,measured_data,predicted_data),'plotmode','super');
-%         hold on
-%         plot(measured_data-predicted_data,'line_color','r')
-%         title('(D)')
-%         subplot(4,2,5)
-%         i=2;
-%         measured_data = tqI_noisy(switch_time(i):switch_time(i+1)-1);
-%         measured_data = measured_data.dataSet;
-%         measured_data = measured_data - mean(measured_data);
-%         predicted_data = tqI(switch_time(i):switch_time(i+1)-1);
-%         predicted_data = predicted_data.dataSet;
-%         predicted_data = predicted_data - mean(predicted_data);
-%         predicted_data = nldat(predicted_data,'domainIncr',ts);
-%         measured_data = nldat(measured_data,'domainIncr',ts);
-%         set(measured_data,'chanNames','Measured torque');
-%         set(predicted_data,'chanNames','Predicted torque');
-%         plot(cat(2,measured_data,predicted_data),'plotmode','super');
-%         hold on
-%         plot(measured_data-predicted_data,'line_color','r')
-%         title('(E)')
-%         subplot(4,2,6)
-%         i=4;
-%         measured_data = tqI_noisy(switch_time(i):switch_time(i+1)-1);
-%         measured_data = measured_data.dataSet;
-%         measured_data = measured_data - mean(measured_data);
-%         predicted_data = tqI(switch_time(i):switch_time(i+1)-1);
-%         predicted_data = predicted_data.dataSet;
-%         predicted_data = predicted_data - mean(predicted_data);
-%         predicted_data = nldat(predicted_data,'domainIncr',ts);
-%         measured_data = nldat(measured_data,'domainIncr',ts);
-%         set(measured_data,'chanNames','Measured torque');
-%         set(predicted_data,'chanNames','Predicted torque');
-%         plot(cat(2,measured_data,predicted_data),'plotmode','super');
-%         hold on
-%         plot(measured_data-predicted_data,'line_color','r')
-%         title('(F)')
-%         subplot(4,2,7)
-%         i=2;
-%         measured_data = tqR_noisy(switch_time(i):switch_time(i+1)-1);
-%         measured_data = measured_data.dataSet;
-%         measured_data = measured_data - mean(measured_data);
-%         predicted_data = tqR(switch_time(i):switch_time(i+1)-1);
-%         predicted_data = predicted_data.dataSet;
-%         predicted_data = predicted_data - mean(predicted_data);
-%         predicted_data = nldat(predicted_data+4.3,'domainIncr',ts);
-%         measured_data = nldat(measured_data+4.3,'domainIncr',ts);
-%         set(measured_data,'chanNames','Measured torque');
-%         set(predicted_data,'chanNames','Predicted torque');
-%         plot(cat(2,measured_data,predicted_data),'plotmode','super');
-%         hold on
-%         plot(measured_data-predicted_data,'line_color','r')
-%         title('(G)')
-%         subplot(4,2,8)
-%         i=6;
-%         measured_data = tqR_noisy(switch_time(i):switch_time(i+1)-1);
-%         measured_data = measured_data.dataSet;
-%         measured_data = measured_data - mean(measured_data);
-%         predicted_data = tqR(switch_time(i):switch_time(i+1)-1);
-%         predicted_data = predicted_data.dataSet;
-%         predicted_data = predicted_data - mean(predicted_data);
-%         predicted_data = nldat(predicted_data+4.3,'domainIncr',ts);
-%         measured_data = nldat(measured_data+4.3,'domainIncr',ts);
-%         set(measured_data,'chanNames','Measured torque');
-%         set(predicted_data,'chanNames','Predicted torque');
-%         plot(cat(2,measured_data,predicted_data),'plotmode','super');
-%         hold on
-%         plot(measured_data-predicted_data,'line_color','r')
-%         title('(H)')
         if plot_mode == 1
             for i =1 : p
                 figure(floor((i-1)/4)+10)
@@ -454,9 +315,9 @@ if condition>0
     end
 end
 else
-    condition = 0;
+    reflexPathID = 0;
 end
-if (condition==0)
+if (reflexPathID==0)
 %Attempt to estimate the reflex path failed, only estimate the intrinsic path
     ts = get(z,'domainIncr');
     in_onsetPointer = get(z,'onsetPointer');
@@ -487,8 +348,6 @@ if (condition==0)
     lags_i = (-irf_len_i:1:irf_len_i);
     nLags_i = length(lags_i);
     for i = 1 : length(endpointer)
-        pos_seg = input(onsetPointer(i):endpointer(i));
-        pos_seg = nldat(pos_seg,'domainIncr',ts);
         positionDelaysegments(pointer:pointer+segLength(i)-1,:) = positionDelay(onsetPointer(i):endpointer(i),:);
         tqT_noisy(pointer:pointer+segLength(i)-1) =output(onsetPointer(i):endpointer(i));
         pointer = pointer + segLength(i);
@@ -572,3 +431,128 @@ for i = 1 : p
     interval(i) = length(output_temp);
 end
 end
+function alpha = halfwave_rectifier_tchebychev(in_min,in_max,order)
+x = in_min:0.0001:in_max;
+y = max(x,0);
+x = nldat(x','domainIncr',0.001);
+y = nldat(y','domainIncr',0.001);
+z = cat(2,x,y);
+p = polynom(z,'polyType','tcheb','polyOrderMax',order,'polyOrderSelectMode','full');
+alpha = p.polyCoef;
+end
+function dhat = intrinsicEstimator (g,k,y)
+    Hg=(eye(size(g,2))-pinv(g)*k*pinv(k)*g);
+    Gg=pinv(g)-pinv(g)*k*pinv(k);
+    dhat = pinv(Hg)*Gg*y;
+end
+function [d_x] = del(x,nDelay)
+% this function adds a delay to the input signal 
+% x is the input signal
+% nDelay - dealy in samples
+% d_x is the delayed singal
+% Now supports negative delays
+d_x = zeros(size(x));
+if nDelay>=0
+    d_x(nDelay+1:end) = x(1:end-nDelay);
+elseif nDelay<0
+    nDelay = abs(nDelay);
+    d_x(1:end-nDelay) = x(nDelay+1:end);
+end
+end
+function [W, flags] = multi_tcheb(V, max_order);
+%
+%  usage W = multi_herm2(V, max_order);
+%
+%  given a collection of column vectors, V, this function returns
+%  a matrix of all of the Tcheb functions up to max_order applied
+%  to all of the vectors in V.
+
+% Copyright 1999-2003, Robert E Kearney and David T Westwick
+% This file is part of the nlid toolbox, and is released under the GNU 
+% General Public License For details, see ../../copying.txt and ../../gpl.txt 
+
+if max_order==0,
+   W=V*0 +1;
+   return;
+end
+
+
+
+
+[nr,nc] = size(V);
+
+
+%  create a matrix of flags, such that flags (i,j) points to the 
+%  column of the i'th basis function raised to the j'th power.
+
+flags = zeros(nc,max_order);
+flags(:,1) = [2:nc+1]';
+for order = 2:max_order
+   % first column is offsetr by 1 from last value of previous order
+   flags(1,order) = flags(nc,order-1)+1;
+    for i = 2 : nc
+        num_terms = flags(nc,order-1)-flags(i-1,order-1)+1;
+        flags(i,order) = flags(i-1,order)+ num_terms;
+      end
+   end
+
+   
+
+% pre-allocate the W matrix
+W = zeros(nr,flags(nc,max_order));
+%  generate the single basis function Hermite polynomials and place 
+%  them  in the correct columns of W
+
+Te = zeros(nr,max_order+1);
+Te(:,1) = ones(nr,1);
+
+%  generate all of the functions involving a Hermite polynomial
+%  applied to a single basis vector
+
+for i = 1:nc
+    Te(:,2) = V(:,i);
+    for j = 2:max_order
+        Te(:,j+1) = 2*V(:,i).*Te(:,j) - Te(:,j-1);
+      end
+    for j = 1:max_order
+        W(:,flags(i,j)) = Te(:,j+1);
+      end
+  end
+W(:,1) = ones(nr,1);
+
+clear Te V
+
+
+%  generate all of the functions involving a powers of a single input vector
+
+
+  
+%  Now, using the functions that we just created, fill in the 
+%  rest of the matrix
+
+
+
+for order = 2:max_order
+    for v1 = 1 : nc-1
+        index = flags(v1,order);
+        for v1_order = order-1:-1:1
+            term1 = W(:,flags(v1,v1_order));
+            rem_order = order - v1_order;
+            
+%           find the terms of order rem_order, whose leading variable
+%           is 'greater' than v1
+
+            first_term = flags(v1+1,rem_order);
+            last_term = flags(nc,rem_order);
+            for j = first_term:last_term
+                index = index+1;
+                W(:,index)=term1.*W(:,j);
+                disp([index flags(v1,v1_order) j])
+              end
+          end
+      end
+  end
+end
+
+
+

@@ -2,10 +2,6 @@ function [intrinsic, reflex, tqI, tqR, tqT] = SDSS_stiffnessID (z,varargin)
 % [system_ss, system, K, B, I, tqR, tqI, tqT, error]= pcascsub (z)
 % This function estimates a parallel-cascade model between input and output stored in columns of z.
 % z = cat(2 , position, torque)
-% The output, pc_nss is a 3x1 cell
-% pc{1} = [K;B;I];
-% pc{2} = reflex; where reflex{1}=static nonlinearity, reflex{2}=state-space model
-% pc{3} = vafs; where vafs=[v]
 % This function is based on the following paper:
 %[*] K. Jalaleddini, Ehsan Sobhani Tehrani and R. E. Kearney, "A Subspace Approach to the Structural Decomposition and Identification of Ankle Joint Dynamic Stiffness", IEEE TBME.
 %[1] K. Jalaleddini and R. E. Kearney, " Subspace Identification of SISO Hammerstein Systems: Application to Stretch Reflex Identification", IEEE TBME 2013.
