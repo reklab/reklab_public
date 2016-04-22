@@ -31,7 +31,7 @@ nrow=length(S);
 
 if nargin==1,
     for i=1:ncol,
-        cw(i)=10;
+        cw(i)=max(length(names{i}),8);
     end
 end
 

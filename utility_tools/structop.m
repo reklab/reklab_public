@@ -1,8 +1,14 @@
 function SS = structop (OPER, S, varargin )
 % SS = StructOP (OPER,  S, varargin )
 % $Revision: 1.75 $
-% Structure operations
-% addfield - add a field vaerargin{1) to structure with value varargin{2};
+% Utiltiy operations for working on strucutres.
+% Structures must be organized as can be organized in either:
+%   -eOrg - element-by-element organization: A(n).fields
+%   -pOrg - organize by planes:  A.fields(n)
+% All elements of the same field must be the same type,
+%
+%
+% addfield - add a field varargin{1) to structure with value varargin{2};
 % cast2string - type cast numerical values to string for all fields
 % cast2num - type cast strings to numerical values for fields supplied
 % in varargin{1}
@@ -16,7 +22,7 @@ function SS = structop (OPER, S, varargin )
 % element_fieldtranspose - tranpsefields of element
 % element_eq
 % element_makeUnique - return a strucutre which is unique in arg1 by
-%                     dropping records. 
+%                     dropping records.
 % element_member
 % element_merge - merge fields vararg3 of vargin1 into S using varargin2 as key.
 %                 arg4 controls warnings true (default) display warning
@@ -30,7 +36,7 @@ function SS = structop (OPER, S, varargin )
 % element_subsref
 % element_transpose
 % element_untranspose
-% flatten - convert a cel array into a flat structure
+% flatten - convert a cell array into a flat structure
 % field_length - length of field arg1
 % find - return elements meeting specified equalities
 %            finds OR values for multiples values
@@ -49,6 +55,8 @@ function SS = structop (OPER, S, varargin )
 %                  merge field vararg3 of vararg1 into S with index
 %                  variable vararg2
 % notmember - return elements with field is not a memeber of arg2
+% orgtype - returns organization type of SS
+% orgconvert -  convvert S to orgtype SS varargin(1);
 % reduce -
 % rename - rename fields arg1 to arg2
 % set - set field arg1 values with index arg2 to value arg3
@@ -56,8 +64,8 @@ function SS = structop (OPER, S, varargin )
 % set_empty_field - set emptyy values of field arg1 to arg2;
 % setempty - set empty vales of field arg1 to arg2
 % sort - sort structure according to keys
-% sort_descend 
-%struct2cell - return a cell array with fieldnames as first row
+% sort_descend
+% struct2cell - return a cell array with fieldnames as first row
 % subset -  provides the subsets of a structure created from distinct sets
 %           of values for the fields provided in the input fields list.
 %           NB works on S.name(n) format. USE element_subset instead.
@@ -86,6 +94,7 @@ if isempty(S),
 end
 
 SS=[];
+inputOrg=getStructOrg(S);
 switch lower(OPER),
     case 'addfield'
         SS=S;
@@ -97,6 +106,7 @@ switch lower(OPER),
                 SS(j).(VAR)=VAL;
             end
         end
+        
     case 'array'
         VAR=varargin{1};
         nVar=length(VAR);
@@ -105,7 +115,7 @@ switch lower(OPER),
         for i=1:nVar,
             SS(:,i)=[S.(VAR{i})];
         end
-
+        
     case 'cast2string'
         if ~iscell(S),
             jTemp{1}=S;
@@ -123,12 +133,12 @@ switch lower(OPER),
             end
         end
         SS=S;
-
+        
     case 'cast2num'
         nEl=length(S);
         fieldName=varargin{1};
         nFields=length(fieldName);
-
+        
         for iField=1:nFields,
             for iEl=1:nEl
                 nElArray=length(S(iEl).(fieldName{iField}));
@@ -140,7 +150,7 @@ switch lower(OPER),
             end
         end
         SS=S;
-
+        
     case 'cat'
         SS= structopCat;
     case 'commalist'
@@ -156,12 +166,12 @@ switch lower(OPER),
                 SS= [ SS ','  num2str(S(i).(field)) ];
             end
         end
-
+        
     case 'datenum'
         if ~iscell(varargin{1});
             varargin(1)={varargin(1)};
         end
-         if ~iscell(varargin{2});
+        if ~iscell(varargin{2});
             varargin(2)={varargin(2)};
         end
         
@@ -170,14 +180,14 @@ switch lower(OPER),
         for iArg=1:nArg,
             VARIN = varargin{1}{iArg};
             VAROUT= varargin{2}{iArg};
-
+            
             for i=1:length(S),
                 dStr=SS(i).(VARIN);
                 dNum=CMB_DateNum(dStr);
                 SS(i).(VAROUT)=dNum;
             end
         end
-
+        
     case 'element_cat' % concatenate elements of S and varargin
         % for all member of cell array use
         % structop('element_cat',P{:});
@@ -194,8 +204,8 @@ switch lower(OPER),
                 SS.(fieldName{i})=[x(:) ;  y(:) ];
             end
         end
-
-      case 'element_eq' % Return indices of element varg1 is equal to arg2;
+        
+    case 'element_eq' % Return indices of element varg1 is equal to arg2;
         [fieldName, fieldLen, nField]=checkFields( S, true);
         testField=varargin{1};
         testVal= varargin{2};
@@ -216,7 +226,7 @@ switch lower(OPER),
             end
         end
         SS=structop('element_subsref',S,j);
-                
+        
         
     case { 'element_member' 'element_notmember'} % Return structure  elements where field elements are/are members of fieldlist
         if nargin<4,
@@ -231,15 +241,15 @@ switch lower(OPER),
                 j=find(~ismember(S.(testField), testSet));
         end
         SS=structop('element_subsref',S,j);
-
+        
     case 'element_fieldtranspose'
         fName=fieldnames(S);
         for i=1:length(fName),
             curField=fName{i};
             SS.(curField)=(S.(curField))';
         end
-
-
+        
+        
     case 'element_merge' % merge fields vararg3 into elements of vararg1 into S with index variable vararg2
         SS=elementMerge;
     case 'element_rep' % Replication elements of a structure
@@ -250,7 +260,7 @@ switch lower(OPER),
         SS=structop('element_subsref', S, I);
     case 'element_sort' % Sort fields in order of fieldName(s) in vararg1
         SS=elementSort;
-
+        
     case 'element_subsasgn' % subscripted assigne,  returns elements arg2 of field arg1 to arg3 ;
         fieldName=fieldnames(S);
         asgnField=varargin{1};
@@ -268,16 +278,16 @@ switch lower(OPER),
         end
         SS=S;
         SS.(asgnField)(asgnElement)=asgnVal;
-
+        
     case 'element_subset' % Operates on transposed data
         SS=elementSubSet;
-
+        
     case 'element_size'
-    [a,b,c]=checkFields(S,true);
-     fName=fieldnames(S);
-    [SS.nRow, SS.nCol]=size(S.(fName{1}));
+        [a,b,c]=checkFields(S,true);
+        fName=fieldnames(S);
+        [SS.nRow, SS.nCol]=size(S.(fName{1}));
     case 'element_subsref' % subscripted reference, returns elements of S defined by varargin{1};
-
+        
         fname=fieldnames(S);
         iElements=varargin{1};
         nFields=length(fname);
@@ -291,75 +301,94 @@ switch lower(OPER),
         end
     case 'element_ungroup'  % Ungroup groups defined by fields with cell arrays
         SS=elementUnGroup
+        
+    case 'orgtype' % Return organization of S 
+        SS=getStructOrg(S);
 
-    case 'element_transpose' % transpose S(n).element to S.element(n)
-        [fieldName, fieldLen, nField]=checkFields( S, false);
-        nRow=length(S);
-
-        for j=1:nField,
-            x=S(1).(fieldName{j});
-            if ischar(x),
-                for iRow=1:nRow,
-                    SS.(fieldName{j})(iRow,1)={S(iRow).(fieldName{j})};
-                end
+    case 'orgconvert' % convert S organizario ro org  varargin{1}
+        outputOrg=varargin{1};
+        orgList={'eOrg' 'pOrg'};
+            % check for a valid format')
+            if ~any(strcmp(outputOrg,orgList)),
+            disp(orgList);
+            error('invlad organiztion specified');
+            end
+            % Already in right format');
+            if strcmp(inputOrg,outputOrg)
+                SS=S;5
+                return
+            end
+            switch outputOrg
+                % Convert eOrg to pOrg. 
+                case 'pOrg' % transpose S(n).element to S.element(n)
+                    [fieldName, fieldLen, nField]=checkFields( S, false);
+                    nRow=length(S);
+                    
+                    for j=1:nField,
+                        x=S(1).(fieldName{j});
+                        if ischar(x),
+                            for iRow=1:nRow,
+                                SS.(fieldName{j})(iRow,1)={S(iRow).(fieldName{j})};
+                            end
+                            
+                        elseif isnumeric(x) | islogical(x) | iscell(x),
+                            SS.(fieldName{j}) = [S.(fieldName{j})]';
+                            
+                        else
+                            error('transpose only supports elements which are characters, logical, or numeric');
+                        end
+                    end
+                    
+                case 'eOrg' % untranspose S.element(n) to S(n).element
+                    [fieldName, fieldLen, nField]=checkFields( S, false);
+                    nRow=length(S(1).(fieldName{1}));
+                    
+                    for j=1:nField,
+                        x=S(1).(fieldName{j});
+                        if iscell(x),
+                            for iRow=1:nRow,
+                                SS(iRow).(fieldName{j})=S.(fieldName{j}){iRow};
+                            end
+                        elseif ischar(x) | isnumeric(x) | islogical(x)
+                            for iRow=1:nRow,
+                                SS(iRow).(fieldName{j})=S.(fieldName{j})(iRow);
+                            end
+                        else
+                            error('untranspose only supports elements which are characters, logical, or numeric');
+                        end
+                    end
+            end
             
-            elseif isnumeric(x) | islogical(x) | iscell(x),
-                SS.(fieldName{j}) = [S.(fieldName{j})]';
-          
-            else
-                error('transpose only supports elements which are characters, logical, or numeric');
-            end
-        end
-
-    case 'element_untranspose' % untranspose S.element(n) to S(n).element
-        [fieldName, fieldLen, nField]=checkFields( S, false);
-        nRow=length(S(1).(fieldName{1}));
-
-        for j=1:nField,
-            x=S(1).(fieldName{j});
-            if iscell(x),
-                for iRow=1:nRow,
-                    SS(iRow).(fieldName{j})=S.(fieldName{j}){iRow};
-                end
-            elseif ischar(x) | isnumeric(x) | islogical(x)
-                for iRow=1:nRow,
-                    SS(iRow).(fieldName{j})=S.(fieldName{j})(iRow);
-                end
-            else
-                error('untranspose only supports elements which are characters, logical, or numeric');
-            end
-        end
-
     case 'element_values' % Return values in field arg1 of S
         % handle nans and empty fields
         outputFieldName=varargin{1};
         fieldLen=length(S.(outputFieldName));
         if iscell(S.(outputFieldName)),
             SS={};
-        end       
+        end
         SS(1:fieldLen)=S.(outputFieldName);
-
+        
     case 'flatten',
         SS=[];
         if iscell(S),
-        for i=1:length(S),
-            SS=[SS structop('element_untranspose',S{i})];
-        end
+            for i=1:length(S),
+                SS=[SS structop('element_untranspose',S{i})];
+            end
         else
             SS=structop('element_untranspose',S);
         end
-
+        
     case 'field_length'
         VAR=varargin{1};
         for i=1:length(S),
             SS(i)=length(S(i).(VAR));
         end
-
+        
     case {'find' ,'match'}  % Finds "and" combinations of variable/value pairs
         SS=structopFind;
     case 'group' %Group values common to a key variable
         SS=structopGroup;
-
+        
     case 'logic_test' % return rows where field function vararg1 (s.(vararg2) is true
         FNC=varargin{1};
         VAR=varargin{2};
@@ -371,7 +400,7 @@ switch lower(OPER),
             end
         end
         SS=S(j);
-
+        
     case 'intersect' % Compute intersction for cell array of structures
         if ~iscell(S),
             S={S};
@@ -382,7 +411,7 @@ switch lower(OPER),
         for i=2:N,
             SS= intersect(SS,[S{i}.(VAR)]);
         end
-
+        
     case 'isequal'  % Compares Columns of sturcture S to arg1
         % varg2 is options list of fileds to ignore;
         S2=varargin{1};
@@ -397,12 +426,12 @@ switch lower(OPER),
                 SS(iS,jS2)=isequal(S(iS),S2(jS2));
             end
         end
-
-
-
+        
+        
+        
     case 'group' %Group values common to a key variable
         SS=structopGroup;
-
+        
     case 'logic_test' % return rows where field function vararg1 (s.(vararg2) is true
         FNC=varargin{1};
         VAR=varargin{2};
@@ -414,7 +443,9 @@ switch lower(OPER),
             end
         end
         SS=S(j);
-
+        
+        
+        
     case 'intersect' % Compute intersction for cell array of structures
         if ~iscell(S),
             S={S};
@@ -425,7 +456,7 @@ switch lower(OPER),
         for i=2:N,
             SS= intersect(SS,[S{i}.(VAR)]);
         end
-
+        
     case 'isequal'  % Compares Columns of sturcture S to arg1
         % varg2 is options list of fileds to ignore;
         S2=varargin{1};
@@ -440,9 +471,9 @@ switch lower(OPER),
                 SS(iS,jS2)=isequal(S(iS),S2(jS2));
             end
         end
-
-
-
+        
+        
+        
     case {'member' 'notmember'} % Return structure  elements where field is not a member of fieldlist
         if nargin<4,
             error('structop notmember requries 4 inputs: oper, struct, fieldname, memberlist)');
@@ -481,7 +512,7 @@ switch lower(OPER),
             end
         end
         SS=rmfield(SS,varargin(iold));
-
+        
     case 'reduce'
         n=length(S);
         var=varargin{1};
@@ -489,7 +520,7 @@ switch lower(OPER),
         for i=2:n,
             SS=cat(1,SS,S(i).(var)(:));
         end;
-
+        
     case 'round' %  set all values of filed arg1 to arg2;
         % Make sure field exists
         SS=S;
@@ -504,9 +535,9 @@ switch lower(OPER),
                 SS(j).(var)=sprintf(specifier,SS(j).(var));
             end
         end
-
-
-
+        
+        
+        
     case 'set' %  field values
         var=varargin{1}; % field name to set
         idx=varargin{2}; % index
@@ -515,7 +546,7 @@ switch lower(OPER),
         if ~any(strcmp(fieldnames(S),var)),
             error([' Field name does not exist: ' var ]);
         end
-
+        
         if length(val)==1,
             val=idx*0 + val;
         end
@@ -527,7 +558,7 @@ switch lower(OPER),
             j=idx(i);
             SS(j).(var)=val(i);
         end
-
+        
     case 'setall' %  set all values of filed arg1 to arg2;
         % Make sure field exists
         SS=S;
@@ -541,7 +572,7 @@ switch lower(OPER),
                 SS(j).(var)=val;
             end
         end
-
+        
     case 'set_empty_field' %  set emtpy fields to a vlaue
         var=varargin{1}; % field name to set
         val=varargin{2}; % new value
@@ -555,10 +586,10 @@ switch lower(OPER),
                 SS(i).(var)=val;
             end
         end
-
+        
     case { 'sort'  'sort_descend'} % Sort field in order of fieldName(s) in varaqrg1
         SS=structopSort;
-
+        
     case 'cell2string'  % extract elements specified in vararg1
         % vararg1 is either a field name or cell array of field names
         fieldName=varargin{1};
@@ -572,7 +603,7 @@ switch lower(OPER),
                 SS(i).(var)=S(i).(var){1};
             end
         end
-
+        
     case 'subset' % Operates on transposed data
         if ~iscell(S),
             jTemp{1}=S;
@@ -588,16 +619,21 @@ switch lower(OPER),
         %% Generate subsets defined by unique values of first element of fieldName
         k=0;
         for iEl=1:nEl,
-            setVal=unique([S{iEl}.(curSet)]);
+            if ischar((S{iEl}(1).(curSet))),
+                setVal=unique({S{iEl}.(curSet)});
+            else
+                setVal=unique([S{iEl}.(curSet)]);
+            end
             for iVal=1:length(setVal),
                 curVal=setVal(iVal);
-                if iscell([S{iEl}.(curSet)]),
-                    kTemp=find(strcmp(S{iEl}.(curSet),curVal));
+                if ischar(S{iEl}(1).(curSet)),
+                    kTemp=find(strcmp({S{iEl}.(curSet)},curVal));
                 else
                     kTemp=find([S{iEl}.(curSet)]==curVal);
                 end
                 k=k+1;
-                SS{k}=structop('element_subsref',S{iEl},kTemp);
+                % SS{k}=structop('element_subsref',S{iEl},kTemp);
+                SS{k}=S{iEl}(kTemp);
             end
         end
         %% If there is only one element in the set list we are done
@@ -607,7 +643,7 @@ switch lower(OPER),
         else
             SS= structop('subset',SS, fieldName(2:end));
         end
-
+        
     case 'substruct'  % extract elements specified in vararg1
         % vararg1 is either a field name or cell array of field names
         fieldName=varargin{1};
@@ -620,7 +656,7 @@ switch lower(OPER),
                 SS(i).(var)=S(i).(var);
             end
         end
-
+        
     case 'min' % Mainimum  value of field arg1 for each row
         SS=S;
         nVar=nargin-2;
@@ -630,7 +666,7 @@ switch lower(OPER),
                 SS(i).(VAR)=min([SS(i).(VAR)]);
             end
         end
-
+        
     case 'max' % Maximum value of field arg1 for each row
         SS=S;
         nVar=nargin-2;
@@ -640,17 +676,17 @@ switch lower(OPER),
                 SS(i).(VAR)=max([SS(i).(VAR)]);
             end
         end
-
+        
     case 'struct2cell' %Convert strucutre to cell arrau with first row containing cell names
         if length(S)==1,
             S=structop('element_untranspose',S);
         end
         SS=[fieldnames(S) struct2cell(S(:))];
         SS=SS';
-
-
-
-
+        
+        
+        
+        
     case 'sum'
         SS=S;
         nVar=nargin-2;
@@ -660,7 +696,7 @@ switch lower(OPER),
                 SS(i).(VAR)=sum([SS(i).(VAR)]);
             end
         end
-
+        
     case 'unique' % return unique elements of a structure
         var=varargin{1};
         if length(S)==0,
@@ -671,18 +707,18 @@ switch lower(OPER),
             SS=[S.(var)];
             j=find(~isnan(SS));
             SS=unique(SS(j));
-
+            
         elseif ischar(S(1).(var)),
-            for i=1:length(S),                
-            SS{i}=S(i).(var);
+            for i=1:length(S),
+                SS{i}=S(i).(var);
             end
             SS=unique(SS);
-
+            
         else
             error ('bad type');
         end
         return
-
+        
     case 'unique_element' % return unique elements of a structure
         SS=S;
         nVar=nargin-2;
@@ -700,7 +736,7 @@ switch lower(OPER),
             end
         end
         return
-
+        
     case 'upper' % Convert values in fields arg1 to upper case
         SS=S;
         if length(S)==0,
@@ -715,7 +751,7 @@ switch lower(OPER),
                 SS(i).(var)=upper(SS(i).(var));
             end
         end
-
+        
     case 'vector' % convert fields of structure to a vector
         var=varargin{1};
         if isempty(S),
@@ -735,15 +771,15 @@ switch lower(OPER),
                 SS{i}=S(i).(var);
             end
         elseif isstruct(S(1).(var)),
-             clear SS;
-             for i=1:length(S),
-                 if isempty(S(i).(var)),
+            clear SS;
+            for i=1:length(S),
+                if isempty(S(i).(var)),
                     error(['struct field cannot be empty i=' num2str(i)]);
                 else
                     SS(i)=[S(i).(var)];
-                 end
-             end
-           
+                end
+            end
+            
         else
             error('data type not supported');
         end
@@ -760,7 +796,7 @@ end
         else
             warningFlag=varargin{4};
         end
-       
+        
         % both structures must by of form S.elements(n);
         % Check field lengths
         [fieldName, fieldLen]=checkFields( S, true);
@@ -773,11 +809,11 @@ end
         if ischar(mergeFields),
             mergeFields= {mergeFields};
         end
-         % Check that mergeStruct is unique in keyValue
-          mk=mergeStruct.(mergeKeyField);
-         if length(mk) ~= length(unique(mk)),
-             error('mergeStructure does not have unique keyValues');
-         end
+        % Check that mergeStruct is unique in keyValue
+        mk=mergeStruct.(mergeKeyField);
+        if length(mk) ~= length(unique(mk)),
+            error('mergeStructure does not have unique keyValues');
+        end
         % Check that all key fields in the merge strucutre are in the
         % structure to be merged into
         a=S.(mergeKeyField);
@@ -823,10 +859,10 @@ end
             end
         end
     end
-%% replicate elements of a structure 
-    function SS=elementRep 
-         [fieldName, fieldLen, nField]=checkFields( S, true);
-         % Check input arguments
+%% replicate elements of a structure
+    function SS=elementRep
+        [fieldName, fieldLen, nField]=checkFields( S, true);
+        % Check input arguments
         if length(varargin) <1,
             error('element_merge requires 3 input arguments ');
         end
@@ -842,37 +878,37 @@ end
             SS=structop('element_cat',SS,S);
         end
     end
-            
-  %% ungroup elements of a structure  in a cell array 
-    function SS=elementUnGroup 
+
+%% ungroup elements of a structure  in a cell array
+    function SS=elementUnGroup
         fieldName=filenames(S);
         nField=length(fieldName);
         
-         % Check input arguments     
+        % Check input arguments
         if ~isstruct(S),
             error('Second input parameter must be a structure');
-        end 
-             for iField=1:nField,
-                 curField=fieldName{iField};
-                 if iscell(S(iLen).(curField)),
-                     % Field is a cel so expand and recurse
-                     for iLen=1:nField,
-                         sTemp=S(iLen);
-                         curVal{iLen}=sTemp.(curField);
-                         nEl=length(curVal);
-                         for iEl=1:nEl,
-                             sTemp.(curField)=curVal{iEl};
-                             if isempty(S),
-                                 SS=sTemp;
-                             else
-                             SS=cat(1,SS,sTemp);
-                             end
-                         end
-                     end
-                 end
-             end
-                    
-    end      
+        end
+        for iField=1:nField,
+            curField=fieldName{iField};
+            if iscell(S(iLen).(curField)),
+                % Field is a cel so expand and recurse
+                for iLen=1:nField,
+                    sTemp=S(iLen);
+                    curVal{iLen}=sTemp.(curField);
+                    nEl=length(curVal);
+                    for iEl=1:nEl,
+                        sTemp.(curField)=curVal{iEl};
+                        if isempty(S),
+                            SS=sTemp;
+                        else
+                            SS=cat(1,SS,sTemp);
+                        end
+                    end
+                end
+            end
+        end
+        
+    end
 
     function SS =elementSort
         [fieldName, fieldLen, nField]=checkFields( S, true);
@@ -908,7 +944,7 @@ end
         nval=length(uval);
         if iscell(el),
             [ssort,isort]=sort(el);
-        else         
+        else
             [ssort,isort]=sort(el,1,sortMode);
         end
         els=el(isort);
@@ -935,11 +971,11 @@ end
             end
             SS=sOut;
         end
-
+        
     end
 
     function SS=elementSubSet
-        % Geberate subset of struutre defied by variables in arg 3
+        % Geberate subset of struutre defiend by variables in arg 3
         if ~iscell(S),
             jTemp{1}=S;
             S=jTemp;
@@ -973,14 +1009,14 @@ end
         else
             SS= structop('subset',SS, fieldName(2:end));
         end
-
+        
     end
 %%
     function SS = structopCat
         % concatonates strucutres in cell array along dimensions dim.
         % Currently only supports structures with dimensins 1xn or nx1
         % If dim is not specified cat operates along the dominesion which
-        % is greater than zero. 
+        % is greater than zero.
         if ~iscell(S),
             SS=S;
             return
@@ -993,7 +1029,7 @@ end
         if isempty(notEmpty),
             SS=[];
             return;
-        % Otherwise drop empty Cells
+            % Otherwise drop empty Cells
         else
             k=1;
             for i=1:length(notEmpty),
@@ -1004,8 +1040,8 @@ end
             S=sTemp;
         end
         [nRow,nCol]=cellfun(@size,S);
-         maxRow=max(nRow);
-         maxCol=max(nCol);
+        maxRow=max(nRow);
+        maxCol=max(nCol);
         %
         % Determine dimension for cat
         if nVarArgIn==1,
@@ -1013,20 +1049,20 @@ end
             if (dim==1 & maxCol ~=1) | (dim==2 & maxRow  ~=1),
                 error ('cat dimensions are not consistent');
             end
-        else            
+        else
             if maxRow==1 & maxCol>1,
                 dim=2;
             elseif maxRow>1 & maxCol==1,
                 dim=1;
             elseif maxRow==1 & maxCol==1,
-                    dim=1;
+                dim=1;
             else
                 error('cat dimensions are not consistent');
             end
-        end               
+        end
         % Do concatonation
         SS=cat(dim,S{:});
-
+        
     end
 %%
     function SS = structopFind
@@ -1085,9 +1121,9 @@ end
         if nargout==2,
             I=i;
         end
-
-
-
+        
+        
+        
     end
 %%
     function SS = structopGroup
@@ -1195,7 +1231,7 @@ end
         else
             [ssort,isort]=sort(el,2,sortMode);
         end
-
+        
         els=el(isort);
         SS=SV(isort);
         if length(sortVar)==1 | length(SS)==1,
@@ -1210,7 +1246,7 @@ end
                     jval=find(strcmp(els,uval(ival)));
                 end
                 S1= structop(OPER,SS(jval), newarg);
-
+                
                 SS(jval)=S1;
             end
         end
@@ -1233,7 +1269,7 @@ nField=length(fieldName);
 fieldLen=[];
 for i=1:nField,
     if ~ischar(S(1).(fieldName{i})),
-    fieldLen=[fieldLen length([S.(fieldName{i})])];
+        fieldLen=[fieldLen length([S.(fieldName{i})])];
     end
 end
 fieldLen=unique(fieldLen);
@@ -1242,3 +1278,18 @@ if length(fieldLen) >1 & error_flag,
     error('Fields have different lengths');
 end
 end
+
+function org = getStructOrg (S)
+[fieldName, fieldLen , nField] = checkFields (S, true);
+% Determine format of a strucutre
+nStruct= length(S);
+if nStruct > 1
+    org='eOrg'
+elseif fieldLen>1
+    org='pOrg';
+else
+    error 'undefined format'
+end
+end
+
+

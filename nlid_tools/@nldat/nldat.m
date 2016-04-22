@@ -510,7 +510,7 @@ classdef nldat < nltop
                 set (z,'dataSet',log(x.dataSet));
             end
             
-            function z = max (x,y, DIM);
+            function [z, iMax]  = max (x,y, DIM);
                 x=nldat(x);
                 [nSamp,nChan,nReal]=size(x);
                 z=x;
@@ -518,21 +518,21 @@ classdef nldat < nltop
                 if nargin==1,
                     for iChan=1:nChan,
                         for iReal=1:nReal,
-                            [xmax(iReal,iChan),i]=max(x.dataSet(:,iChan,iReal));
-                            domainValues(iReal,iChan,:)=d(i);
+                            [xmax(iReal,iChan),iMax(iReal,iChan)]=max(x.dataSet(:,iChan,iReal));
+                            domainValues(iReal,iChan,:)=d(iMax(iReal,iChan));
                         end
                     end
                     set(z,'dataSet',xmax,'domainValues',domainValues);
                     
                 elseif nargin==2,
                     y=nldat(y);
-                    z.dataSet=max(x.dataSet,y.dataSet);
+                   [ z.dataSet, iMax]=max(x.dataSet,y.dataSet);
                 elseif nargin==3,
                     if isempty(y)
-                        z.dataSet=max(x.dataSet,[] ,DIM);
+                        [z.dataSet,iMax]=max(x.dataSet,[] ,DIM);
                     else
                         y=nldat(y);
-                        z.dataSet=max(x.dataSet,y.dataSet,DIM);
+                        [z.dataSet,iMax]=max(x.dataSet,y.dataSet,DIM);
                     end
                 end
                 set (z,'comment','Max');
