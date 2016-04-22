@@ -25,11 +25,11 @@ trq = trq - mean(trq);
 %Define position, velocity and acceleration signals.
 vel = ddt(pos);
 pos = get(pos,'dataSet');
-velData = get(vel,'dataSet');
 vel = decimate(vel,decimation_ratio);
 trq = get(trq,'dataSet');
-dvel = del(velData,ceil(delay/(ts)));
+dvel = del(vel,delay);
 dvel = decimate(dvel,decimation_ratio);
+dvel = get(dvel,'dataSet');
 pos = decimate(pos,decimation_ratio);
 trq = decimate(trq,decimation_ratio);
 nSamp = size(pos,1);
