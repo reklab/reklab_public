@@ -69,10 +69,10 @@ classdef randvar  < nltop
             elseif ~strcmp(class(X),'nldat'),
                 error ('Second input must be either double or nldat');
             end
-            [m,n]=size(X);
+            [m,n,p]=size(X);
             Y=X;
             set(Y,'comment',['Realization of ' RV.randvarType ' variate']);
-            pList= cat(2, getParamValCell(RV.parameterSet), m,n);
+            pList= cat(2, getParamValCell(RV.parameterSet), m,n,p);
             set(Y,'dataSet',random(RV.randvarType,pList{:}));
         end
         
