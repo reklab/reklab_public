@@ -24,14 +24,13 @@ pos = pos - mean(pos);
 trq = trq - mean(trq);
 %Define position, velocity and acceleration signals.
 vel = ddt(pos);
-pos = get(pos,'dataSet');
-vel = decimate(vel,decimation_ratio);
 trq = get(trq,'dataSet');
 dvel = del(vel,delay);
 dvel = decimate(dvel,decimation_ratio);
 dvel = get(dvel,'dataSet');
 pos = decimate(pos,decimation_ratio);
 trq = decimate(trq,decimation_ratio);
+vel = decimate(vel,decimation_ratio);
 nSamp = size(pos,1);
 %Constructed input signal based on (5) in [*] using Tchebycehv polynomial
 avg = (max(dvel) + min(dvel))/2;
@@ -42,9 +41,10 @@ u_r = multi_tcheb(un,order-1);
 irf_len_i = delay/ts/decimation_ratio;
 lags_i = (-irf_len_i:1:irf_len_i);
 nLags_i = length(lags_i);
-u_i = zeros(length(pos),nLags_i);
+u_i = zeros(length(dvel),nLags_i);
 for i = 1:nLags_i
-    u_i(:,i) = del(pos,lags_i(i));
+    posDelay = del(pos,lags_i(i) * ts * decimation_ratio);
+    u_i(:,i) = get(posDelay,'dataSet');
 end
 u = [u_i,u_r];
 %% Identification

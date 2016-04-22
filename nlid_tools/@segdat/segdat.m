@@ -60,7 +60,7 @@ classdef segdat<nldat
                 onsetPointer = get(S,'onsetPointer');
                 segLength = get(S,'segLength');
                 for i = 1 : numSegment
-                    S_nldat_Segment = S_nldat(onsetPointer(i):onsetPointer(i)+segLength(i),:);
+                    S_nldat_Segment = S_nldat(onsetPointer(i):onsetPointer(i)+segLength(i)-1,:);
                     plot(S_nldat_Segment,'line_color','r')
                 end
                 legend('Original Record','Segmented Data')

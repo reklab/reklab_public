@@ -41,7 +41,7 @@ else
 end
 %% Preparing data for identification
 dataSet = get(z,'dataSet');
-position = dataSet(:,1);
+position = z(:,1);
 position = position - mean(position);
 torque = dataSet(:,2);
 torque = torque - mean(torque);
@@ -56,33 +56,36 @@ N(N<1) = [];
 if ~isempty(N)
 endpointer = segmentOnsetPointer + segmentLength - 1;
 intrinsicIRF_Length = delayinput / ts / decimation_ratio;
-lagsIntrinsic = (-irf_leintrinsicIRF_Lengthn_i:1:intrinsicIRF_Length);
+lagsIntrinsic = (-intrinsicIRF_Length:1:intrinsicIRF_Length);
 numLagsIntrinsic = length(lagsIntrinsic);
 %inputDec = decimate(input,decimation_ratio);
-positionDelay = zeros(size(position,1),nLanumLagsIntrinsicgs_i);
+positionDelay = zeros(size(position,1),numLagsIntrinsic);
 for j = 1 : numLagsIntrinsic
-    positionDelay(:,j) = del(position,lagsIntrinsic(j)*decimation_ratio);
+     posDelay = del(position,lagsIntrinsic(j) * ts);
+     positionDelay(:,j) = get(posDelay,'dataSet');
 end
-velocity = ddt(nldat(input,'domainIncr',ts));
+positionNldat = nldat(get(position,'dataSet'),'domainIncr',ts);
+velocity = ddt(positionNldat);
 velocity = get(velocity,'dataSet');
-positionDelaysegments = zeros(sum(segLength),nLags_i);
-dvelocity = zeros(sum(segLength),1);
-tqT_noisy = zeros(sum(segLength),1);
+positionDelaysegments = zeros(sum(segmentLength),numLagsIntrinsic);
+dvelocity = zeros(sum(segmentLength),1);
+tqT_noisy = zeros(sum(segmentLength),1);
 pointer = 1;
 switch_time = zeros(length(endpointer)-1,1);
 for i = 1 : length(endpointer)
-    vel_seg = velocity(onsetPointer(i):endpointer(i));
-    dvel_seg = del(vel_seg,delayinput/ts);
-    dvelocity(pointer:pointer+segLength(i)-1) = dvel_seg;
-    tqT_noisy(pointer:pointer+segLength(i)-1) = output(onsetPointer(i):endpointer(i));
-    positionDelaysegments(pointer:pointer+segLength(i)-1,:) = positionDelay(onsetPointer(i):endpointer(i),:);
-    pointer = pointer + segLength(i);
+    vel_seg = velocity(segmentOnsetPointer(i):endpointer(i));
+    dvel_seg = del(nldat(vel_seg,'domainIncr',ts),delayinput*ts);
+    %dvel_seg = del(vel_seg,delayinput/ts);
+    dvelocity(pointer:pointer+segmentLength(i)-1) = get(dvel_seg,'dataSet');
+    tqT_noisy(pointer:pointer+segmentLength(i)-1) = torque(segmentOnsetPointer(i):endpointer(i));
+    positionDelaysegments(pointer:pointer+segmentLength(i)-1,:) = positionDelay(segmentOnsetPointer(i):endpointer(i),:);
+    pointer = pointer + segmentLength(i);
     switch_time(i) = pointer;
 end
 [dvelocity,~,~,~] = decimate_segment(dvelocity,switch_time(1:end-1),decimation_ratio);
 positionDelaysegments = bsxfun(@minus,positionDelaysegments,mean(positionDelaysegments));
-u_i = zeros(size(dvelocity,1),nLags_i);
-for i = 1:nLags_i
+u_i = zeros(size(dvelocity,1),numLagsIntrinsic);
+for i = 1 : numLagsIntrinsic
     [u_i(:,i),~,~,~] = decimate_segment(positionDelaysegments(:,i),switch_time(1:end-1),decimation_ratio);
 end
 [tqT_noisy,switch_time,segLength,~] = decimate_segment(tqT_noisy,switch_time(1:end-1),decimation_ratio);
@@ -93,7 +96,7 @@ ts = ts * decimation_ratio;
 nsamp = length(dvelocity);
 p = length(segLength);
 %Ensure enough number of samples is available O.W. identify intrinsic path only
-if nsamp>2*hanklesize*p-p+2*maxordernle*hanklesize+nLags_i*hanklesize+1
+if nsamp>2*hanklesize*p-p+2*maxordernle*hanklesize+numLagsIntrinsic*hanklesize+1
 %Construct the input signal
     avg = (max(dvelocity) + min(dvelocity)) / 2;
     rng = max(dvelocity) - min(dvelocity);
@@ -102,17 +105,17 @@ if nsamp>2*hanklesize*p-p+2*maxordernle*hanklesize+nLags_i*hanklesize+1
     u = [u_i,u_r];
 %First attempt to identify AT and CT
     Yf_tot = zeros(sum(N),hanklesize);
-    Uf_tot = zeros(sum(N),(maxordernle+nLags_i)*hanklesize);
-    Up_tot = zeros(sum(N),(maxordernle+nLags_i)*hanklesize);
+    Uf_tot = zeros(sum(N),(maxordernle+numLagsIntrinsic)*hanklesize);
+    Up_tot = zeros(sum(N),(maxordernle+numLagsIntrinsic)*hanklesize);
     for i = 1 : p
-        Uf = zeros(N(i),(maxordernle+nLags_i)*hanklesize); 
-        Up = zeros(N(i),(maxordernle+nLags_i)*hanklesize); 
+        Uf = zeros(N(i),(maxordernle+numLagsIntrinsic)*hanklesize); 
+        Up = zeros(N(i),(maxordernle+numLagsIntrinsic)*hanklesize); 
         Yf = zeros(N(i), hanklesize);
         u_r_segment = u(switch_time(i):switch_time(i+1)-1,:);
         output_segment = tqT_noisy(switch_time(i):switch_time(i+1)-1,:);
         for k = (1:hanklesize)
-            Up(:,(k-1) * (maxordernle+nLags_i)+1:k * (maxordernle+nLags_i)) = u_r_segment(k:N(i)+k-1,:); 
-            Uf(:,(k-1) * (maxordernle+nLags_i)+1:k * (maxordernle+nLags_i)) = u_r_segment(hanklesize+k:N(i)+hanklesize+k-1,:); 
+            Up(:,(k-1) * (maxordernle+numLagsIntrinsic)+1:k * (maxordernle+numLagsIntrinsic)) = u_r_segment(k:N(i)+k-1,:); 
+            Uf(:,(k-1) * (maxordernle+numLagsIntrinsic)+1:k * (maxordernle+numLagsIntrinsic)) = u_r_segment(hanklesize+k:N(i)+hanklesize+k-1,:); 
             Yf(:,(k-1) * 1+1:k * 1) = output_segment(hanklesize+k:N(i)+hanklesize+k-1,:); 
         end
         Yf_tot(sum(N(1:i))-N(i)+1:sum(N(1:i)),:) = Yf;
@@ -122,7 +125,7 @@ if nsamp>2*hanklesize*p-p+2*maxordernle*hanklesize+nLags_i*hanklesize+1
     data_matrix = [Uf_tot Up_tot Yf_tot];
     [~ , R] = qr(data_matrix);
     L = R';
-    L32 = L(2*(maxordernle+nLags_i)*hanklesize+1:2*(maxordernle+nLags_i)*hanklesize+hanklesize,(maxordernle+nLags_i)*hanklesize+1:(maxordernle+nLags_i)*hanklesize+maxordernle*hanklesize);
+    L32 = L(2*(maxordernle+numLagsIntrinsic)*hanklesize+1:2*(maxordernle+numLagsIntrinsic)*hanklesize+hanklesize,(maxordernle+numLagsIntrinsic)*hanklesize+1:(maxordernle+numLagsIntrinsic)*hanklesize+maxordernle*hanklesize);
     [Un,~,~] = svd(L32); 
     R = struct('L',L,'Un',Un,'m',1,'l',1,'i',hanklesize);
     %m = orderselect(Sn,orderselectmethod);
@@ -450,101 +453,3 @@ function dhat = intrinsicEstimator (g,k,y)
     Gg=pinv(g)-pinv(g)*k*pinv(k);
     dhat = pinv(Hg)*Gg*y;
 end
-
-function [W, flags] = multi_tcheb(V, max_order);
-%
-%  usage W = multi_herm2(V, max_order);
-%
-%  given a collection of column vectors, V, this function returns
-%  a matrix of all of the Tcheb functions up to max_order applied
-%  to all of the vectors in V.
-
-% Copyright 1999-2003, Robert E Kearney and David T Westwick
-% This file is part of the nlid toolbox, and is released under the GNU 
-% General Public License For details, see ../../copying.txt and ../../gpl.txt 
-
-if max_order==0,
-   W=V*0 +1;
-   return;
-end
-
-
-
-
-[nr,nc] = size(V);
-
-
-%  create a matrix of flags, such that flags (i,j) points to the 
-%  column of the i'th basis function raised to the j'th power.
-
-flags = zeros(nc,max_order);
-flags(:,1) = [2:nc+1]';
-for order = 2:max_order
-   % first column is offsetr by 1 from last value of previous order
-   flags(1,order) = flags(nc,order-1)+1;
-    for i = 2 : nc
-        num_terms = flags(nc,order-1)-flags(i-1,order-1)+1;
-        flags(i,order) = flags(i-1,order)+ num_terms;
-      end
-   end
-
-   
-
-% pre-allocate the W matrix
-W = zeros(nr,flags(nc,max_order));
-%  generate the single basis function Hermite polynomials and place 
-%  them  in the correct columns of W
-
-Te = zeros(nr,max_order+1);
-Te(:,1) = ones(nr,1);
-
-%  generate all of the functions involving a Hermite polynomial
-%  applied to a single basis vector
-
-for i = 1:nc
-    Te(:,2) = V(:,i);
-    for j = 2:max_order
-        Te(:,j+1) = 2*V(:,i).*Te(:,j) - Te(:,j-1);
-      end
-    for j = 1:max_order
-        W(:,flags(i,j)) = Te(:,j+1);
-      end
-  end
-W(:,1) = ones(nr,1);
-
-clear Te V
-
-
-%  generate all of the functions involving a powers of a single input vector
-
-
-  
-%  Now, using the functions that we just created, fill in the 
-%  rest of the matrix
-
-
-
-for order = 2:max_order
-    for v1 = 1 : nc-1
-        index = flags(v1,order);
-        for v1_order = order-1:-1:1
-            term1 = W(:,flags(v1,v1_order));
-            rem_order = order - v1_order;
-            
-%           find the terms of order rem_order, whose leading variable
-%           is 'greater' than v1
-
-            first_term = flags(v1+1,rem_order);
-            last_term = flags(nc,rem_order);
-            for j = first_term:last_term
-                index = index+1;
-                W(:,index)=term1.*W(:,j);
-                disp([index flags(v1,v1_order) j])
-              end
-          end
-      end
-  end
-end
-
-
-
