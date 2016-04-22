@@ -21,7 +21,7 @@ assign(model.parameterSet);
 %
 % Simulate a time-varying response
 %
-if strcmp(tvFlag,'Yes'),
+if strcmp(tvFlag,'yes'),
    if nSides==1,
        sides='one';
    else
@@ -36,16 +36,14 @@ if strcmp(tvFlag,'Yes'),
    yout=reshape(yout,n,1,m);
    y=xin;
    set(y,'c','filtered','Data',yout);
-   %
    % Simulate a time-invariant response
-   %
 else
-  x=x(:,1);  
+  x=x(:,1,:);  
     
     [nsamp, nchan,nreal]= size(filter);
     for i=1:nchan,
         for j=1:nreal,
-            yout(:,i,j) = filter_ts(filter(:,i,j), x, nSides, incr);
+            yout(:,i,j) = filter_ts(filter(:,i,j), x(:,1,j), nSides, incr);
         end
     end
     y=xin;
