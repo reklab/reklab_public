@@ -49,6 +49,25 @@ classdef segdat<nldat
             end
             set(Z,'dataSet',z,'onsetPointer',onsetpointer,'segLength',seglength);
         end
+        function plot(S)
+            if (size(S,2)==1) && ((size(S,3)==1))
+                S_nldat = nldat(get(S,'dataSet'),'domainIncr',get(S,'domainIncr'),'chanNames'...
+                ,get(S,'chanNames'),'chanUnits',get(S,'chanUnits'),'domainName',get(S,'domainName')...
+                ,'comment',get(S,'comment'));
+                plot(S_nldat)
+                hold on
+                numSegment = length(get(S,'segLength'));
+                onsetPointer = get(S,'onsetPointer');
+                segLength = get(S,'segLength');
+                for i = 1 : numSegment
+                    S_nldat_Segment = S_nldat(onsetPointer(i):onsetPointer(i)+segLength(i),:);
+                    plot(S_nldat_Segment,'line_color','r')
+                end
+                legend('Original Record','Segmented Data')
+            else
+                plot(nldat(S))
+            end
+        end
         function out = decimate(data,decimation_ratio)
             errorcheck(data);
             [~,nchan,~] =size(data);
