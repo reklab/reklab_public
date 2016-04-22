@@ -68,6 +68,7 @@ velocity = ddt(positionNldat);
 velocity = get(velocity,'dataSet');
 positionDelaySegments = zeros(sum(segmentLength),numLagsIntrinsic);
 velocityDelaySegments = zeros(sum(segmentLength),1);
+velocitySegments = zeros(sum(segmentLength),1);
 torqueSegments = zeros(sum(segmentLength),1);
 pointer = 1;
 switch_time = zeros(length(endpointer)-1,1);
@@ -75,12 +76,14 @@ for i = 1 : length(endpointer)
     vel_seg = velocity(segmentOnsetPointer(i):endpointer(i));
     dvel_seg = del(nldat(vel_seg,'domainIncr',ts),delayinput);
     velocityDelaySegments(pointer:pointer+segmentLength(i)-1) = get(dvel_seg,'dataSet');
+    velocitySegments(pointer:pointer+segmentLength(i)-1) = vel_seg;
     torqueSegments(pointer:pointer+segmentLength(i)-1) = torque(segmentOnsetPointer(i):endpointer(i));
     positionDelaySegments(pointer:pointer+segmentLength(i)-1,:) = positionDelay(segmentOnsetPointer(i):endpointer(i),:);
     pointer = pointer + segmentLength(i);
     switch_time(i) = pointer;
 end
 [velocityDelaySegments,~,~,~] = decimate_segment(velocityDelaySegments,switch_time(1:end-1),decimation_ratio);
+[velocitySegments,~,~,~] = decimate_segment(velocitySegments,switch_time(1:end-1),decimation_ratio);
 positionDelaySegments = bsxfun(@minus,positionDelaySegments,mean(positionDelaySegments));
 u_i = zeros(size(velocityDelaySegments,1),numLagsIntrinsic);
 for i = 1 : numLagsIntrinsic
@@ -172,10 +175,38 @@ if reflexPathID>0
     tqI = u_i * intrinsic;
     tqI_res = torqueSegments - tqI;
     tqI_res = tqI_res - mean(tqI_res);
-    velocitySegments = segdat(velocityDelaySegments,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',0.01);
+    velocitySegments = segdat(velocitySegments,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',0.01);
     reflexTorqueSegments = segdat(tqI_res,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',0.01);
     z = cat(2,velocitySegments,reflexTorqueSegments);
-    reflexNLID = nlbl(z,'idMethod','subspace','nDelayInput',5,'maxOrderNLE',8);
+    reflexNLID = nlbl(z,'idMethod','subspace','nDelayInput',floor(delayinput/ts),...
+        'maxOrderNLE',maxordernle,'threshNSE',threshold,'hankleSize',hanklesize);
+    tqR = nlsim(reflexNLID,z);
+    tqI = nldat(tqI,'domainIncr',ts);
+    tqT = tqI + tqR;
+	torqueSegments = nldat(torqueSegments,'domainIncr',ts);
+	vaf_tot = vaf(torqueSegments,tqT);
+	vaf_I = vaf(torqueSegments,tqI);
+	vaf_R = vaf(torqueSegments,tqR);
+    
+    if plot_mode == 1
+            for i =1 : p
+                figure(floor((i-1)/4)+10)
+                subplot(4,1,mod(i-1,4)+1)
+                measured_data = torqueSegments(switch_time(i):switch_time(i+1)-1);
+                measured_data = measured_data.dataSet;
+                measured_data = measured_data - mean(measured_data);
+                predicted_data = tqT(switch_time(i):switch_time(i+1)-1);
+                predicted_data = predicted_data.dataSet;
+                predicted_data = predicted_data - mean(predicted_data);
+                predicted_data = nldat(predicted_data,'domainIncr',ts);
+                measured_data = nldat(measured_data,'domainIncr',ts);
+                set(measured_data,'chanNames','Measured torque');
+                set(predicted_data,'chanNames','Predicted torque');
+                plot(cat(2,measured_data,predicted_data),'plotmode','super');
+                hold on
+                plot(measured_data-predicted_data,'line_color','r')
+            end
+     end
 %Second attempt to refine the estimates of A and C
     Yf_tot = zeros(sum(N),hanklesize);
     Uf_tot = zeros(sum(N),(maxordernle)*hanklesize);
@@ -303,25 +334,7 @@ if reflexPathID>0
         vaf_tot = vaf(torqueSegments,tqT);
         vaf_I = vaf(torqueSegments,tqI);
         vaf_R = vaf(torqueSegments,tqR);
-        if plot_mode == 1
-            for i =1 : p
-                figure(floor((i-1)/4)+10)
-                subplot(4,1,mod(i-1,4)+1)
-                measured_data = torqueSegments(switch_time(i):switch_time(i+1)-1);
-                measured_data = measured_data.dataSet;
-                measured_data = measured_data - mean(measured_data);
-                predicted_data = tqT(switch_time(i):switch_time(i+1)-1);
-                predicted_data = predicted_data.dataSet;
-                predicted_data = predicted_data - mean(predicted_data);
-                predicted_data = nldat(predicted_data,'domainIncr',ts);
-                measured_data = nldat(measured_data,'domainIncr',ts);
-                set(measured_data,'chanNames','Measured torque');
-                set(predicted_data,'chanNames','Predicted torque');
-                plot(cat(2,measured_data,predicted_data),'plotmode','super');
-                hold on
-                plot(measured_data-predicted_data,'line_color','r')
-            end
-        end
+        
     end
 end
 else

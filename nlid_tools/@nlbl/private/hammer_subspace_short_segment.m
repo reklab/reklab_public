@@ -142,6 +142,8 @@ if condition>0
     omega_hat = zeros(maxOrderNLE+1,it);
     omega0 = rand(maxOrderNLE+1,1);
     omega0 = omega0 / norm(omega0);
+	omega0 = [0.01;halfwave_rectifier_tchebychev(min(in),max(in),maxOrderNLE-1)];
+    omega0 = omega0 / norm(omega0);
     s1 = 10^10;
     s2 = 10^10;
     for i=1:it
@@ -262,4 +264,19 @@ for i=1:size(bnew,2)
     end
 end
 Phi = bnew;
+end
+
+function alpha = halfwave_rectifier_tchebychev(in_min,in_max,order)
+x = in_min:0.0001:in_max;
+y = max(x,0);
+x = nldat(x','domainIncr',0.001);
+y = nldat(y','domainIncr',0.001);
+z = cat(2,x,y);
+p = polynom(z,'polyType','tcheb','polyOrderMax',order,'polyOrderSelectMode','full');
+alpha = p.polyCoef;
+end
+function dhat = intrinsicEstimator (g,k,y)
+    Hg=(eye(size(g,2))-pinv(g)*k*pinv(k)*g);
+    Gg=pinv(g)-pinv(g)*k*pinv(k);
+    dhat = pinv(Hg)*Gg*y;
 end

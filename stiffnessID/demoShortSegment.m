@@ -9,7 +9,7 @@ samplingTime = get(z_pf,'domainIncr');
 %Randomly select segments from this data
 minSegment = 0.5;%minimum segment length in s
 maxSegment = 1;%maximum segment length in s
-numSegment = 20;%number of segments
+numSegment = 60;%number of segments
 minSegment = floor(minSegment / samplingTime);
 maxSegment = floor(maxSegment / samplingTime);
 segLength = randi([minSegment,maxSegment],numSegment,1);% vector of segment lengths
@@ -34,13 +34,14 @@ pause
 if (ishandle(h))
     close(h);
 end
+
+[intrinsic, reflex, tqI, tqR, tqT, vafs] = SS_SDSS_stiffnessID (z);
 %%
-system = SS_SDSS_stiffnessID (z);
 figure
 subplot(2,1,1)
-plot(system{1})
+plot(intrinsic)
 title('Intrinsic IRF')
 subplot(2,2,3)
-plot(system{2}{1})
+plot(reflex{1})
 subplot(2,2,4)
-plot(system{2}{2})
+plot(fresp(reflex{2}))
