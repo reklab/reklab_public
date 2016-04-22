@@ -172,7 +172,11 @@ if reflexPathID>0
     tqI = u_i * intrinsic;
     tqI_res = torqueSegments - tqI;
     tqI_res = tqI_res - mean(tqI_res);
-
+    velocitySegments = segdat(velocityDelaySegments,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',0.01);
+    reflexTorqueSegments = segdat(tqI_res,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',0.01);
+    z = cat(2,velocitySegments,reflexTorqueSegments);
+    reflexNLID = nlbl(z,'idMethod','subspace','nDelayInput',floor(delayinput/ts)...
+        ,'maxOrderNLE',maxordernle,'threshNSE',threshold,'hankleSize',hanklesize);
 %Second attempt to refine the estimates of A and C
     Yf_tot = zeros(sum(N),hanklesize);
     Uf_tot = zeros(sum(N),(maxordernle)*hanklesize);

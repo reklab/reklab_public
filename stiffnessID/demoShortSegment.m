@@ -9,7 +9,7 @@ samplingTime = get(z_pf,'domainIncr');
 %Randomly select segments from this data
 minSegment = 0.5;%minimum segment length in s
 maxSegment = 1;%maximum segment length in s
-numSegment = 60;%number of segments
+numSegment = 20;%number of segments
 minSegment = floor(minSegment / samplingTime);
 maxSegment = floor(maxSegment / samplingTime);
 segLength = randi([minSegment,maxSegment],numSegment,1);% vector of segment lengths
