@@ -18,6 +18,7 @@ function system_nlbl = hammer_subspace_short_segment (z,ps)
 %      return
 %  end
 %%
+plotMode = 0;
 assign(ps);
 condition = 1;
 ts = get(z,'domainIncr');
@@ -216,17 +217,19 @@ if condition>0
             outp(switch_time(i):switch_time(i+1)-1) = dlsim(AT,BT_kron,CT,DT_kron,u(switch_time(i):switch_time(i+1)-1,:),initial(:,i));
         end
         outp = outp - mean(outp);
-        h = figure;
-        for i =1 : p
-            figure(floor((i-1)/4)+h)
-            subplot(4,1,mod(i-1,4)+1)            
-            measured_data = out(switch_time(i):switch_time(i+1)-1);
-            predicted_data = outp(switch_time(i):switch_time(i+1)-1);
-            predicted_data = nldat(predicted_data','domainIncr',ts);
-            measured_data = nldat(measured_data,'domainIncr',ts);
-            set(measured_data,'chanNames','Measured output');
-            set(predicted_data,'chanNames','Predicted output');
-            plot(cat(2,measured_data,predicted_data),'plotmode','super');
+        if (plotMode == 1)
+            h = figure;
+            for i =1 : p
+                figure(floor((i-1)/4)+h)
+                subplot(4,1,mod(i-1,4)+1)            
+                measured_data = out(switch_time(i):switch_time(i+1)-1);
+                predicted_data = outp(switch_time(i):switch_time(i+1)-1);
+                predicted_data = nldat(predicted_data','domainIncr',ts);
+                measured_data = nldat(measured_data,'domainIncr',ts);
+                set(measured_data,'chanNames','Measured output');
+                set(predicted_data,'chanNames','Predicted output');
+                plot(cat(2,measured_data,predicted_data),'plotmode','super');
+            end
         end
     end
 else
