@@ -676,7 +676,7 @@ classdef nldat < nltop
                 [nSap,nChan,nReal]=size(x);
            
                  for i=1:nReal,
-                f(:,1,i)=  phase(x.dataSet(:,1,i));
+                f(:,1,i)=  angle(x.dataSet(:,1,i));
                  end
                 z.dataSet=f;
                 z.comment=[ 'PHASE of ' x.comment];
