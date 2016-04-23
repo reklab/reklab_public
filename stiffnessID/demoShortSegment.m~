@@ -1,11 +1,12 @@
 clc
 %loading experimental data
 load experimental_data.mat
+data = z_pf;
 %select the position and torque from z_pf. You can try other data records
 %Each variable has position and torque records as input and output signals
-position = get(z_pf(:,1),'dataSet');%input position
-torque = get(z_pf(:,2),'dataSet');%output torque
-samplingTime = get(z_pf,'domainIncr');
+position = get(data(:,1),'dataSet');%input position
+torque = get(data(:,2),'dataSet');%output torque
+samplingTime = get(data,'domainIncr');
 %Randomly select segments from this data
 minSegment = 0.5;%minimum segment length in s
 maxSegment = 1;%maximum segment length in s
@@ -40,7 +41,7 @@ end
 %% Plotting System
 figure
 subplot(2,1,1)
-zIntrinsic = cat(2,decimate(z_pf(:,1),10),nlsim(intrinsic, decimate(z_pf(:,1),10)));
+zIntrinsic = cat(2,decimate(data(:,1),10),nlsim(intrinsic, decimate(data(:,1),10)));
 frespIntrinsic = fresp(zIntrinsic);
 FrespData = frespIntrinsic.dataSet;
 F = nldat(abs(FrespData(:,1)),'domainIncr',get(frespIntrinsic,'domainIncr'));
@@ -64,5 +65,16 @@ xlim([0.1,50])
 ylabel('Magnitude (dB)')
 xlabel('Frequency (Hz)')
 %% Validation
-% The purpose of this section is to validate the identified system on
-% different 
+% The purpose of this section is to simulate the response of 
+% the identified system to novel segments
+% Generating new segments from the data
+numSegmentValidation = 10;
+segLengthValidation = randi([minSegment,maxSegment],numSegmentValidation,1);% vector of segment lengths
+onsetPointerValidation = randi([1,length(position) - maxSegment],numSegmentValidation,1);%vector of segment onset
+positionValidation = segdat(position,'onsetPointer',onsetPointerValidation,'segLength',segLengthValidation,'domainIncr',samplingTime...
+,'comment','Position','chanNames','Joint angular position (rad)');
+torqueValidation = segdat(torque,'onsetPointer',onsetPointerValidation,'segLength',segLengthValidation,'domainIncr',0.001...
+,'comment','Torque','chanNames','Joint torque (Nm)');
+%Concatenate input and output
+zValidation = cat(2,positionValidation,torqueValidation);
+

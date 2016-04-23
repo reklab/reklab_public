@@ -102,10 +102,13 @@ classdef ssm<nltop
             
         end
         function out = nlsim(S,z)
+            [~,nchan,~]=size(xin);
             ztype = class(z);
             switch ztype
                 case 'segdat'
-                    out = nlsim_short_segment (S.parameterSet,z);
+                    if nchan == 2
+                        out = nlsim_short_segment (S.parameterSet,z);
+                    end
                 case 'nldat'
                     matrix_a = get(S,'A');
                     matrix_b = get(S,'B');
