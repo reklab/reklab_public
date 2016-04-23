@@ -1,10 +1,17 @@
 function [intrinsic, reflex, tqI, tqR, tqT, vafs] = SS_SDSS_stiffnessID (z,varargin)
-% system = SS_SDSS_stiffnessID (z)
+% [intrinsic, reflex, tqI, tqR, tqT, vafs] = SS_SDSS_stiffnessID (z)
 % This function requires NLID toolbox in MATLAB path
 % This function estimates parallel-cascade joint stiffness between input and output
 % from short segments of data
-%
-%
+% intrinsic is IRF representation of the intrinsic pathway
+% reflex is an nlbl object containing the reflex hammerstein elements
+% tqI is the identified intrinsic torque
+% tqR is the identified reflex torque
+% tqT is the identified total torque; tqT = tqI + tqR
+% vafs is a vector of identification VAF; it has three elements
+% vafs(1) is the total %VAF
+% vafs(2) is the intrinsic %VAF
+% vafs(3) is the reflex %VAF
 options={{'decimation_ratio' 10 'decimation ratio'} ...
          {'maxordernle' 8 'maximum order for nonlinearity'} ...
          {'hanklesize' 20 'Size of hankle matrix'} ...

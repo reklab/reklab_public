@@ -35,7 +35,7 @@ if (ishandle(h))
     close(h);
 end
 %% Identification of the PC structure
-
+% Identify the system. intrinsic and reflex are nlid objects
 [intrinsic, reflex, tqI, tqR, tqT, vafs] = SS_SDSS_stiffnessID (z);
 %% Plotting System
 figure
