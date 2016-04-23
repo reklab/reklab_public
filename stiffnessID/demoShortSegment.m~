@@ -41,14 +41,9 @@ figure
 subplot(2,1,1)
 zIntrinsic = cat(2,decimate(z_df3(:,1),10),nlsim(intrinsic, decimate(z_df3(:,1),10)));
 frespIntrinsic = fresp(zIntrinsic);
-FrespData = frespIntrinsic.dataSet;
-F = nldat(abs(FrespData(:,1)),'domainIncr',get(frespIntrinsic,'domainIncr'));
-plot(F)
-set(gca,'XScale','log');
-xlim([0.1,50])
-title(['Intrinsic FRF; VAF = ',num2str(vafs(1))])
-ylabel('Magnitude (dB)')
-xlabel('Frequency (Hz)')
+plot(intrinsic)
+title('Intrinsic IRF')
+text(0,0.5,['VAF = ',num2str(vafs(1))],'FontSize',12)
 subplot(2,2,3)
 plot(reflex{1})
 title('Reflex Static Nonlinearity')
@@ -58,7 +53,5 @@ F = fresp(reflex{2});
 F = nldat(abs(F.dataSet),'domainIncr',get(F,'domainIncr'));
 plot(F)
 set(gca,'XScale','log');
-title('Reflex Linear Dynamics FRF')
+title('Reflex Linear Dynamics')
 xlim([0.1,50])
-ylabel('Magnitude (dB)')
-xlabel('Frequency (Hz)')

@@ -181,33 +181,38 @@ if reflexPathID>0
     z = cat(2,velocitySegments,reflexTorqueSegments);
     reflex = nlbl(z,'idMethod','subspace','nDelayInput',floor(delayinput/ts),...
         'maxOrderNLE',maxordernle,'threshNSE',threshold,'hankleSize',hanklesize);
-    tqR = nlsim(reflex,z);
-    tqI = nldat(tqI,'domainIncr',ts);
-    tqT = tqI + tqR;
-	torqueSegments = nldat(torqueSegments,'domainIncr',ts);
-	vaf_tot = vaf(torqueSegments,tqT);
-	vaf_I = vaf(torqueSegments,tqI);
-	vaf_R = vaf(torqueSegments,tqR);
+    if ~isempty(reflex{2}.A)
+            tqR = nlsim(reflex,z);
+            tqI = nldat(tqI,'domainIncr',ts);
+            tqT = tqI + tqR;
+            torqueSegments = nldat(torqueSegments,'domainIncr',ts);
+            vaf_tot = vaf(torqueSegments,tqT);
+            vaf_I = vaf(torqueSegments,tqI);
+            vaf_R = vaf(torqueSegments,tqR);
     
-    if plot_mode == 1
-            for i =1 : p
-                figure(floor((i-1)/4)+10)
-                subplot(4,1,mod(i-1,4)+1)
-                measured_data = torqueSegments(switch_time(i):switch_time(i+1)-1);
-                measured_data = measured_data.dataSet;
-                measured_data = measured_data - mean(measured_data);
-                predicted_data = tqT(switch_time(i):switch_time(i+1)-1);
-                predicted_data = predicted_data.dataSet;
-                predicted_data = predicted_data - mean(predicted_data);
-                predicted_data = nldat(predicted_data,'domainIncr',ts);
-                measured_data = nldat(measured_data,'domainIncr',ts);
-                set(measured_data,'chanNames','Measured torque');
-                set(predicted_data,'chanNames','Predicted torque');
-                plot(cat(2,measured_data,predicted_data),'plotmode','super');
-                hold on
-                plot(measured_data-predicted_data,'line_color','r')
+            if plot_mode == 1
+                for i =1 : p
+                    figure(floor((i-1)/4)+10)
+                    subplot(4,1,mod(i-1,4)+1)
+                    measured_data = torqueSegments(switch_time(i):switch_time(i+1)-1);
+                    measured_data = measured_data.dataSet;
+                    measured_data = measured_data - mean(measured_data);
+                    predicted_data = tqT(switch_time(i):switch_time(i+1)-1);
+                    predicted_data = predicted_data.dataSet;
+                    predicted_data = predicted_data - mean(predicted_data);
+                    predicted_data = nldat(predicted_data,'domainIncr',ts);
+                    measured_data = nldat(measured_data,'domainIncr',ts);
+                    set(measured_data,'chanNames','Measured torque');
+                    set(predicted_data,'chanNames','Predicted torque');
+                    plot(cat(2,measured_data,predicted_data),'plotmode','super');
+                    hold on
+                    plot(measured_data-predicted_data,'line_color','r')
+                end
             end
-     end
+    else
+        reflexPathID = 0;
+    end
+
 
 end
 else
@@ -232,32 +237,33 @@ if (reflexPathID==0)
     output = output - mean(output);
     endpointer = onsetPointer + segLength - 1;
     %extracting input-output data from segdat
-    positionDelay = zeros(size(input),numLagsIntrinsic);
-    for j = 1:numLagsIntrinsic
-        positionDelay(:,j) = del(input,lagsIntrinsic(j)*decimation_ratio);
-    end
-    positionDelaySegments = zeros(sum(segLength),numLagsIntrinsic);
-    torqueSegments = zeros(sum(segLength),1);
-    pointer = 1;
-    switch_time = zeros(length(endpointer)-1,1);
-    irf_len_i = delayinput/ts/decimation_ratio;
-    lags_i = (-irf_len_i:1:irf_len_i);
-    numLagsIntrinsic = length(lags_i);
-    for i = 1 : length(endpointer)
-        positionDelaySegments(pointer:pointer+segLength(i)-1,:) = positionDelay(onsetPointer(i):endpointer(i),:);
-        torqueSegments(pointer:pointer+segLength(i)-1) =output(onsetPointer(i):endpointer(i));
-        pointer = pointer + segLength(i);
-        switch_time(i) = pointer;
-    end
-    positionDelaySegments = bsxfun(@minus,positionDelaySegments,mean(positionDelaySegments));
-    [torqueSegments1,~,~,~] = decimate_segment(torqueSegments,switch_time(1:end-1),decimation_ratio);
-    u_i = zeros(size(torqueSegments1,1),numLagsIntrinsic);
-    for i = 1:numLagsIntrinsic
-        [u_i(:,i),~,~,~] = decimate_segment(positionDelaySegments(:,i),switch_time(1:end-1),decimation_ratio);
-    end
-    [torqueSegments,~,~,~] = decimate_segment(torqueSegments,switch_time(1:end-1),decimation_ratio);
-    torqueSegments = torqueSegments - mean(torqueSegments);
-    ts = ts * decimation_ratio;
+%     positionDelay = zeros(size(input,1),numLagsIntrinsic);
+%     for j = 1 : numLagsIntrinsic
+%          posDelay = del(position,lagsIntrinsic(j) * ts);
+%          positionDelay(:,j) = get(posDelay,'dataSet');
+%     end
+%     positionDelaySegments = zeros(sum(segLength),numLagsIntrinsic);
+%     torqueSegments = zeros(sum(segLength),1);
+%     pointer = 1;
+%     switch_time = zeros(length(endpointer)-1,1);
+%     irf_len_i = delayinput/ts/decimation_ratio;
+%     lags_i = (-irf_len_i:1:irf_len_i);
+%     numLagsIntrinsic = length(lags_i);
+%     for i = 1 : length(endpointer)
+%         positionDelaySegments(pointer:pointer+segLength(i)-1,:) = positionDelay(onsetPointer(i):endpointer(i),:);
+%         torqueSegments(pointer:pointer+segLength(i)-1) =output(onsetPointer(i):endpointer(i));
+%         pointer = pointer + segLength(i);
+%         switch_time(i) = pointer;
+%     end
+%     positionDelaySegments = bsxfun(@minus,positionDelaySegments,mean(positionDelaySegments));
+%     [torqueSegments1,~,~,~] = decimate_segment(torqueSegments,switch_time(1:end-1),decimation_ratio);
+%     u_i = zeros(size(torqueSegments1,1),numLagsIntrinsic);
+%     for i = 1:numLagsIntrinsic
+%         [u_i(:,i),~,~,~] = decimate_segment(positionDelaySegments(:,i),switch_time(1:end-1),decimation_ratio);
+%     end
+%     [torqueSegments,~,~,~] = decimate_segment(torqueSegments,switch_time(1:end-1),decimation_ratio);
+%     torqueSegments = torqueSegments - mean(torqueSegments);
+%     ts = ts * decimation_ratio;
     intrinsic=u_i\torqueSegments;
     tqI = nldat(u_i*intrinsic,'domainIncr',ts);
     tqR = tqI*0;
@@ -270,7 +276,6 @@ if (reflexPathID==0)
     vaf_R = vaf(torqueSegments,tqR);
     system_ss = ssm;
     set(system_ss,'domainIncr',ts,'nDelayInput',delayinput/ts);
-    static_nl = polynom;
 end
 %Assigning Function's output
 vafs = [vaf_tot.dataSet;vaf_I.dataSet;vaf_R.dataSet];
