@@ -63,3 +63,6 @@ title('Reflex Linear Dynamics FRF')
 xlim([0.1,50])
 ylabel('Magnitude (dB)')
 xlabel('Frequency (Hz)')
+%% Validation
+% The purpose of this section is to simulate the response of 
+% the identified system to novel segments

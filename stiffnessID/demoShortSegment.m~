@@ -3,9 +3,9 @@ clc
 load experimental_data.mat
 %select the position and torque from z_pf. You can try other data records
 %Each variable has position and torque records as input and output signals
-position = get(z_df3(:,1),'dataSet');%input position
-torque = get(z_df3(:,2),'dataSet');%output torque
-samplingTime = get(z_df3,'domainIncr');
+position = get(z_pf(:,1),'dataSet');%input position
+torque = get(z_pf(:,2),'dataSet');%output torque
+samplingTime = get(z_pf,'domainIncr');
 %Randomly select segments from this data
 minSegment = 0.5;%minimum segment length in s
 maxSegment = 1;%maximum segment length in s
@@ -34,16 +34,22 @@ pause
 if (ishandle(h))
     close(h);
 end
-%%
+%% Identification of the PC structure
+% Identify the system. intrinsic and reflex are nlid objects
 [intrinsic, reflex, tqI, tqR, tqT, vafs] = SS_SDSS_stiffnessID (z);
 %% Plotting System
 figure
 subplot(2,1,1)
-zIntrinsic = cat(2,decimate(z_df3(:,1),10),nlsim(intrinsic, decimate(z_df3(:,1),10)));
+zIntrinsic = cat(2,decimate(z_pf(:,1),10),nlsim(intrinsic, decimate(z_pf(:,1),10)));
 frespIntrinsic = fresp(zIntrinsic);
-plot(intrinsic)
-title('Intrinsic IRF')
-text(0,0.5,['VAF = ',num2str(vafs(1))],'FontSize',12)
+FrespData = frespIntrinsic.dataSet;
+F = nldat(abs(FrespData(:,1)),'domainIncr',get(frespIntrinsic,'domainIncr'));
+plot(F)
+set(gca,'XScale','log');
+xlim([0.1,50])
+title(['Intrinsic FRF; VAF = ',num2str(vafs(1))])
+ylabel('Magnitude (dB)')
+xlabel('Frequency (Hz)')
 subplot(2,2,3)
 plot(reflex{1})
 title('Reflex Static Nonlinearity')
@@ -53,5 +59,10 @@ F = fresp(reflex{2});
 F = nldat(abs(F.dataSet),'domainIncr',get(F,'domainIncr'));
 plot(F)
 set(gca,'XScale','log');
-title('Reflex Linear Dynamics')
+title('Reflex Linear Dynamics FRF')
 xlim([0.1,50])
+ylabel('Magnitude (dB)')
+xlabel('Frequency (Hz)')
+%% Validation
+% The purpose of this section is to validate the identified system on
+% different 
