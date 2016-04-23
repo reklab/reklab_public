@@ -102,7 +102,7 @@ classdef ssm<nltop
             
         end
         function out = nlsim(S,z)
-            [~,nchan,~]=size(xin);
+            [~,nchan,~]=size(z);
             ztype = class(z);
             switch ztype
                 case 'segdat'
