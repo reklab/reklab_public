@@ -38,6 +38,8 @@ end
 %% Identification of the PC structure
 % Identify the system. intrinsic and reflex are nlid objects
 [intrinsic, reflex, tqI, tqR, tqT, vafs] = SS_SDSS_stiffnessID (z);
+disp('Identification finished')
+disp(['Identification VAF was : ',num2str(vafs(1))])
 %% Plotting System
 figure
 subplot(2,1,1)
@@ -64,11 +66,19 @@ title('Reflex Linear Dynamics FRF')
 xlim([0.1,50])
 ylabel('Magnitude (dB)')
 xlabel('Frequency (Hz)')
+pause
 %% Validation
 % The purpose of this section is to simulate the response of 
 % the identified system to novel segments
 % Generating new segments from the data
-numSegmentValidation = 10;
+disp('Validation Starting')
+numSegmentValidation = 20;
+minSegment = 0.25;
+maxSegment = 0.5;
+minSegment = floor(minSegment / samplingTime);
+maxSegment = floor(maxSegment / samplingTime);
+
+disp(['Randomly selecting : ',num2str(numSegmentValidation),' segments for validation'])
 segLengthValidation = randi([minSegment,maxSegment],numSegmentValidation,1);% vector of segment lengths
 onsetPointerValidation = randi([1,length(position) - maxSegment],numSegmentValidation,1);%vector of segment onset
 positionValidation = segdat(position,'onsetPointer',onsetPointerValidation,'segLength',segLengthValidation,'domainIncr',samplingTime...
@@ -77,8 +87,30 @@ torqueValidation = segdat(torque,'onsetPointer',onsetPointerValidation,'segLengt
 ,'comment','Torque','chanNames','Joint torque (Nm)');
 %Concatenate input and output
 zValidation = cat(2,positionValidation,torqueValidation);
-[tqIValidation,tqRValidation,tqTValidation,vafValidation] = simulate_PC_ShortSegment(intrinsic,reflex,zValidation);
+[tqIValidation,tqRValidation,tqTValidation,vafValidation,posMeasured,trqMeasured] = simulate_PC_ShortSegment(intrinsic,reflex,zValidation);
+disp(['Validation VAF was : ',num2str(vafValidation(1)),' for validation'])
 %Let's visualize
+onsetPointer = tqIValidation.onsetPointer;
+segLength = tqIValidation.segLength;
+posMeasured = nldat(posMeasured.dataSet,'domainIncr',0.01,'comment',['Position; VAF = ',num2str(vafValidation(1))],'chanNames','Position (rad)');
+trqMeasured = nldat(trqMeasured.dataSet,'domainIncr',0.01,'comment','Total Torque','chanNames','Torque (Nm)');
+tqIValidation = nldat(tqIValidation.dataSet,'domainIncr',0.01,'comment','Intrinsic Torque','chanNames','Torque (Nm)');
+tqRValidation = nldat(tqRValidation.dataSet,'domainIncr',0.01,'comment','Reflex Torque','chanNames','Torque (Nm)');
+tqTValidation = nldat(tqTValidation.dataSet,'domainIncr',0.01,'comment','Total Torque','chanNames','Torque (Nm)');
+
+disp('Plotting validation segments')
 for i = 1 : numSegmentValidation
-    
+	h = figure;
+    subplot(4,1,1)
+    plot(posMeasured(onsetPointer(i):onsetPointer(i)+segLength(i)-1,1))
+    subplot(4,1,2)
+    plot(trqMeasured(onsetPointer(i):onsetPointer(i)+segLength(i)-1,1))
+    hold on
+    plot(tqTValidation(onsetPointer(i):onsetPointer(i)+segLength(i)-1,1),'line_color','r')
+    subplot(4,1,3)
+    plot(tqIValidation(onsetPointer(i):onsetPointer(i)+segLength(i)-1,1),'line_color','r')
+    subplot(4,1,4)
+    plot(tqRValidation(onsetPointer(i):onsetPointer(i)+segLength(i)-1,1),'line_color','r')
+    pause
+    close(h)
 end

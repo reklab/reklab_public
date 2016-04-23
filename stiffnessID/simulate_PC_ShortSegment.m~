@@ -72,11 +72,9 @@ u_i = zeros(size(velocitySegments,1),numLagsIntrinsic);
 for i = 1 : numLagsIntrinsic
 	[u_i(:,i),~,~,~] = decimate_segment(positionDelaySegments(:,i),switch_time(1:end-1),decimationRatio);
 end
-posMeasured = u_i(:,ceil(numLagsIntrinsic/2));
+posMeasured = 
 [trqMeasured,switch_time,segLength,~] = decimate_segment(trqMeasured,switch_time(1:end-1),decimationRatio);
 velocitySegments = segdat(velocitySegments,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',samplingTime);
-posMeasured = segdat(posMeasured,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',samplingTime);
-trqMeasured = segdat(trqMeasured,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',samplingTime);
 trqIntrinsicPredict = u_i * intrinsicIRFCoeff;
 tqIResidual = trqMeasured - trqIntrinsicPredict;
 trqIntrinsicPredict = segdat(trqIntrinsicPredict,'domainIncr',samplingTime,'chanNames','Torque (Nm)','comment','Intrinsic Torque','onsetPointer',switch_time(1:end-1),'segLength',segLength);
