@@ -3,9 +3,9 @@ clc
 load experimental_data.mat
 %select the position and torque from z_pf. You can try other data records
 %Each variable has position and torque records as input and output signals
-position = get(z_df3(:,1),'dataSet');%input position
-torque = get(z_df3(:,2),'dataSet');%output torque
-samplingTime = get(z_df3,'domainIncr');
+position = get(z_df2(:,1),'dataSet');%input position
+torque = get(z_df2(:,2),'dataSet');%output torque
+samplingTime = get(z_df2,'domainIncr');
 %Randomly select segments from this data
 minSegment = 0.5;%minimum segment length in s
 maxSegment = 1;%maximum segment length in s
@@ -39,7 +39,7 @@ end
 %% Plotting System
 figure
 subplot(2,1,1)
-zIntrinsic = cat(2,decimate(z_df3(:,1),10),nlsim(intrinsic, decimate(z_df3(:,1),10)));
+zIntrinsic = cat(2,decimate(z_df2(:,1),10),nlsim(intrinsic, decimate(z_df2(:,1),10)));
 frespIntrinsic = fresp(zIntrinsic);
 FrespData = frespIntrinsic.dataSet;
 F = nldat(abs(FrespData(:,1)),'domainIncr',get(frespIntrinsic,'domainIncr'));
