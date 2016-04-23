@@ -152,7 +152,6 @@ if ~isempty(N)
     end
     if reflexPathID>0
         %% Identify the intrinsic pathway using the decomposition technqiue
-
         %Defining regressor matrices
         %Gamma is the regressor for the initial conditions
         Gamma_total = zeros(size(torqueSegments,1),p*m);
@@ -174,22 +173,24 @@ if ~isempty(N)
         Phi = [Gamma_total Phi_total];
         intrinsic = intrinsicEstimator(u_i,Phi,torqueSegments);
         tqI = u_i * intrinsic;
+        intrinsic = irf('nSides',2,'dataSet',intrinsic/ts,'domainIncr',ts,'domainStart',-intrinsicIRF_Length*ts,'comment','Intrinsic IRF','chanNames','IRF');
         tqI_res = torqueSegments - tqI;
         tqI_res = tqI_res - mean(tqI_res);
         velocitySegments = segdat(velocitySegments,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',0.01);
         reflexTorqueSegments = segdat(tqI_res,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',0.01);
         zReflex = cat(2,velocitySegments,reflexTorqueSegments);
         reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',floor(delayinput/ts),...
-            'maxOrderNLE',maxordernle,'threshNSE',threshold,'hankleSize',hanklesize);
+            'maxOrderNLE',maxordernle,'threshNSE',threshold,'hankleSize',hanklesize,'orderSelect',2);
         if ~isempty(reflex{2}.A)
                 tqR = nlsim(reflex,zReflex);
-                tqI = nldat(tqI,'domainIncr',ts);
+                tqI = nldat(tqI,'domainIncr',ts,'chanNames','Torque (Nm)','comment','Intrinsic Torque');
+                set(tqR,'chanNames','Torque (Nm)','comment','Reflex Torque');
                 tqT = tqI + tqR;
+                tqT = nldat(tqT,'domainIncr',ts,'chanNames','Torque (Nm)','comment','Total Torque');
                 torqueSegments = nldat(torqueSegments,'domainIncr',ts);
                 vaf_tot = vaf(torqueSegments,tqT);
                 vaf_I = vaf(torqueSegments,tqI);
                 vaf_R = vaf(torqueSegments,tqR);
-
                 if plot_mode == 1
                     for i =1 : p
                         figure(floor((i-1)/4)+10)
@@ -212,31 +213,24 @@ if ~isempty(N)
         else
             reflexPathID = 0;
         end
-
-
     end
 else
     reflexPathID = 0;
 end
 if (reflexPathID==0)
 %Attempt to estimate the reflex path failed, only estimate the intrinsic path
+%Construct the data again because the very small short segments are OK
     ts = get(z,'domainIncr');
-    in_onsetPointer = get(z,'onsetPointer');
-    onsetPointer = in_onsetPointer (:,2);
-    in_onsetPointer = in_onsetPointer (:,1);
-    in_segLength = get(z,'segLength');
-    segLength = in_segLength (:,2);
-    in_segLength = in_segLength (:,1);
-    if ~( isequal(onsetPointer,in_onsetPointer) &&  isequal(in_segLength,segLength))
-        error('The input and output onset pointer and length must be equal..')
-    end
+    segmentOnsetPointer = get(z,'onsetPointer');
+    segmentOnsetPointer = segmentOnsetPointer (:,1);
+    segmentLength = get(z,'segLength');
+    segmentLength = segmentLength (:,1);
     data = get(z,'dataSet');
     input = data(:,1);
     input = input - mean(input);
     output = data(:,2);
     output = output - mean(output);
-    endpointer = onsetPointer + segLength - 1;
-    %extracting input-output data from segdat
+    segmentEndPointer = segmentOnsetPointer + segmentLength - 1;
     positionDelay = zeros(size(input,1),numLagsIntrinsic);
     for j = 1 : numLagsIntrinsic
          posDelay = del(position,lagsIntrinsic(j) * ts * decimation_ratio);
@@ -245,10 +239,10 @@ if (reflexPathID==0)
     positionDelaySegments = zeros(sum(segLength),numLagsIntrinsic);
     torqueSegments = zeros(sum(segLength),1);
     pointer = 1;
-    switch_time = zeros(length(endpointer)-1,1);
-    for i = 1 : length(endpointer)
-        positionDelaySegments(pointer:pointer+segLength(i)-1,:) = positionDelay(onsetPointer(i):endpointer(i),:);
-        torqueSegments(pointer:pointer+segLength(i)-1) =output(onsetPointer(i):endpointer(i));
+    switch_time = zeros(length(segmentEndPointer)-1,1);
+    for i = 1 : length(segmentEndPointer)
+        positionDelaySegments(pointer:pointer+segLength(i)-1,:) = positionDelay(segmentOnsetPointer(i):segmentEndPointer(i),:);
+        torqueSegments(pointer:pointer+segLength(i)-1) =output(segmentOnsetPointer(i):segmentEndPointer(i));
         pointer = pointer + segLength(i);
         switch_time(i) = pointer;
     end
@@ -261,13 +255,15 @@ if (reflexPathID==0)
     end
     
     ts = ts * decimation_ratio;
-    intrinsic=u_i\torqueSegments;
-    tqI = nldat(u_i*intrinsic,'domainIncr',ts);
-    tqR = tqI*0;
+    intrinsic = u_i \ torqueSegments;
+    tqI = u_i * intrinsic;
+    tqR = tqI * 0;
     tqT = tqI;
     torqueSegments = nldat(torqueSegments,'domainIncr',ts);
-    tqI = nldat(tqI,'domainIncr',ts);
-    tqR = nldat(tqR,'domainIncr',ts);
+    tqI = nldat(tqI,'domainIncr',ts,'chanNames','Torque (Nm)','comment','Intrinsic Torque');
+    tqR = nldat(tqR,'domainIncr',ts,'chanNames','Torque (Nm)','comment','Reflex Torque');
+    tqT = nldat(tqT,'domainIncr',ts,'chanNames','Torque (Nm)','comment','Total Torque');
+    intrinsic = irf('nSides',2,'dataSet',intrinsic/ts,'domainIncr',ts,'domainStart',-intrinsicIRF_Length*ts,'comment','Intrinsic IRF','chanNames','IRF');
     vaf_tot = vaf(torqueSegments,tqT);
     vaf_I = vaf(torqueSegments,tqI);
     vaf_R = vaf(torqueSegments,tqR);
@@ -278,7 +274,6 @@ end
 vafs = [vaf_tot.dataSet;vaf_I.dataSet;vaf_R.dataSet];
 vafs((vafs>100)) = 0;
 vafs((vafs<0)) = 0;
-intrinsic = irf('nSides',2,'dataSet',intrinsic/ts,'domainIncr',ts,'domainStart',-intrinsicIRF_Length*ts,'comment','Intrinsic IRF','chanNames','IRF');
 end
 
 

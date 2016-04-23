@@ -97,11 +97,9 @@ if nsamp>2*hankleSize*p-p+2*maxOrderNLE*hankleSize+3*hankleSize+1
     Sn = diag(Sn); 
     Sn = Sn(1:hankleSize); 
     R = struct('L',L,'Un',Un,'m',1,'l',1,'i',hankleSize);
-    if isnumeric(orderSelect)
-        m = orderSelect;
-    else
-        m = orderselect(Sn,orderSelect);
-    end
+    if isnumeric(orderSelect
+        m = orderS
+    m = orderselect(Sn,orderSelect);
     if m==0 
         condition = 0;
         warning('Selected order is zero.')
