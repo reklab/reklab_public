@@ -1,5 +1,10 @@
 clc
 %loading experimental data
+disp('This demo is prepared for identification of parallel-cascade structure')
+disp('using short data segments')
+disp('This demo loads typical experimental data recorded from a healthy subejct')
+disp('Subject consented to the experimental procedure that had been already approved')
+disp('by McGill Univserity Institutional Review Board')
 load experimental_data.mat
 data = z_pf;
 %select the position and torque from z_pf. You can try other data records
@@ -24,6 +29,7 @@ torque = segdat(torque,'onsetPointer',onsetPointer,'segLength',segLength,'domain
 %Concatenate input and output
 z = cat(2,position,torque);
 %Let's visualize the data
+disp('Plotting segmented data')
 h = figure;
 subplot(2,1,1)
 plot(position)
@@ -71,7 +77,7 @@ pause
 % The purpose of this section is to simulate the response of 
 % the identified system to novel segments
 % Generating new segments from the data
-disp('Validation Starting')
+disp('Starting Model Validation Using New Segments')
 numSegmentValidation = 20;
 minSegment = 0.25;
 maxSegment = 0.5;

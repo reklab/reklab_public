@@ -1,5 +1,10 @@
 clc
 %loading experimental data
+disp('This demo is prepared for identification of parallel-cascade structure')
+disp('using short data segments')
+disp('This demo loads typical experimental data recorded from a healthy subejct')
+disp('Subject consented to the experimental procedure that had been already approved')
+disp('by McGill University Institu')
 load experimental_data.mat
 data = z_pf;
 %select the position and torque from z_pf. You can try other data records
@@ -71,9 +76,14 @@ pause
 % The purpose of this section is to simulate the response of 
 % the identified system to novel segments
 % Generating new segments from the data
-disp('Validation Starting')
-numSegmentValidation = 10;
-disp(['Randomly selecting total number of : ',num2str(10),' for validation'])
+disp('Starting Model Validation Using New Segments')
+numSegmentValidation = 20;
+minSegment = 0.25;
+maxSegment = 0.5;
+minSegment = floor(minSegment / samplingTime);
+maxSegment = floor(maxSegment / samplingTime);
+
+disp(['Randomly selecting : ',num2str(numSegmentValidation),' segments for validation'])
 segLengthValidation = randi([minSegment,maxSegment],numSegmentValidation,1);% vector of segment lengths
 onsetPointerValidation = randi([1,length(position) - maxSegment],numSegmentValidation,1);%vector of segment onset
 positionValidation = segdat(position,'onsetPointer',onsetPointerValidation,'segLength',segLengthValidation,'domainIncr',samplingTime...
@@ -83,7 +93,7 @@ torqueValidation = segdat(torque,'onsetPointer',onsetPointerValidation,'segLengt
 %Concatenate input and output
 zValidation = cat(2,positionValidation,torqueValidation);
 [tqIValidation,tqRValidation,tqTValidation,vafValidation,posMeasured,trqMeasured] = simulate_PC_ShortSegment(intrinsic,reflex,zValidation);
-disp(['Validation VAF was : ',num2str(vafs),' for validation'])
+disp(['Validation VAF was : ',num2str(vafValidation(1)),' for validation'])
 %Let's visualize
 onsetPointer = tqIValidation.onsetPointer;
 segLength = tqIValidation.segLength;
@@ -93,7 +103,7 @@ tqIValidation = nldat(tqIValidation.dataSet,'domainIncr',0.01,'comment','Intrins
 tqRValidation = nldat(tqRValidation.dataSet,'domainIncr',0.01,'comment','Reflex Torque','chanNames','Torque (Nm)');
 tqTValidation = nldat(tqTValidation.dataSet,'domainIncr',0.01,'comment','Total Torque','chanNames','Torque (Nm)');
 
-
+disp('Plotting validation segments')
 for i = 1 : numSegmentValidation
 	h = figure;
     subplot(4,1,1)
