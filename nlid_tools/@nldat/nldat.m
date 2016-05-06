@@ -243,7 +243,23 @@ classdef nldat < nltop
             v.dataSet=vd;
             v.comment =[ 'DDT ' x.comment ];
         end
-        
+        function [x] = del(x,delay)
+            % this function adds a delay to the input signal 
+            % x is the input signal
+            % delay - delay in (s)
+            % d_x is the delayed singal
+            % Now supports negative delays
+            nDelay = floor(delay/get(x,'domainIncr'));
+            xDataSet = get(x,'dataSet');
+            d_x = zeros(size(x));
+            if nDelay>=0
+                d_x(nDelay+1:end,:) = xDataSet(1:end-nDelay,:);
+            elseif nDelay<0
+                nDelay = abs(nDelay);
+                d_x(1:end-nDelay,:) = xDataSet(nDelay+1:end,:);
+            end
+            set(x,'dataSet',d_x);
+        end
         function y = decimate (d, n, type);
             % usage  y = decimate (d, n);
             % or     y = decimate (d, n, 'fir');
@@ -660,7 +676,7 @@ classdef nldat < nltop
                 [nSap,nChan,nReal]=size(x);
            
                  for i=1:nReal,
-                f(:,1,i)=  phase(x.dataSet(:,1,i));
+                f(:,1,i)=  unwrap(angle(x.dataSet(:,1,i)));
                  end
                 z.dataSet=f;
                 z.comment=[ 'PHASE of ' x.comment];

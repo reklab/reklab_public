@@ -209,10 +209,7 @@ classdef polynom < nltop
                 segdat_flag = 1;
                 xIN = xin;
                 xin =nldat(xin(:,1));
-                if nchan == 2
-                    nchan = 1;
-                end
-                if (nchan ~= nin)
+                if (~(nchan == nin)) || (~(nchan-1 == nin))
                     error ('number of input channels does not match polynominal');
                 end
                 %nchan = nchan - 1;
