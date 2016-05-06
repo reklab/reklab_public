@@ -2,9 +2,9 @@ function vf = vaf (x,y, DIM)
 % VAF function for nldat sets vf = vaf (x,y, DIM)
 %                             vf = vaf (Z,DIM]
 %
-% DIM  opt - "reralization" VAF for each realization
-%       - "sample" VAF for each sample time acorss realizations
-%       - "total" VAF for all data 
+% DIM  opt - "realization" VAF for each realization
+%       - "sample" VAF for each sample time across realizations
+%       - "total" VAF for all data DEFAULT
 
 % Copyright 1999-2003, Robert E Kearney
 % This file is part of the nlid toolbox, and is released under the GNU 
