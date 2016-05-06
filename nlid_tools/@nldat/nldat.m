@@ -941,7 +941,7 @@ classdef nldat < nltop
                     elseif strcmp(S(i).type,'()')
                         oDom=domain(nTemp);
                         d=nTemp.dataSet;
-                        dTemp=builtin('subsref', d, S(i));
+                    dTemp=builtin('subsref', d, S(i));
                         nTemp.dataSet=dTemp;
                         sIndex = S(i).subs;
                         % Fix DomainStart and DomainValues if necessary
