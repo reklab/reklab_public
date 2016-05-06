@@ -8,10 +8,10 @@ classdef param
     properties
         paramDefault= NaN  ;
         paramHelp='Help';
-        paramLimits=[-inf inf];
+        paramLimits=[-inf inf]; % Specify as a vecctor  if paramtype is number or string array if select
         paramName='Param Name';
-        paramType='number';
-        paramValue={NaN};
+        paramType='number'; 
+        paramValue=NaN;
     end
     
     methods
@@ -44,7 +44,7 @@ classdef param
                 Value = varargin{i+1};
                 if strcmp(Property,'paramType'),
                     % check for valid types
-                    validTypes= { 'number' 'string' 'select' };
+                    validTypes= { 'number' 'string' 'logical' 'select' };
                     if ~any(strcmp(Value, validTypes)),
                         disp(['Valid paramTypes:' validTypes]);
                         error ([Value ' is not a valid paramType' ]);
@@ -70,7 +70,7 @@ classdef param
             nParam= length(P);
             for i=1:nParam,
                 pVal=getParamValue(P,P(i).paramName);
-                     disp([P(i).paramName ':' num2str(pVal(:)')]); 
+                     disp(['  ' P(i).paramName ':' num2str(pVal(:)')]); 
 
             end
         end
@@ -87,13 +87,13 @@ classdef param
                 ltype = P(i).paramType;
                 switch lower(ltype)
                     case 'number'
-                         disp(['paramValue:' num2str(P(i).paramValue{1})]); 
+                         disp(['paramValue:' num2str(P(i).paramValue)]); 
                           disp(['paramDefault:' num2str(P(i).paramDefault)]); 
-                        llim = num2str(limits{1});
-                        ulim = num2str(limits{2});
+                        llim = num2str(limits(1));
+                        ulim = num2str(limits(2));
                         disp(['paramLimits: [ ' llim pad ulim ' ]']);
                     case 'select'
-                        val=(P(i).paramValue{1});
+                        val=(P(i).paramValue);
                         if isnan(val),
                             val='NaN';
                         end
@@ -120,10 +120,10 @@ classdef param
                 warning (['Parameter name does not exist:' paramName]);
                 Pout=NaN;
             else
-                if isnan(P(j).paramValue{1}),
+                if isnan(P(j).paramValue),
                     Pout=P(j).paramDefault;
                 else
-                    Pout=P(j).paramValue{:};
+                    Pout=P(j).paramValue;
                 end
             end
         end
@@ -144,10 +144,10 @@ classdef param
         function Pout = getParamValCell ( P )
             % Return a cell array of parameter values
             for i=1:length(P),
-                if isnan(P(i).paramValue{1}),
+                if isnan(P(i).paramValue),
                     Pout{i}=P(i).paramDefault;
                 else
-                    Pout{i}=P(i).paramValue{:};
+                    Pout{i}=P(i).paramValue;
                 end
             end
         end
@@ -218,12 +218,30 @@ classdef param
                 if j ==0,
                     error (['Parameter:' name 'not found']);
                 end
-                if strcmp(Pin.Type(j),'select'),
-                    if ~any(strcmp(value,Pin.paramLimits{j})),
-                        error (['The value: ''' value ''' is not in the limits list for select parameter: ' Pin.Name{j} ]);
-                    end
+                if isempty(value),
+                    disp([' Value not specified for Parameter:' name]);
+                    disp('Parameter properties:');
+                    dispFull(Pin(j));
+                    Pout=Pin;
+                    return
                 end
-                Pout.paramValue{j}=varargin{i+1};
+                    
+                if strcmp(Pin(j).paramType,'select'),
+                    if ~any(strcmp(value,Pin(j).paramLimits)),
+                        error (['The value: ''' value ''' is not in the limits list for select parameter: ' Pin(j).paramName ]);
+                    end
+                elseif strcmp(Pin(j).paramType,'number'),
+                    if value > Pin(j).paramLimits(2),
+                        error (['The value: ''' num2str(value) ''' too large for parameter: ' Pin(j).paramName ]);
+                    elseif value < Pin(j).paramLimits(2),
+                        
+                    end
+                 elseif strcmp(Pin(j).paramType,'logical'),
+                     if ~islogical(value),
+                          error (['Values for '  Pin(j).paramName ' must be type logical'  ]);
+                     end
+                end
+                Pout(j).paramValue=value;
             end
         end
         
@@ -233,10 +251,10 @@ classdef param
             if nargin==1,
                 i=1;
             end
-            if isnan(p.paramValue{1}),
+            if isnan(p.paramValue),
                 x=p.paramDefault;
             else
-                x=p.paramValue{1};
+                x=p.paramValue;
             end
             switch p.paramType
                 case 'real'
