@@ -24,7 +24,6 @@ classdef kern < nldat
             K.parameterSet(4)=param('paramName','tvFlag','paramDefault',false, ...
                 'paramType','logical', ...
                 'paramHelp','tvFlag( true false)');
-         
             if nargin ==0,
                 return
             elseif isa(x,'kern'),

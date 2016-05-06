@@ -21,10 +21,10 @@ assign(model.parameterSet);
 %
 % Simulate a time-varying response
 %
-[irfLen, irfDim, nSampIrf]=size(model);
- if nSides==1,
-      offSet=0
-      offSetStart=irfLen-1;
+
+if strcmp(tvFlag,'yes'),
+   if nSides==1,
+       sides='one';
    else
       offsetStart=(irfLen-1)/2;
       offsetEnd=-offSetStart;
@@ -48,9 +48,7 @@ if (tvFlag),
    yout=reshape(yout,n,1,m);
    y=xin;
    set(y,'c','filtered','Data',yout);
-   %
    % Simulate a time-invariant response
-   %
 else
   x=x(:,1,:);  
     
