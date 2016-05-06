@@ -21,17 +21,29 @@ assign(model.parameterSet);
 %
 % Simulate a time-varying response
 %
-if strcmp(tvFlag,'Yes'),
-   if nSides==1,
-       sides='one';
+[irfLen, irfDim, nSampIrf]=size(model);
+ if nSides==1,
+      offSet=0
+      offSetStart=irfLen-1;
    else
-       sides='two';
+      offsetStart=(irfLen-1)/2;
+      offsetEnd=-offSetStart;
+   end
+[nSamp, nChan, nReal]=size(xin)
+if (tvFlag),
+  
+   for iReal=1:nReal,
+       for iSamp=1:nSamp,
+           curIRF=model(:,1,iSamp);
+           iEnd=iSamp+offSetEnd;
+           iStart=iSamp-offSetStart;
+       end
    end
    x=x(:,1,:);  
    x=squeeze(x);
    filter=squeeze(filter);
    filter=filter;
-   yout = etvc(x,filter,incr,sides);
+   yout = etvc(x,filter',incr,sides);
    [n,m]=size(yout);
    yout=reshape(yout,n,1,m);
    y=xin;
@@ -40,12 +52,12 @@ if strcmp(tvFlag,'Yes'),
    % Simulate a time-invariant response
    %
 else
-  x=x(:,1);  
+  x=x(:,1,:);  
     
     [nsamp, nchan,nreal]= size(filter);
     for i=1:nchan,
         for j=1:nreal,
-            yout(:,i,j) = filter_ts(filter(:,i,j), x, nSides, incr);
+            yout(:,i,j) = filter_ts(filter(:,i,j), x(:,i,j), nSides, incr);
         end
     end
     y=xin;
