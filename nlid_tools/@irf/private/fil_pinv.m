@@ -1,4 +1,4 @@
-function [irf,bound] = fil_pinv(u,y,hlen,sides,level,mode);
+function [irf,bound] = fil_pinv(u,y,hlen,sides,level,mode, irfFigNum );
 % nonparamtric filter identification
 % solves for the nonparametric filter between a given
 % input and output using correllation techniques, and 
@@ -25,6 +25,7 @@ function [irf,bound] = fil_pinv(u,y,hlen,sides,level,mode);
 %               'full', 'auto', 'manual'  (default 'auto')
 %               if 0<mode<numlags+1, then mode is used as the pseudo-inverse
 %               order.
+% irfFigNum : figure to use for under interactions
 %
 %
 %    nfil     : the identified nonparametric filter.
@@ -45,6 +46,7 @@ global dtw_pinv_irf dtw_pinv_bound
 %global dtw_pinv_IRFs dtw_pinv_Bounds 
 global dtw_pinv_done
 
+global dtw_pinv_figure
 global dtw_pinv_done
 global dtw_mdls
 
@@ -74,6 +76,7 @@ dtw_pinv_output = y;
 dtw_pinv_numlags = hlen;
 dtw_pinv_numsides = sides;
 dtw_pinv_level = level;
+dtw_pinv_figure= irfFigNum;
 compute_pinv('init');
 
 
