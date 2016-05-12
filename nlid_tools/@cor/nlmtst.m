@@ -25,6 +25,6 @@ z(:,2)=double(z(:,2)).^2;
 
 %% Third order 
 disp('cor - third order not workding');
-cxxy=cor(z,'kernOrder',3);
+%cxxy=cor(z,'kernOrder',3);
 %%subplot (nx,ny,4);
 %%plot (cxxy);
