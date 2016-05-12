@@ -47,6 +47,7 @@ function [Hident,bound,sing_vectors,cpu] = tv_ident(X,Y,dt,arg1,arg2,approach,co
 % Copyright 1998-2003, Robert E Kearney, David T Westwick and Mireille Lortie
 % This file is part of the nlid toolbox, and is released under the GNU 
 % General Public License For details, see ../../copying.txt and ../../gpl.txt 
+
 % Check that number of input arguments is valid.
 num_args = nargin;
 error(nargchk(5,7,num_args));
@@ -155,7 +156,8 @@ if (strcmp(approach,'tvfil'))
       yi = Y(i,:);
       yi = yi';
       % solve for hi using pinv function
-      [pseudoinv,r] = pinv(Xi);
+      [pseudoinv] = pinv(Xi);
+      r=rank(Xi); 
       hi = 1/dt*pseudoinv*yi;
       Hident = [Hident; hi'];
 
@@ -213,7 +215,8 @@ elseif (strcmp(approach,'corr'))
       phiyx = 1/L*phiyx;
 
       % find hi
-      [pseudoinv,r] = pinv(PHIxx);
+      [pseudoinv] = pinv(PHIxx);
+      r=rank(PHIxx); 
       hi = 1/dt*pseudoinv*phiyx;
       
       % append to Hident matrix 
