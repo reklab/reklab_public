@@ -37,23 +37,25 @@ classdef nltop
                     % Must change so that handles parameters of different
                     % names.
                     ps = sys.parameterSet;
-                    j=pindex(ps,Prop);
-                    if j,
-                        if isempty(Value), % Value not specified so show options
-                            dispFull(ps(j));
-                        else
-                            if strcmp(sys.parameterSet(j).paramType,'number'),
-                                sys.parameterSet(j).paramValue={double(Value)};
-                            else
-                                sys.parameterSet(j).paramValue={Value};
-                            end
-                        end
-                    else
-                        error([ Prop ' is not the name of a valid property or parameter']);
-                    end
-                else
-                    error([ Prop ' is not the name of a valid property or parameter']);
-                    
+                    outPs=setval(ps,Prop,Value);
+                    sys.parameterSet=outPs;
+%                     j=pindex(ps,Prop);
+%                     if j,
+%                         if isempty(Value), % Value not specified so show options
+%                             dispFull(ps(j));
+%                         else
+%                             if strcmp(sys.parameterSet(j).paramType,'number'),
+%                                 sys.parameterSet(j).paramValue={double(Value)};
+%                             else
+%                                 sys.parameterSet(j).paramValue={Value};
+%                             end
+%                         end
+%                     else
+%                         error([ Prop ' is not the name of a valid property or parameter']);
+%                     end
+%                 else
+%                     error([ Prop ' is not the name of a valid property or parameter']);
+%                     
                 end
             end
             if ~isempty(inputname(1)),
@@ -140,6 +142,16 @@ classdef nltop
             if ismember('parameterSet',properties(sys))
                 disp('parameterSet:');
                 disp(sys.parameterSet);
+            end
+            
+        end
+        
+        function dispFull(sys)
+            % Dispay object with full paramter information 
+            builtin('disp',sys);
+            if ismember('parameterSet',properties(sys))
+                disp('parameterSet:');
+                dispFull(sys.parameterSet);
             end
             
         end

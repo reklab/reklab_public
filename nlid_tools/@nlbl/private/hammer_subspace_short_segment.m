@@ -18,6 +18,7 @@ function system_nlbl = hammer_subspace_short_segment (z,ps)
 %      return
 %  end
 %%
+plotMode = 0;
 assign(ps);
 condition = 1;
 ts = get(z,'domainIncr');
@@ -96,7 +97,11 @@ if nsamp>2*hankleSize*p-p+2*maxOrderNLE*hankleSize+3*hankleSize+1
     Sn = diag(Sn); 
     Sn = Sn(1:hankleSize); 
     R = struct('L',L,'Un',Un,'m',1,'l',1,'i',hankleSize);
-    m = orderselect(Sn,orderSelect);
+    if isnumeric(orderSelect)
+        m = orderSelect;
+    else
+        m = orderselect(Sn,orderSelect);
+    end
     if m==0 
         condition = 0;
         warning('Selected order is zero.')
@@ -140,6 +145,8 @@ if condition>0
     bd_hat = zeros(p * m+ m + 1,it);
     omega_hat = zeros(maxOrderNLE+1,it);
     omega0 = rand(maxOrderNLE+1,1);
+    omega0 = omega0 / norm(omega0);
+	omega0 = [0.01;halfwave_rectifier_tchebychev(min(in),max(in),maxOrderNLE-1)];
     omega0 = omega0 / norm(omega0);
     s1 = 10^10;
     s2 = 10^10;
@@ -216,17 +223,19 @@ if condition>0
             outp(switch_time(i):switch_time(i+1)-1) = dlsim(AT,BT_kron,CT,DT_kron,u(switch_time(i):switch_time(i+1)-1,:),initial(:,i));
         end
         outp = outp - mean(outp);
-        h = figure;
-        for i =1 : p
-            figure(floor((i-1)/4)+h)
-            subplot(4,1,mod(i-1,4)+1)            
-            measured_data = out(switch_time(i):switch_time(i+1)-1);
-            predicted_data = outp(switch_time(i):switch_time(i+1)-1);
-            predicted_data = nldat(predicted_data','domainIncr',ts);
-            measured_data = nldat(measured_data,'domainIncr',ts);
-            set(measured_data,'chanNames','Measured output');
-            set(predicted_data,'chanNames','Predicted output');
-            plot(cat(2,measured_data,predicted_data),'plotmode','super');
+        if (plotMode == 1)
+            h = figure;
+            for i =1 : p
+                figure(floor((i-1)/4)+h)
+                subplot(4,1,mod(i-1,4)+1)            
+                measured_data = out(switch_time(i):switch_time(i+1)-1);
+                predicted_data = outp(switch_time(i):switch_time(i+1)-1);
+                predicted_data = nldat(predicted_data','domainIncr',ts);
+                measured_data = nldat(measured_data,'domainIncr',ts);
+                set(measured_data,'chanNames','Measured output');
+                set(predicted_data,'chanNames','Predicted output');
+                plot(cat(2,measured_data,predicted_data),'plotmode','super');
+            end
         end
     end
 else
@@ -259,4 +268,19 @@ for i=1:size(bnew,2)
     end
 end
 Phi = bnew;
+end
+
+function alpha = halfwave_rectifier_tchebychev(in_min,in_max,order)
+x = in_min:0.0001:in_max;
+y = max(x,0);
+x = nldat(x','domainIncr',0.001);
+y = nldat(y','domainIncr',0.001);
+z = cat(2,x,y);
+p = polynom(z,'polyType','tcheb','polyOrderMax',order,'polyOrderSelectMode','full');
+alpha = p.polyCoef;
+end
+function dhat = intrinsicEstimator (g,k,y)
+    Hg=(eye(size(g,2))-pinv(g)*k*pinv(k)*g);
+    Gg=pinv(g)-pinv(g)*k*pinv(k);
+    dhat = pinv(Hg)*Gg*y;
 end

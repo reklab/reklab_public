@@ -2,10 +2,6 @@ function [intrinsic, reflex, tqI, tqR, tqT] = SDSS_stiffnessID (z,varargin)
 % [system_ss, system, K, B, I, tqR, tqI, tqT, error]= pcascsub (z)
 % This function estimates a parallel-cascade model between input and output stored in columns of z.
 % z = cat(2 , position, torque)
-% The output, pc_nss is a 3x1 cell
-% pc{1} = [K;B;I];
-% pc{2} = reflex; where reflex{1}=static nonlinearity, reflex{2}=state-space model
-% pc{3} = vafs; where vafs=[v]
 % This function is based on the following paper:
 %[*] K. Jalaleddini, Ehsan Sobhani Tehrani and R. E. Kearney, "A Subspace Approach to the Structural Decomposition and Identification of Ankle Joint Dynamic Stiffness", IEEE TBME.
 %[1] K. Jalaleddini and R. E. Kearney, " Subspace Identification of SISO Hammerstein Systems: Application to Stretch Reflex Identification", IEEE TBME 2013.
@@ -28,14 +24,13 @@ pos = pos - mean(pos);
 trq = trq - mean(trq);
 %Define position, velocity and acceleration signals.
 vel = ddt(pos);
-pos = get(pos,'dataSet');
-velData = get(vel,'dataSet');
-vel = decimate(vel,decimation_ratio);
 trq = get(trq,'dataSet');
-dvel = del(velData,ceil(delay/(ts)));
+dvel = del(vel,delay);
 dvel = decimate(dvel,decimation_ratio);
+dvel = get(dvel,'dataSet');
 pos = decimate(pos,decimation_ratio);
 trq = decimate(trq,decimation_ratio);
+vel = decimate(vel,decimation_ratio);
 nSamp = size(pos,1);
 %Constructed input signal based on (5) in [*] using Tchebycehv polynomial
 avg = (max(dvel) + min(dvel))/2;
@@ -46,9 +41,10 @@ u_r = multi_tcheb(un,order-1);
 irf_len_i = delay/ts/decimation_ratio;
 lags_i = (-irf_len_i:1:irf_len_i);
 nLags_i = length(lags_i);
-u_i = zeros(length(pos),nLags_i);
+u_i = zeros(length(dvel),nLags_i);
 for i = 1:nLags_i
-    u_i(:,i) = del(pos,lags_i(i));
+    posDelay = del(pos,lags_i(i) * ts * decimation_ratio);
+    u_i(:,i) = get(posDelay,'dataSet');
 end
 u = [u_i,u_r];
 %% Identification
