@@ -47,7 +47,6 @@ function [Hident,bound,sing_vectors,cpu] = tv_ident(X,Y,dt,arg1,arg2,approach,co
 % Copyright 1998-2003, Robert E Kearney, David T Westwick and Mireille Lortie
 % This file is part of the nlid toolbox, and is released under the GNU 
 % General Public License For details, see ../../copying.txt and ../../gpl.txt 
-
 % Check that number of input arguments is valid.
 num_args = nargin;
 error(nargchk(5,7,num_args));
