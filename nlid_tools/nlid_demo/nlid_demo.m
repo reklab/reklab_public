@@ -20,8 +20,7 @@ end
 %% default input signal is unit variance white noise
 if nargin <2,
     x=randn (1000,1);
-    x=nld
-    at(x,'domainIncr',.01);
+    x=nldat(x,'domainIncr',.01);
 end
 % default noise level is 10%
 if nargin < 3,
@@ -78,7 +77,7 @@ demo_pause;
 %
 comment='NL Model';
 disp(comment);
-nl=nlbl(z,'nLags',nLags);
+nl=nlbl(z,'nLagLE',nLags);
 disp(comment);
 demo_plot(nl,z,comment);
 W=wseries(nl);
