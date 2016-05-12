@@ -1,5 +1,5 @@
 function nlid_demo (model_type, x, noise_level);
-% NLID_DEMO - Demonstrate Object Oriented NLID ientification
+% NLID_DEMO - Demonstrate Object Oriented NLID identification
 % xin - input signal
 % model_type - type of model to simulate; see nlid_sim for valid options;
 %					 default value is 'LN2';
@@ -9,7 +9,7 @@ function nlid_demo (model_type, x, noise_level);
 % Copyright 2003, Robert E Kearney and David T Westwick
 % This file is part of the nlid toolbox, and is released under the GNU
 % General Public License For details, see copying.txt and gpl.txt
-% Seocnd trst comment
+% Third test comment
 % noise level - normlaized noise power
 nlevel=0;
 ans='y';
@@ -20,7 +20,8 @@ end
 %% default input signal is unit variance white noise
 if nargin <2,
     x=randn (1000,1);
-    x=nldat(x,'domainIncr',.01);
+    x=nld
+    at(x,'domainIncr',.01);
 end
 % default noise level is 10%
 if nargin < 3,
@@ -77,7 +78,7 @@ demo_pause;
 %
 comment='NL Model';
 disp(comment);
-nl=nlbl(z,'nLagLE',nLags);
+nl=nlbl(z,'nLags',nLags);
 disp(comment);
 demo_plot(nl,z,comment);
 W=wseries(nl);
