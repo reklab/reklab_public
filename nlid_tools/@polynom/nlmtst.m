@@ -53,17 +53,18 @@ for t=1:length(ptypes),
 end
 
 %%
+return
+
 
 % Test of double
 pd = double(p);
 
 % Hessian
 
-h= hessian(p,Z);
+% h= hessian(p,z);
 
 % Jacobian
-j = jacobian(p,Z);
-return
+% j = jacobian(p,z);
 % nlid_resid(p,z);
 
 %
