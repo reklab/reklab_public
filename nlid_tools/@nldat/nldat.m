@@ -132,7 +132,7 @@ classdef nldat < nltop
             Z.comment = [ 'cat' int2str(DIM) ' ' inputname(2)  ];
             
             for i=2:nargin-1,
-                y=(varargin{i});
+                y=nldat((varargin{i}));
                 z=cat(DIM,z,double(y));
                 Z.comment = [Z.comment ',' inputname(i+1)];
                 switch DIM
