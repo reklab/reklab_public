@@ -32,7 +32,7 @@ classdef lnbl < nlm
             
             ln.parameterSet(5) = param('paramName','updateGain','paramDefault',1,'paramHelp',...
                 'Gain applied to error in update (alpha)', 'paramType','number',...
-                'paramLimits',[0  ]});
+                'paramLimits',[0  inf]);
             
             %  lm parameters
             
