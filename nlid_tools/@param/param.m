@@ -132,12 +132,7 @@ classdef param
             
             for i=1:length(P),
                 outName=P(i).paramName;
-                
-                if isnan(P(i).paramValue{1}),
-                    Pout.(outName)=P(i).paramDefault;
-                else
-                    Pout.(outName)=P(i).paramValue{:};
-                end
+                Pout.(outName) = getParamValue (P,outName);
             end
         end
         
@@ -216,7 +211,7 @@ classdef param
                 value = varargin{i+1};
                 j=pindex(Pin,name);
                 if j ==0,
-                    error (['Parameter:' name 'not found']);
+                    error (['Parameter name not found:' name]);
                 end
                 if isempty(value),
                     disp([' Value not specified for Parameter:' name]);
