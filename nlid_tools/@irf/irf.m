@@ -4,10 +4,12 @@ classdef irf < kern
     %   nLags - [< sample length] length of IRF in samples
     %   nSides -[1/2]  number of sides
     %  tvFlag- [true/false] time varying IRF
+    %    TV IRFs are stored using realizations for the time variable: (lag,1,time);
+    %  tvStartTime - stsart time for TV ITfs
     %  displayFlag -  [T/F] display plot
     %  irfErrorLvel -  [ real <=100] if confidence bounds are desired, this is the
     %                           computed
-    %   irfIdMethod - method to estimate IRF
+    %  irfIdMethod - method to estimate IRF
     %       tvfill - time varying identificiation
     %       corr - correlation method with Toeplitz
     %       pseudo - pseduo inverse
@@ -28,19 +30,30 @@ classdef irf < kern
         function I = irf (a,varargin)
             % Add IRF specific parameters
             j=length(I.parameterSet);
-            I.parameterSet(j+1)=param('paramName','displayFlag','paramDefault','true',...
+            I.parameterSet(j+1)=param('paramName','tvFlag','paramDefault',false, ...
+                'paramType','logical', ...
+                'paramHelp','tvFlag( true false) kernel is time varying');
+             I.parameterSet(j+2)=param('paramName','tvStartTime','paramDefault',0, ...
+                'paramType','number', ...
+                'paramHelp','start time for TV parameter');
+            I.parameterSet(j+3)=param('paramName','displayFlag','paramDefault','true',...
                 'paramHelp','display');
-            I.parameterSet(j+2)=param('paramName','irfErrorLevel','paramDefault',95, ...
+            I.parameterSet(j+4)=param('paramName','irfErrorLevel','paramDefault',95, ...
                 'paramHelp','error level','paramType','number', 'paramLimits',[0 100]);
-            I.parameterSet(j+3)=param('paramName','irfPseudoInvMode','paramDefault','full',...
+            I.parameterSet(j+5)=param('paramName','irfPseudoInvMode','paramDefault','auto',...
                 'paramHelp', 'pseudo-inverse order selection mode ', ...
                 'paramType','select',...
                 'paramLimits',{'full','auto','manual'});
-            I.parameterSet(j+4)=param('paramName','irfIdMethod', ...
+            I.parameterSet(j+6)=param('paramName','irfIdMethod', ...
                 'paramDefault','pseudo',...
-                'paramHelp','Estimation method: tvfil/corr/pseudo/parmetric',...
+                'paramHelp','Estimation method: tvfil/corr/pseudo/param/user',...
                 'paramType','select',...
-                'paramLimits', {'tvfil', 'corr', 'param', 'pseudo'});
+                'paramLimits', {'tvfil', 'corr', 'param', 'pseudo' 'user'});
+            I.parameterSet(j+7)=param('paramName','irfFigNum', ...
+                'paramDefault',1,...
+                'paramHelp','Figure to use for manual selection [1]',...
+                'paramType','number',...
+                'paramLimits', [1 inf]);
             
             I.comment='IRF Model';
             I.domainName='Lag (s)';
@@ -106,7 +119,7 @@ classdef irf < kern
         end
         
         function i = nlident (i, z,  varargin)
-            % CONSTRUCT an irf (impulse response function object
+            % identify an irf (impulse response function object
             % Setup default values
             %
             if nargin < 2,
@@ -171,7 +184,8 @@ classdef irf < kern
                 sides='one';
             end
             %
-            % Parameter "tvFlag is true so Identify a time-varying impulse response functio
+            % Parameter "tvFlag is true so Identify a time-varying impulse
+            % response from ensemble data
             %
             if (tvFlag),
                 %  Paramaeter "estimationMethod" determines the method used:
@@ -182,8 +196,18 @@ classdef irf < kern
                 %   Default is 'corr'.
                 x = squeeze(double(z(:,1,:)));
                 y =squeeze(double(z(:,2,:)));
+                [m,n]=size(x); 
+                zeroPad=zeros(nLags, n);
+                x=cat(1,zeroPad, x);
+                y=cat(1,zeroPad,y);
+                if nSides==2,
+                     x=cat(1,x,zeroPad);
+                     y=cat(1,y,zeroPad);
+                end
+                    
+                    
                 conf_level=NaN;
-                [Hident,bound,sing_vectors,cpu] = tv_ident(x,y,Ts,sides,numlags,irfIDMethod,conf_level);
+                [hIdent,bound,sing_vectors,cpu] = tv_ident(x,y,Ts,sides,numlags,irfIdMethod,conf_level);
                 if nSides ==2,
                     LagStart=-nLags*Ts;
                     TimeStart=nLags*Ts;
@@ -191,10 +215,11 @@ classdef irf < kern
                     LagStart=0;
                     TimeStart=(nLags-1)*Ts;
                 end
-                
-                set(i,'nSides',nSides, 'domainIncr',[Ts Ts],'dataSet',Hident, ...
-                    'nLags',nLags,'domainStart',[TimeStart LagStart], 'domainName',{'Time' 'Lag'});
-                i.kern=K;
+                [m,n]=size(hIdent);
+                tvI=hIdent';
+                tvI=reshape(tvI,n,1,m);
+                set(i,'nSides',nSides, 'domainIncr',Ts,'dataSet',tvI, ...
+                    'nLags',nLags,'domainStart', LagStart, 'domainName','Lag', 'tvStartTime',z.domainStart);
                 %
                 % Otherwise identify a time-invariant impulse response function
                 %
@@ -211,7 +236,7 @@ classdef irf < kern
                     x = double(zd(:,1,iReal));
                     y =double(zd(:,2,iReal));
                     [filt,bounds]= fil_pinv(x,y,numlags,nSides, ...
-                        irfErrorLevel,irfPseudoInvMode);
+                        irfErrorLevel,irfPseudoInvMode, irfFigNum);
                     if iReal ==1,
                         dtotal=cat(2, filt/Ts, bounds/Ts);
                     else
@@ -233,76 +258,81 @@ classdef irf < kern
             end
             
         end
+        
         function y = nlsim ( model, xin )
-% irf/nlsim Simulate response of IRF to input data set
-% input options not fill defined as yet
-filter = model.dataSet;
-if isa(xin,'double'),
-    xin=nldat(xin);
-    set(xin,'domainIncr',model.domainIncr);
-end
-delx = xin.domainIncr;
-deli=model.domainIncr;
-if delx ~= deli,
-    W=(str2mat('Model & data have different domain increments', ...
-        'the output of the IRF depends on the sampling rate', ...
-        'Output may be scaled incorrectly and/or have the wrong increment'));
-    warning(' ');disp(W)
-end
-x=double (xin);
-
-incr = model.domainIncr;
-assign(model.parameterSet);
-%
-% Simulate a time-varying response
-%
-[irfLen, irfDim, nSampIrf]=size(model);
- if nSides==1,
-      offSet=0
-      offSetStart=irfLen-1;
-   else
-      offsetStart=(irfLen-1)/2;
-      offsetEnd=-offSetStart;
-   end
-[nSamp, nChan, nReal]=size(xin)
-if (tvFlag),
+            % irf/nlsim Simulate response of IRF to input data set
+            % input options not fill defined as yet
+            filter = model.dataSet;
+            if isa(xin,'double'),
+                xin=nldat(xin);
+                set(xin,'domainIncr',model.domainIncr);
+            end
+            delx = xin.domainIncr;
+            deli=model.domainIncr;
+            if delx ~= deli,
+                W=(str2mat('Model & data have different domain increments', ...
+                    'the output of the IRF depends on the sampling rate', ...
+                    'Output may be scaled incorrectly and/or have the wrong increment'));
+                warning(' ');disp(W)
+            end
+            x=double (xin);
+            
+            incr = model.domainIncr;
+            assign(model.parameterSet);
+            %
+            % Simulate a time-varying response
+            %
+            [irfLen, irfDim, nSampIrf]=size(model);
+            [nSamp, nChan, nReal]=size(xin);
   
-   for iReal=1:nReal,
-       for iSamp=1:nSamp,
-           curIRF=model(:,1,iSamp);
-           iEnd=iSamp+offSetEnd;
-           iStart=iSamp-offSetStart;
-       end
-   end
-   x=x(:,1,:);  
-   x=squeeze(x);
-   filter=squeeze(filter);
-   filter=filter;
-   yout = etvc(x,filter',incr,sides);
-   [n,m]=size(yout);
-   yout=reshape(yout,n,1,m);
-   y=xin;
-   set(y,'c','filtered','Data',yout);
-   %
-   % Simulate a time-invariant response
-   %
-else
-  x=x(:,1,:);  
-    
-    [nsamp, nchan,nreal]= size(filter);
-    for i=1:nchan,
-        for j=1:nreal,
-            yout(:,i,j) = filter_ts(filter(:,i,j), x(:,i,j), nSides, incr);
+            if (tvFlag),
+                if nSamp>nSampIrf,
+                    warning(' Number of input samples > number of TV IRfs. Output truncated' );
+                    nSamp=nSampIrf;
+                end
+                if xin.domainStart ~= tvStartTime,
+                    error('Data and TV IRFs have different start times');
+                end
+                
+                if nSides==1,
+                    offSet=1
+                else
+                    offset= -(model.domainStart/model.domainIncr) + 1;
+                end
+                irf=double(model);
+                for iSamp=1:nSamp,
+                    yTemp=0;
+                    for jLag=1:irfLen,
+                        k=iSamp -jLag +offset;
+                        if (k>=1 & k<=nSamp),
+                            yTemp=yTemp+(irf(jLag,1,iSamp)*x(k,1,:));
+                        end
+                    end
+                    yOut(iSamp,1,:)=yTemp*incr;
+                end
+                y=xin;
+                set(y,'comment','filtered','dataSet',yOut);
+                %
+                % Simulate a time-invariant response
+                %
+            else
+                x=x(:,1,:);
+                [nsamp, nchan,nreal]= size(filter);
+                for i=1:nchan,
+                    for j=1:nreal,
+                        yout(:,i,j) = filter_ts(filter(:,i,j), x(:,i,j), nSides, incr);
+                    end
+                end
+                y=xin;
+                set(y,'comment','filtered','dataSet',yout);
+                set (y,'chanNames',{'Predicted output'});
+                
+            end
+            
         end
+        
+        
     end
-    y=xin;
-    set(y,'comment','filtered','dataSet',yout);
-    
 end
-set (y,'chanNames',{'Predicted output'});
 
-        end
-    end
-    
-end
 
