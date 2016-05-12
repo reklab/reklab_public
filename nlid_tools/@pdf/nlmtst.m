@@ -12,11 +12,11 @@ plot(pdf (P,x,'pdfType','Frequency'));
 subplot (2,2,3);
 plot(pdf (P,x,'pdfType','Probability'));
 subplot(2,2,4)
-plot(pdf (P,x,'pdfType','CumulativeProbability'));
+plot(pdf (P,x,'pdfType','CDF'));
 
 figure(2);
 subplot (2,1,1);
-P=(pdf(X,'pdfType','Density','nBins',10,'binMin',-5,'binMax',5));
+P=(pdf(X,'pdfType','Density','domainValues',[-5:1:5]));
 plot(P)
 
 
