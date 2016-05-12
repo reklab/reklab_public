@@ -12,6 +12,19 @@ plot(i)
 figure(2);
 r1=nlid_resid(i,z);
 title('Residuals');
+figure(3);
+% Hessian
+h=hessian(i, z);
+mesh(h);
+
+%
+% Convert to fresp;
+plot (fresp(i));
+
+%
+% Convert to nldat
+plot (nldat(abs(i)));
+
 %
 % two sided 
 %
@@ -22,31 +35,29 @@ i1=irf(z1,'nSides',2,'nLags',50);
 figure(3);
 plot(i1)
 
-% Test options
+% Demosntate options for handling noise; 
 noise=randvar;
-set(noise,'std',double(std(z(:,2))));
+noiseSd=double(std(z(:,2)))/5;
+set(noise,'std',noiseSd);
+N=nlsim(noise,z(:,2));
+zN=z;
+zN(:,2)=z(:,2)+N; 
 
-i2=irf(z,'nLags',101,'irfIdMethod','corr');
-i3=irf(z,'nLags',101,'irfIdMethod','pseudo','irfPseudoInvMode','full' );
-i4=irf(z,'nLags',101,'irfIdMethod','pseudo','irfPseudoInvMode','auto' );
-i5=irf(z,'nLags',101,'irfIdMethod','pseudo','irfPseudoInvMode','manual' );
 
-
+i2=irf(zN,'nLags',101,'irfIdMethod','corr'); 
+i3=irf(zN,'nLags',101,'irfIdMethod','pseudo','irfPseudoInvMode','full' );
+i4=irf(zN,'nLags',101,'irfIdMethod','pseudo','irfPseudoInvMode','auto' )
+figure(99);
+i5=irf(zN,'nLags',101,'irfIdMethod','pseudo','irfPseudoInvMode','manual' ,'irfFigNum',99);
+figure (2); clf
+subplot (2,2,1); plot(i2);title('Correlation Method'); 
+subplot (2,2,2); plot(i3);title('Full pseduoinverse'); 
+subplot (2,2,3); plot(i4);title('Pseduoinverse - automatic'); 
+subplot (2,2,4); plot(i5);title('Pseduoinverse -manual'); 
 
 % 
 plot (smo(i,5));
 
-
-% Hessian
-h=hessian(i, z);
-
-%
-% Convert to fresp;
-plot (fresp(i));
-
-%
-% Convert to nldat
-plot (nldat(abs(i)));
 
 
 
@@ -65,19 +76,36 @@ plot (nldat(abs(i)));
 
  % TI IRF for each realization 
   iTI=irf(Z,'nSides',2,'nLags',9);
-  ypTI=nlsim(iTI,Z(:,1,:));
-  vaf(Y,ypTI)
+  ypTI=nlsim(iTI,X); 
+  v1=vaf(Y,ypTI,'realization');
+ plot (v1); 
   
- % Generate TV IRF
+  % Estimate TV IRF for TI case
+  
+  iTV=irf(Z,'nSides',2,'nLags',9,'tvFlag',true,'irfIdMethod','corr');
+  ySimTV = nlsim(iTV, X);
+  V= vaf(Y,ySimTV,'realization');
+plot(V)  
+
+ %% Generate an TV IRF
  iTV=iTI;
  set(iTV,'tvFlag',true); 
  for i=50:125,
-     iTV(:,1,i)=iTI(:,1,i)*0;
+     iTV(:,1,i)=iTI(:,1,i)*.2;
  end
-yTV=nlsim(iTV,X(:,1,1));
+plot(iTV)
+yTV=nlsim(iTV,X(:,1,:));
 
- % TV IRFSS
-   iTV=irf(Z,'nSides',2,'nLags',9,'tvFlag','Yes','irfIdMethod','corr');
+ % TV IRFs
+ zTV=cat(2,X,yTV);
+ iTVe=irf(zTV,'nSides',2,'nLags',9,'tvFlag',true,'irfIdMethod','pseudo');
+ vIRF=vaf(iTV,iTVe,'realization'); 
+ plot(vIRF);
+ yTVp=nlsim(iTVe,X);
+ vPred=vaf(yTV,yTVp,'realization');
+plot(vPred) 
+   
+ %% Problem with scaling in nlsim or NLIDENT?
  
  
  Y
