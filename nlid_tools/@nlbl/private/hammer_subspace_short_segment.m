@@ -10,7 +10,8 @@ function system_nlbl = hammer_subspace_short_segment (z,ps)
 % options={{'hankle_size' 20 'Size of hankle matrix'} ...
 %          {'order' 8 'maximum order for nonlinearity'} ...
 %          {'delay' 0 'Delay added to the input'} ...
-%          {'orderdetection','manual'}...
+%          {'orderDetectionMethod','preset'}...
+%   { orderLe - order of LE 
 %          {'threshold' 10^(-5)}...
 %          {'plot_mode','No'}...
 %      };
@@ -97,10 +98,10 @@ if nsamp>2*hankleSize*p-p+2*maxOrderNLE*hankleSize+3*hankleSize+1
     Sn = diag(Sn); 
     Sn = Sn(1:hankleSize); 
     R = struct('L',L,'Un',Un,'m',1,'l',1,'i',hankleSize);
-    if isnumeric(orderSelect)
-        m = orderSelect;
+    if strcmp('preset', orderSelectMethodLE),
+        m = orderLE;
     else
-        m = orderselect(Sn,orderSelect);
+        m = orderselect(Sn,orderSelectMethodLE);
     end
     if m==0 
         condition = 0;
@@ -213,7 +214,7 @@ if condition>0
     newMean = mean(in);
     newStd = std(in);
     omega_coef = omega(:);
-    static_nl = polynom('polyCoef',omega_coef,'polyType','Tcheb','comment','Static Nonlinearity','polyRange',[newMin;newMax],'polyMean',newMean,'polyStd',newStd);
+    static_nl = polynom('polyCoef',omega_coef,'polyType','tcheb','comment','Static Nonlinearity','polyRange',[newMin;newMax],'polyMean',newMean,'polyStd',newStd);
     system_nlbl = nlbl;
     set(system_nlbl,'elements',{static_nl,system_ss},'idMethod','subspace');
     if displayFlag == 1
@@ -242,7 +243,8 @@ else
     static_nl = polynom;
     system_nlbl = nlbl;
     system_ss = ssm;
-    set(system_nlbl,'elements',{static_nl,system_ss},'idMethod','subspace');
+    set(system_nlbl,'elements',{static_nl,system_ss},'idMethod','subspace', ...
+        'ordeLE',n);
 end
 end
 function Phi = BD_omega_regressor(u,A,C)
