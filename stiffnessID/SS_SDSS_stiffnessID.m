@@ -187,7 +187,8 @@ if ~isempty(N)
         reflexTorqueSegments = segdat(tqI_res,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',0.01);
         zReflex = cat(2,velocitySegments,reflexTorqueSegments);
         reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',floor(delayinput/ts),...
-            'maxOrderNLE',maxordernle,'threshNSE',threshold,'hankleSize',hanklesize,'orderSelect',2);
+            'maxOrderNLE',maxordernle,'threshNSE',threshold,'hankleSize',hanklesize, ...
+            'orderSelectMethodLE','preset','orderLE',2);
         if ~isempty(reflex{2}.A)
                 tqR = nlsim(reflex,zReflex);
                 tqI = nldat(tqI,'domainIncr',ts,'chanNames','Torque (Nm)','comment','Intrinsic Torque');
