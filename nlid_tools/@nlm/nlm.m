@@ -104,18 +104,20 @@ classdef nlm < nltop
         
         
         
-        function [npath,nel]= size (d)
+        function [npath,nel, nReal]= size (d)
             % overloaded size function for nlm.
             % npath - number of parallel paths
             % nel - number of elements per path
+            % nReal is faked from first element 
             E=d.elements;
-            [npath, nel]=size(E);
+            [m,n,nReal]=size(d.elements{1,1});
+            [npath, nel, nReal]=size(E);
             if nargout == 0,
                 disp(['number of paths =' int2str(npath)]);
                 disp(['number of series elements per path =' int2str(nel)]);
                 
             elseif nargout == 1;
-                npath =[ npath nel ];
+                npath =[ npath nel nReal];
             end
         end
         
