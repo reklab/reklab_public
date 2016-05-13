@@ -542,13 +542,13 @@ classdef nldat < nltop
                     
                 elseif nargin==2,
                     y=nldat(y);
-                   [ z.dataSet, iMax]=max(x.dataSet,y.dataSet);
+                   [ z.dataSet]=max(x.dataSet,y.dataSet);
                 elseif nargin==3,
                     if isempty(y)
                         [z.dataSet,iMax]=max(x.dataSet,[] ,DIM);
                     else
                         y=nldat(y);
-                        [z.dataSet,iMax]=max(x.dataSet,y.dataSet,DIM);
+                        [z.dataSet]=max(x.dataSet,y.dataSet,DIM);
                     end
                 end
                 set (z,'comment','Max');
