@@ -33,7 +33,7 @@ classdef irf < kern
             I.parameterSet(j+1)=param('paramName','tvFlag','paramDefault',false, ...
                 'paramType','logical', ...
                 'paramHelp','tvFlag( true false) kernel is time varying');
-             I.parameterSet(j+2)=param('paramName','tvStartTime','paramDefault',0, ...
+            I.parameterSet(j+2)=param('paramName','tvStartTime','paramDefault',0, ...
                 'paramType','number', ...
                 'paramHelp','start time for TV parameter');
             I.parameterSet(j+3)=param('paramName','displayFlag','paramDefault','true',...
@@ -102,6 +102,11 @@ classdef irf < kern
             set (I,'domainIncr',delt,'nLags',length(t),'dataSet', i, ...
                 'comment','Second order irf');
         end
+        
+        function I=nlmtst(i)
+            irfDemo
+        end
+        
         
         function plotBounds(I)
             %- plot IRF with error bounds
@@ -196,16 +201,16 @@ classdef irf < kern
                 %   Default is 'corr'.
                 x = squeeze(double(z(:,1,:)));
                 y =squeeze(double(z(:,2,:)));
-                [m,n]=size(x); 
+                [m,n]=size(x);
                 zeroPad=zeros(nLags, n);
                 x=cat(1,zeroPad, x);
                 y=cat(1,zeroPad,y);
                 if nSides==2,
-                     x=cat(1,x,zeroPad);
-                     y=cat(1,y,zeroPad);
+                    x=cat(1,x,zeroPad);
+                    y=cat(1,y,zeroPad);
                 end
-                    
-                    
+                
+                
                 conf_level=NaN;
                 [hIdent,bound,sing_vectors,cpu] = tv_ident(x,y,Ts,sides,numlags,irfIdMethod,conf_level);
                 if nSides ==2,
@@ -284,7 +289,7 @@ classdef irf < kern
             %
             [irfLen, irfDim, nSampIrf]=size(model);
             [nSamp, nChan, nReal]=size(xin);
-  
+            
             if (tvFlag),
                 if nSamp>nSampIrf,
                     warning(' Number of input samples > number of TV IRfs. Output truncated' );

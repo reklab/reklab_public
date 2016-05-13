@@ -149,6 +149,10 @@ classdef nlbl < nlm
             end
             nl=normCoefNLE(nl);
         end
+
+        function nlmtst(N)
+            nlblDemo;
+        end
         
         function  NN  = normGainLE ( N )
             % Normalize nlbl to assign all gain to the NL element.
