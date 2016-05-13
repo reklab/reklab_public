@@ -53,7 +53,11 @@ u_r = multi_tcheb(un,maxOrderNLE-1);
 %% Estimate the extended observability matrix for u_r as the input and output
 [S, R] = dordpi(u_r,output.dataSet,hankleSize);
 %Selecting the order of the linear system
-n = orderselect(S,orderSelect);
+if strcmp('preset',orderSelectMethodLE),
+    n=orderLE
+else
+n = orderselect(S,orderSelectMethodLE);
+end
 %% Estimate the A and C matrix from extended observability matrix
 [AT, CT] = destac(R,n);
 %Return if the system poles are outside of the unit circle
@@ -151,7 +155,7 @@ newMin = min(input);
 newMax = max(input);
 newMean = mean(input);
 newStd = std(input);
-alpha = polynom('polyCoef',alpha,'polyType','Tcheb',...
+alpha = polynom('polyCoef',alpha,'polyType','tcheb',...
     'comment','Static Nonlinearity','polyRange',[newMin;newMax],...
     'polyMean',newMean,'polyStd',newStd);
 %Constrcut ssm object for the linear system
@@ -160,7 +164,9 @@ set(system_ss,'A',AT,'B',BT,'C',CT,'D',DT,'domainIncr',ts,'nDelayInput',nDelayIn
 %Concatenate the polynom and IRF objects to construct the estimated Hammerstein system
 static_nl = alpha;
 system = nlbl;
-set(system,'comment','NL System identified using subspace method ','elements',{static_nl,system_ss},'idMethod','subspace');
+set(system,'comment','NL System identified using subspace method ', ...
+    'elements',{static_nl,system_ss},'idMethod','subspace', ...
+    'orderLE', n);
 end
 end
 function [d_x] = del(x,nDelay)
