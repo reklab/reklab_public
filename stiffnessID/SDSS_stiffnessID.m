@@ -97,7 +97,10 @@ if n>0
     tqI_r = trq - tqI;
     tqI = nldat(tqI,'domainIncr',ts*decimation_ratio);
     zReflex = cat(2,vel,nldat(tqI_r,'domainIncr',ts*decimation_ratio));
-    reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',delay/ts/decimation_ratio,'maxOrderNLE',order,'threshNSE',10^-5,'displayFlag',0,'hankleSize',hankle_size,'orderSelect',orderdetection);
+    reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',...
+        delay/ts/decimation_ratio,'maxOrderNLE', ...
+        order,'threshNSE',10^-5,'displayFlag',false,'hankleSize', ...
+        hankle_size,'orderSelectMethodLE',orderdetection);
     set(reflex,'comment','Identified reflex Hammerstein');
     if isempty(reflex{2}.A)
         n = 0;
