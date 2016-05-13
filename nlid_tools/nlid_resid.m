@@ -28,7 +28,7 @@ function [R, V, yp] = nlid_resid( M, z, varargin);
 [ nSampZ, nChanZ, nRealZ]=size(z);
 
 if (nRealM>1) & (nRealZ>1) & (nRealM ~= nRealZ)
-    error (' There is a mismathc in the number of realizations for the model and data');
+    error (' There is a mismatch in the number of realizations for the model and data');
 end
 options={{'plotflag' true 'Plot results '} ...
     {'choplen' 0 'length of transiet to ignore at begining and end of response'} ...
