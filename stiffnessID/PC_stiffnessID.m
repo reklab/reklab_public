@@ -25,7 +25,7 @@ mReflex=nlbl;
 if strcmpi(reflex_id_method,'hk'),
     set(mReflex,'idMethod','hk','nLagLE',nlag_reflex_irf, 'maxOrderNLE',reflex_nl_ordermax);
 elseif strcmpi(reflex_id_method,'sls'),
-    set(mReflex,'idMethod','sls', 'displayFlag',0,'nIterMax',10,'nLagLE',nlag_reflex_irf, 'maxOrderNLE',reflex_nl_ordermax);
+    set(mReflex,'idMethod','sls', 'displayFlag',false,'nIterMax',10,'nLagLE',nlag_reflex_irf, 'maxOrderNLE',reflex_nl_ordermax);
 elseif strcmpi(reflex_id_method,'rect'),
     mReflex=irf;
     set (mReflex,'nSides',1,'nLags',nlag_reflex_irf,'irfIdMethod',irf_mode);
