@@ -127,6 +127,7 @@ classdef irf < kern
             % identify an irf (impulse response function object
             % Setup default values
             %
+            
             if nargin < 2,
                 disp('NLIDtakes two inputs for irf objects: irf, Z' );
             elseif nargin > 2,
@@ -168,6 +169,20 @@ classdef irf < kern
             
             % Parse options
             [nsamp,nchan,nReal]=size(z);
+            %% Nchan=1 so convert it to an IRF
+            if nchan==1,
+                i.chanNames=z.chanNames;
+                i.chanUnits=z.chanUnits;
+                i.domainIncr=z.domainIncr;
+                i.domainName=z.domainName;
+                i.domainStart=z.domainStart;
+                i.domainValues=z.domainValues;
+                i.dataSet=z.dataSet;
+                i.dataSize=z.dataSize;
+                i.comment=z.comment;
+                return
+            end
+            
             
             assign(i.parameterSet);
             if isnan (nLags)
@@ -300,15 +315,15 @@ classdef irf < kern
                 end
                 
                 if nSides==1,
-                    offSet=1
+                    offSet=1;
                 else
-                    offset= -(model.domainStart/model.domainIncr) + 1;
+                    offSet= -(model.domainStart/model.domainIncr) + 1;
                 end
                 irf=double(model);
                 for iSamp=1:nSamp,
                     yTemp=0;
                     for jLag=1:irfLen,
-                        k=iSamp -jLag +offset;
+                        k=iSamp -jLag +offSet;
                         if (k>=1 & k<=nSamp),
                             yTemp=yTemp+(irf(jLag,1,iSamp)*x(k,1,:));
                         end
@@ -322,10 +337,19 @@ classdef irf < kern
                 %
             else
                 x=x(:,1,:);
-                [nsamp, nchan,nreal]= size(filter);
+                [nsamp,nchan,nreal]=size(x);
+                [nsampFilter, nchanFilter,nrealFilter]= size(filter);
+   % check that realizations are reasonable
+    if nreal==nrealFilter | nreal==1 | nrealFilter==1,
+        nRealMax=max(nreal,nrealFilter);
+    else
+        error ('Number of realizatins in IRF and input are not compatible');
+    end
                 for i=1:nchan,
-                    for j=1:nreal,
-                        yout(:,i,j) = filter_ts(filter(:,i,j), x(:,i,j), nSides, incr);
+                    for j=1:nRealMax,
+                        jFilter=min(j,nrealFilter);
+                        jInput=min(j,nreal);
+                        yout(:,i,j) = filter_ts(filter(:,i,jFilter), x(:,i,jInput), nSides, incr);
                     end
                 end
                 y=xin;
