@@ -118,7 +118,7 @@ classdef kern < nldat
                     kdat = kdat;
                 case 1
                     % first order kernel -- smooth it.
-                    kdat = smo(kdat,n);
+                    kdat=smo(nldat(k),n);
                 case 2
                     % second order kernel -- use a 2d smoother
                     kdat = smo_2d(kdat,n);
