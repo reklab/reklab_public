@@ -1,0 +1,3 @@
+%%% D
+load experimental_data.mat
+[intrinsic, reflex, tqI, tqR, tqT] = SDSS_stiffnessID (z);

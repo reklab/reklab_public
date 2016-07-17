@@ -54,7 +54,7 @@ u_r = multi_tcheb(un,maxOrderNLE-1);
 [S, R] = dordpi(u_r,output.dataSet,hankleSize);
 %Selecting the order of the linear system
 if strcmp('preset',orderSelectMethodLE),
-    n=orderLE
+    n = orderLE;
 else
 n = orderselect(S,orderSelectMethodLE);
 end

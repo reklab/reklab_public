@@ -49,8 +49,9 @@ end
 u = [u_i,u_r];
 %% Identification
 %Estimating AT and CT from SMI toolbox
-[S, R] = dordpi(u,trq,hankle_size);
-n = orderselect(S,orderdetection);
+[~, R] = dordpi(u,trq,hankle_size);
+%n = orderselect(S,orderdetection);
+n = 2;
 [AT, CT] = destac(R,n);
 f=find(abs(eig(AT))>1, 1);
 if ~isempty(f)
@@ -100,7 +101,7 @@ if n>0
     reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',...
         delay/ts/decimation_ratio,'maxOrderNLE', ...
         order,'threshNSE',10^-5,'displayFlag',false,'hankleSize', ...
-        hankle_size,'orderSelectMethodLE',orderdetection);
+        hankle_size,'orderSelectMethodLE','preset','orderLE',2);
     set(reflex,'comment','Identified reflex Hammerstein');
     if isempty(reflex{2}.A)
         n = 0;
