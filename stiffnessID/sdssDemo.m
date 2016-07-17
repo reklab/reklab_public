@@ -2,6 +2,7 @@
 clear
 clc
 close all
+disp('SDSS demo')
 disp('Identifiying PC structure; experimental data PF condition')
 load experimental_data.mat
 z=z_pf2;
@@ -16,8 +17,24 @@ title('Reflex static nonlinearity')
 subplot(2,2,4)
 plot(reflex{2})
 title('Reflex linear dynamics')
-V = vaf(decimate(z(:,2),10),tqT);
+torqueDecimated = decimate(z(:,2),10);
+positionDecimated = decimate(z(:,1),10);
+torqueDecimated = torqueDecimated - mean(torqueDecimated);
+set(torqueDecimated,'domainStart',0);
+V = vaf(torqueDecimated,tqT);
 disp(['VAF was: ',num2str(V.dataSet)])
+figure
+subplot(4,1,1)
+plot(positionDecimated)
+subplot(4,1,2)
+plot(tqI)
+subplot(4,1,3)
+plot(tqR)
+subplot(4,1,4)
+plot(torqueDecimated)
+hold on
+plot(tqT,'line_color','r')
+xAxisPanZoom
 %%
 disp('Identifiying PC structure; experimental data DF condition')
 z=z_df3;
@@ -32,5 +49,21 @@ title('Reflex static nonlinearity')
 subplot(2,2,4)
 plot(reflex{2})
 title('IRF of Reflex linear dynamics')
+torqueDecimated = decimate(z(:,2),10);
+positionDecimated = decimate(z(:,1),10);
+torqueDecimated = torqueDecimated - mean(torqueDecimated);
+
 V = vaf(decimate(z(:,2),10),tqT);
 disp(['VAF was: ',num2str(V.dataSet)])
+figure
+subplot(4,1,1)
+plot(positionDecimated)
+subplot(4,1,2)
+plot(tqI)
+subplot(4,1,3)
+plot(tqR)
+subplot(4,1,4)
+plot(torqueDecimated)
+hold on
+plot(tqT,'line_color','r')
+xAxisPanZoom
