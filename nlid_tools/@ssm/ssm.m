@@ -133,7 +133,7 @@ classdef ssm<nltop
                 set(S,varargin{:});
             end
             assign(S.parameterSet)
-            set(S,'domainIncr',domainIncr);
+            set(S,'domainIncr',get(z,'domainIncr'));
             ztype = class(z);
             switch ztype
                 case 'fresp'
