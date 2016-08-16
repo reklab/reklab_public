@@ -94,7 +94,8 @@ if plotflag,
     title(['Predicted ' Vt]);
     
     subplot (4,1,3);
-    plot (cat(2,y,yp),'plotmode','Super');
+    plot (y);
+    h=line(yp); set(h,'color','r'); 
     title('Superimposed');
     subplot (4,1,4);
     plot (R);
