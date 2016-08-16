@@ -50,7 +50,7 @@ function [Hident,bound,sing_vectors,cpu] = tv_ident(X,Y,dt,arg1,arg2,approach,co
 
 % Check that number of input arguments is valid.
 num_args = nargin;
-error(nargchk(5,7,num_args));
+(narginchk(5,7));
 
 % Check that input arguments are valid.
 if ~(isnumeric(X))
