@@ -92,7 +92,7 @@ elseif strcmp(plotmode,'super'),
     for i = 1:numchan
       cmd = [cmd  d.chanNames{i} ''','''];
     end
-    cmd = [cmd(1:end-1) '2);'];
+    cmd = [cmd(1:end-1) '''NorthEast'')'];
     eval(cmd);
     % end of legend hack.    
     
