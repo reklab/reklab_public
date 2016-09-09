@@ -112,7 +112,7 @@ if n>0
         tqR = nlsim(reflex,vel);
         tqT = tqI + tqR;
     end
-if n==0
+elseif n==0
     % If the order of the reflex system is selected as 0 only identify the
     % intrinsic pathway
     lags_i = (-irf_len_i:1:irf_len_i);
@@ -129,5 +129,4 @@ if n==0
     nl_reflex = polynom;
     l_reflex_ss =ssm;
     reflex = nlbl('elements',{nl_reflex,l_reflex_ss},'comment','Relex stiffness model');
-end
 end
