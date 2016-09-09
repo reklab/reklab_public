@@ -6,7 +6,7 @@ disp('SDSS demo')
 disp('Identifiying PC structure; experimental data PF condition')
 load experimental_data.mat
 z=z_pf2;
-[intrinsic, reflex, tqI, tqR, tqT] = SDSS_stiffnessID (z);
+[intrinsic, reflex, tqI, tqR, tqT] = SDSS_stiffnessID (z,'orderselectmethod',2);
 figure
 subplot(2,1,1)
 plot(intrinsic)
@@ -35,10 +35,12 @@ plot(torqueDecimated)
 hold on
 plot(tqT,'line_color','r')
 xAxisPanZoom
+disp('Press any key to continue')
+pause
 %%
 disp('Identifiying PC structure; experimental data DF condition')
 z=z_df3;
-[intrinsic, reflex, tqI, tqR, tqT] = SDSS_stiffnessID (z,'delay',0.05);
+[intrinsic, reflex, tqI, tqR, tqT] = SDSS_stiffnessID (z,'delay',0.05,'orderselectmethod',2);
 figure
 subplot(2,1,1)
 plot(intrinsic)
