@@ -9,7 +9,7 @@ options={{'decimation_ratio' 10 'ratio to decimate data'} ...
          {'order' 12 'maximum order for nonlinearity'} ...
          {'hankle_size' 20 'Size of hankle matrix'} ...
          {'delay' 0.04 'Reflex delay in s'} ...
-         {'orderdetection','manual'}...
+         {'orderselectmethod','manual'}...
      };
  if arg_parse(options,varargin);
      return
@@ -49,9 +49,13 @@ end
 u = [u_i,u_r];
 %% Identification
 %Estimating AT and CT from SMI toolbox
-[~, R] = dordpi(u,trq,hankle_size);
-%n = orderselect(S,orderdetection);
-n = 2;
+[S, R] = dordpi(u,trq,hankle_size);
+if isnumeric(orderselectmethod)
+    n = orderselectmethod;
+else
+    n = orderselect(S,orderselectmethod);
+end
+
 [AT, CT] = destac(R,n);
 f=find(abs(eig(AT))>1, 1);
 if ~isempty(f)
@@ -98,10 +102,20 @@ if n>0
     tqI_r = trq - tqI;
     tqI = nldat(tqI,'domainIncr',ts*decimation_ratio);
     zReflex = cat(2,vel,nldat(tqI_r,'domainIncr',ts*decimation_ratio));
-    reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',...
+    
+    if isnumeric(orderselectmethod)
+        reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',...
         delay/ts/decimation_ratio,'maxOrderNLE', ...
         order,'threshNSE',10^-5,'displayFlag',false,'hankleSize', ...
-        hankle_size,'orderSelectMethodLE','preset','orderLE',2);
+        hankle_size,'orderSelectMethodLE','preset','orderLE',orderselectmethod);
+    
+    else
+        reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',...
+        delay/ts/decimation_ratio,'maxOrderNLE', ...
+        order,'threshNSE',10^-5,'displayFlag',false,'hankleSize', ...
+        hankle_size,'orderSelectMethodLE',orderselectmethod);
+    end    
+    
     set(reflex,'comment','Identified reflex Hammerstein');
     if isempty(reflex{2}.A)
         n = 0;
@@ -112,6 +126,7 @@ if n>0
         tqR = nlsim(reflex,vel);
         tqT = tqI + tqR;
     end
+end
 if n==0
     % If the order of the reflex system is selected as 0 only identify the
     % intrinsic pathway
@@ -129,5 +144,4 @@ if n==0
     nl_reflex = polynom;
     l_reflex_ss =ssm;
     reflex = nlbl('elements',{nl_reflex,l_reflex_ss},'comment','Relex stiffness model');
-end
 end
