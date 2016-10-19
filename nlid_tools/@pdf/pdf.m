@@ -116,7 +116,10 @@ classdef pdf  < nldat
                                 n=pList{1};
                                 Y = unidpdf(p.domainValues, n);
                             otherwise
-                                PD = ProbDistUnivParam(z.randvarType,[pList{:}]);                               
+                                
+              
+                                PD = makedist(z.randvarType,pList{:});
+                                
                                 Y = pdf (PD, p.domainValues);
                         end
                         tempComment=['Probabilty density of randVar object'];
@@ -133,7 +136,7 @@ classdef pdf  < nldat
                             case 'discrete uniform'
                                 Y = unidcdf(p.domainValues, pList{:});
                             otherwise
-                                PD = ProbDistUnivParam(z.randvarType,[pList{:}]);
+                                PD = makedist(z.randvarType,pList{:});
                                 Y = cdf (PD, p.domainValues);
                         end
                         tempComment=['Cumulative Probabilty of randVar object'];
