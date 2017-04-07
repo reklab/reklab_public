@@ -70,6 +70,17 @@ classdef irf < kern
             
         end
         
+        function t = domain(I),
+            nLags=length(I.dataSet);
+            nSides=get(I,'nSides');
+            dt=I.domainIncr;
+            t=[0:nLags-1]*dt;
+            if nSides==2,
+                t= t-((nLags-1)/2)*dt;
+            end
+            
+            
+        end
         function F = fresp(I)
             % Convert an IRF to frequency response
             F=fresp;
