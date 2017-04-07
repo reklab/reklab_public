@@ -12,7 +12,7 @@ i=irf(z,'nLags',101);
 plot(i); title('One sided-IRF'); 
 figNum=figNum+1; figure(figNum);
 r1=nlid_resid(i,z);
-streamer('One-sied predictions');
+streamer('One-sided predictions');
 
 % Hessianwhich 
 figNum=figNum+1; figure(figNum);
