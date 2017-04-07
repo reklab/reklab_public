@@ -26,7 +26,7 @@ classdef nlm < nltop
                 return
             elseif nargin==1,
                 N=nlmkobj(N,a);
-            elseif isa(a,'nlm')
+            elseif isa(a,'nl')
                 N=nlmkobj(a,varargin{:});
             else
                 N.nlmkobj(N,a,varargin{:});
