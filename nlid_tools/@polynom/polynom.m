@@ -6,13 +6,13 @@ classdef polynom < nltop
     % polyMean [0] - mean of polynomial
     % polyStd[1] - standard deviation of polynomial
     %         - polyMean and polySTD are used with hermite polynomials to scsle the input to
-    %          have zero mean and unti variance. These values must be set to the value expected when 
+    %          have zero mean and unti variance. These values must be set to the value expected when
     %          when creating hemrite polynomials a priori.
     % polyOrderSelectMode
     %   'auto' - polynomial order selected on the basis of the minimum data
-    %   length 
+    %   length
     %   'full' - polynomial order is set to polyOrderMax
-    %   'manual' - polynomial order is selected interactively.  
+    %   'manual' - polynomial order is selected interactively.
     properties
         polyCoef= nan;
         nInputs=1;
@@ -205,7 +205,7 @@ classdef polynom < nltop
             assign(sys.parameterSet);
             [~,nchan,nreal]=size(xin);
             segdat_flag = 0;
-            if strcmp(class(xin),'segdat') 
+            if strcmp(class(xin),'segdat')
                 segdat_flag = 1;
                 xIN = xin;
                 xin =nldat(xin(:,1));
@@ -221,7 +221,7 @@ classdef polynom < nltop
             end
             if strcmp(class(xin),'nldat')
                 y=xin;
-            elseif isa(class(xin),'segdat') 
+            elseif isa(class(xin),'segdat')
                 y=segdat;
             else
                 y = nldat;
@@ -231,38 +231,44 @@ classdef polynom < nltop
             if nin > nc,
                 error ('dimension mismatch');
             else
+                for iReal=1:nreal,
+                    x=double(xin(:,:,iReal));
+                    
+                    switch lower(polyType)
+                        
+                        case 'power'
+                            p=multi_pwr(x,sys.polyOrder);
+                            yout=p*sys.polyCoef(:);
+                        case 'hermite'
+                            for i=1:nchan,
+                                x(:,i) = (x(:,i) - sys.polyMean(i))/sys.polyStd(i);
+                            end
+                            p=multi_herm (x,sys.polyOrder);
+                            yout=p*sys.polyCoef(:);
+                        case 'tcheb'
+                            for i=1:nchan,
+                                % scale input with same scale factor
+                                % used in estimating the polynomial
+                                r=sys.polyRange;
+                                a=r(1,i);
+                                b=r(2,i);
+                                x(:,i)=(2*x(:,i) -(b+a))/(b-a);
+                            end
+                            p=multi_tcheb (x,sys.polyOrder);
+                            yout=p*sys.polyCoef(:);
+                    end
+                     Y(:,:,iReal)=yout;
                 
-                switch lower(polyType)
-                    case 'power'
-                        p=multi_pwr(x,sys.polyOrder);
-                        yout=p*sys.polyCoef(:);
-                    case 'hermite'
-                        for i=1:nchan,
-                            x(:,i) = (x(:,i) - sys.polyMean(i))/sys.polyStd(i);
-                        end
-                        p=multi_herm (x,sys.polyOrder);
-                        yout=p*sys.polyCoef(:);
-                    case 'tcheb'
-                        for i=1:nchan,
-                            % scale input with same scale factor
-                            % used in estimating the polynomial
-                            r=sys.polyRange;
-                            a=r(1,i);
-                            b=r(2,i);
-                            x(:,i)=(2*x(:,i) -(b+a))/(b-a);
-                        end
-                        p=multi_tcheb (x,sys.polyOrder);
-                        yout=p*sys.polyCoef(:);
                 end
-                
+               
             end
             if segdat_flag
                 dataset = xIN.dataSet;
-                dataset (:,1) = yout;
+                dataset (:,1) = Y;
                 y = xIN;
                 set(y,'dataSet',dataset);
             else
-                set(y,'dataSet',yout);
+                set(y,'dataSet',Y);
             end
             set(y,'comment','power-series prediction');
             % polynom/nlsim
@@ -288,7 +294,7 @@ classdef polynom < nltop
                 plot (x,y);
                 if nargin > 1,
                     hold on
-              
+                    
                     plot (z(:,1).dataSet, z(:,2).dataSet,'r.');
                     hold off
                 end
