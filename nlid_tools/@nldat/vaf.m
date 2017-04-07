@@ -86,6 +86,6 @@ switch DIM
 end
 vf=squeeze(vf);
 vf=nldat(vf);
-set(vf,'chanNames',{'VAF'},'chanUnits','%','domainIncr',di,'domainName',dn, 'comment',cmt);
+set(vf,'chanNames',{'VAF'},'chanUnits','%','domainIncr',di,'domainName',dn, 'comment',cmt, 'domainStart',x.domainStart);
 
 return
