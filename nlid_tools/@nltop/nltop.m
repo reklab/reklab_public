@@ -39,23 +39,23 @@ classdef nltop
                     ps = sys.parameterSet;
                     outPs=setval(ps,Prop,Value);
                     sys.parameterSet=outPs;
-%                     j=pindex(ps,Prop);
-%                     if j,
-%                         if isempty(Value), % Value not specified so show options
-%                             dispFull(ps(j));
-%                         else
-%                             if strcmp(sys.parameterSet(j).paramType,'number'),
-%                                 sys.parameterSet(j).paramValue={double(Value)};
-%                             else
-%                                 sys.parameterSet(j).paramValue={Value};
-%                             end
-%                         end
-%                     else
-%                         error([ Prop ' is not the name of a valid property or parameter']);
-%                     end
-%                 else
-%                     error([ Prop ' is not the name of a valid property or parameter']);
-%                     
+                    %                     j=pindex(ps,Prop);
+                    %                     if j,
+                    %                         if isempty(Value), % Value not specified so show options
+                    %                             dispFull(ps(j));
+                    %                         else
+                    %                             if strcmp(sys.parameterSet(j).paramType,'number'),
+                    %                                 sys.parameterSet(j).paramValue={double(Value)};
+                    %                             else
+                    %                                 sys.parameterSet(j).paramValue={Value};
+                    %                             end
+                    %                         end
+                    %                     else
+                    %                         error([ Prop ' is not the name of a valid property or parameter']);
+                    %                     end
+                    %                 else
+                    %                     error([ Prop ' is not the name of a valid property or parameter']);
+                    %
                 end
             end
             if ~isempty(inputname(1)),
@@ -93,8 +93,8 @@ classdef nltop
             Value=sys;
             for iS=1:length(S),
                 switch S(iS).type
-                    case '.',      
-                    Value = get(Value, S(iS).subs);
+                    case '.',
+                        Value = get(Value, S(iS).subs);
                     case '{}'
                         nDim=length(S(iS).subs);
                         if nDim==1,
@@ -105,7 +105,7 @@ classdef nltop
                             error ('Unexpected values');
                         end
                     otherwise
-                    Value=builtin('subsref',Value,S(iS));
+                        Value=builtin('subsref',Value,S(iS));
                 end
             end
         end
@@ -113,7 +113,7 @@ classdef nltop
         function Value= subsasgn (A,S,B)
             Value=A;
             sTemp=S;
-           if length(sTemp)== 2,
+            if length(sTemp)== 2,
                 disp('warning nlm/subsasgn may not work for this stucture');
                 newA=subsref(A,sTemp(1));
                 sTemp=sTemp(2);
@@ -131,7 +131,7 @@ classdef nltop
                     Value = builtin('subsasgn',A,S,B);
                     
             end
-       end
+        end
         
         
         
@@ -147,7 +147,7 @@ classdef nltop
         end
         
         function dispFull(sys)
-            % Dispay object with full paramter information 
+            % Dispay object with full paramter information
             builtin('disp',sys);
             if ismember('parameterSet',properties(sys))
                 disp('parameterSet:');
