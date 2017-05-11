@@ -8,8 +8,8 @@ classdef tvm < nlm
     % General Public License For details, see ../copying.txt and ../gpl.txt
     
     properties
-        tvStart=nan;
-        tvIncr=0;
+        tvStart=0;
+        tvIncr=1;
     end
     
     methods
@@ -95,7 +95,7 @@ classdef tvm < nlm
             
         end
         
-        function TVM = nlident ( TVM, Z, varargin)
+        function tvmIdent = nlident ( TVM, Z, modelPrototype, varargin)
             % Identify a tvm model
             % tvIdent = nlident ( tvm, Data, modelProtype, varargin
             %  tvm - templete for tv model
@@ -105,12 +105,21 @@ classdef tvm < nlm
             %   tvidentmethod -
             %        manual - created manually
             %        ensemble - ensemble data
-            disp(Z);
-            modelPrototype=varargin{1};
-            modelType =class(varargin{1});
+            modelType =class(modelPrototype);
             switch modelType
                 case 'irf'
-                    disp('estimate a TV irf');
+                     tvmIdent = nlidentIRF ( TVM, Z, modelPrototype );
+                case 'polynom'
+                     tvmIdent = nlidentPOLYNOM ( TVM, Z, modelPrototype );
+                otherwise
+                    disp(['tvm: identification not supported for model  type: ' modelType ]);
+            end
+          
+        end
+        
+        function tvmIdent = nlidentIRF ( TVM, Z, modelPrototype )
+            tvmIdent=TVM;
+             disp('estimate a TV irf');
                     X=squeeze(double(Z(:,1,:)));
                     Y=squeeze(double(Z(:,2,:)));
                     dt=Z.domainIncr;
@@ -141,16 +150,23 @@ classdef tvm < nlm
                         set(i,'dataSet', curIRF);
                         I{iReal}=i;
                     end
-                    set(TVM,'tvStart',TimeStart,'tvIncr',dt,'elements',I');
-                    
-                otherwise
-                    disp(['tvm: identification not supported for model  type: ' modelType ]);
-            end
-            %% Reformat for output.
-            
-            
-            disp(modelType);
+                    set(tvmIdent,'tvStart',TimeStart,'tvIncr',dt,'elements',I');
         end
+        
+          function tvmIdent = nlidentPOLYNOM ( TVM, Z, modelPrototype )
+              % identify a TV polynomial from an ensemble
+              tvmIdent=TVM;
+              [nSamp, nChan, nReal]=size(Z);
+              P=[];
+              for iSamp=1:nSamp
+                  z1=squeeze(Z(iSamp,1,:));
+                  z2=squeeze(Z(iSamp,2,:));
+                  z=cat(2,z1,z2)
+                  pTemp=nlident(modelPrototype,z);
+                  P{iSamp}=pTemp;
+              end
+               set(tvmIdent,'tvStart',Z.domainStart,'tvIncr',Z.domainIncr,'elements',P');             
+          end
         
         
         

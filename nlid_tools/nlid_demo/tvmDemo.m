@@ -1,3 +1,4 @@
+function tvDemo
 % tvmDemo - demonstrate tvm propoerties
 %% TV IRF
 %Generate an TV IRF
@@ -27,6 +28,53 @@ set(I,'nLags',50);
 tvIdent=nlident(tvm,Z,I);
 
 simY=nlsim(tvIdent,X);
+
+figure(1);
+subplot(3,1,1);
+plot(Y);
+title('Output');
+subplot (3,1,2);
+plot (simY);
+title('Estimated Output');
+subplot(3,1,3);
+plot(Y-simY);
+title('Residuals');
+
+
+%% TV Polynomial
+
+p=polynom('polyType','power','polyOrder',2)
+PI=[];
+coef=[ 0 1 1];
+for i=1:1000,
+    coef(3)=gain(i);
+     pTemp=set(p,'polyCoef',coef);
+     PI{i}=pTemp;
+end
+ TVM=tvm;
+ set(TVM,'elements',PI,'tvIncr',X.domainIncr);
+ plot(TVM); 
+ 
+Y=nlsim(TVM,X);
+Z=cat(2,X,Y); 
+
+
+tvIdent=nlident(tvm,Z,p);
+
+simY=nlsim(tvIdent,X);
+
+figure(1);
+subplot(3,1,1);
+plot(Y);
+title('Output');
+subplot (3,1,2);
+plot (simY);
+title('Estimated Output');
+subplot(3,1,3);
+plot(Y-simY);
+title('Residuals');
+
+
 
 
 ; 
