@@ -1,4 +1,4 @@
-function  nldat_tst( X )
+hfunction  nldat_tst( X )
 %UNTITLED Test opweration of nldat objects 
 %   Detailed explanation goes here
 x=randn(1000,1);
