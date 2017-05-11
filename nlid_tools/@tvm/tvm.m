@@ -96,6 +96,15 @@ classdef tvm < nlm
         end
         
         function TVM = nlident ( TVM, Z, varargin)
+            % Identify a tvm model
+            % tvIdent = nlident ( tvm, Data, modelProtype, varargin
+            %  tvm - templete for tv model
+            %  Data - input/output data set
+            %  modelPrototype - prootype of TV model
+            % varargin - name./value pairs
+            %   tvidentmethod -
+            %        manual - created manually
+            %        ensemble - ensemble data
             disp(Z);
             modelPrototype=varargin{1};
             modelType =class(varargin{1});
