@@ -988,7 +988,7 @@ classdef nldat < nltop
                 end
             end
             
-            function stairs (x)
+            function y= stairs (x)
                 % options not yet implements
                 [nsamp,nchan,nreal]=size(x);
                 yval = x.dataSet;
@@ -997,7 +997,13 @@ classdef nldat < nltop
                 else
                     xval=x.domainValues;
                 end
+                if nargout==0,
                 stairs (xval,yval);
+                else
+                    [x1,y1]=stairs(xval,yval);
+                    y=x;
+                    set(y,'dataSet',y1,'domainValues',x1);
+                end
             end
             
             
