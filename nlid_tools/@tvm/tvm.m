@@ -1,12 +1,28 @@
 classdef tvm < nlm
     % Time Varyibg Model class
-    % define and create time-varying model objects
     %  Parent: nlm
-    
-    % Copyright 2017, Robert E Kearney
+    % Time-varying model is stored as a cell array of nlm models with one
+    % element for each time.
+    %
+    % nlsim method supports nlmparallel cascade  models of arbitrary
+    % complexity comprising parallel cascades of IRF and POLYNOM elements.
+    %
+    % nlident method supports identification of:
+    %   irf, polynom and nl block models.
+    %
+    % tvIdentMethod is a parameter defining how the tv model was created
+    % Values are:
+    %   manual - model created manually
+    %   ensemble - model estimated using an ensemble idnetification method
+    %   basisexpansion - model estimate using a basis expansion mehtod
+    %
+    % see tvmDemo for demonstration of use.
+    %
+    %
+    %Copyright 2017, Robert E Kearney
     % This file is part of the nlid toolbox, and is released under the GNU
     % General Public License For details, see ../copying.txt and ../gpl.txt
-    
+    % need to docment how to use.
     properties
         tvStart=0;
         tvIncr=1;
@@ -19,7 +35,7 @@ classdef tvm < nlm
             TVM.parameterSet(1)=param('paramName','tvIdentMethod','paramDefault','manual',...
                 'paramHelp', 'Method used to create tvm ', ...
                 'paramType','select',...
-                'paramLimits',{'manual','ensemble'});
+                'paramLimits',{'manual','ensemble' 'basisexpansion'});
             if nargin==0;
                 return
             elseif nargin==1,
@@ -96,37 +112,60 @@ classdef tvm < nlm
         end
         
         function tvmIdent = nlident ( TVM, Z, modelPrototype, varargin)
+            % tvIdent = nlident ( tvm, Data, modelProtype,
             % Identify a tvm model
-            % tvIdent = nlident ( tvm, Data, modelProtype, varargin
-            %  tvm - templete for tv model
-            %  Data - input/output data set
-            %  modelPrototype - prootype of TV model
-            % varargin - name./value pairs
-            %   tvidentmethod -
-            %        manual - created manually
-            %        ensemble - ensemble data
+            % Inuts:
+            % TVM - template for the tv model
+            %   TVM.tcvIdentMethod determines identification method
+            %       = ensemble - ensemble TV idnetifiction method
+            %       = basisexpansion = temporal expansion method
+            %  Z  - input/output data set
+            %  modelPrototype - protype of TV model ( irf, polynom)
+            %   - propeties of the prototype determine those of the model
+            %   estimates.
+            % varargin - name/value pais defining options for temporal
+            % expansion identifiction.
+            % vrargin(1) = BASIS - polynom object defining the basis function used
+            %         withi the temporal expansion method
+            %        'periodic' 'no' 'Periodic data {yes/no}'
+            %         'method' 'Bayes' 'Linear estimation algorithm to be used {Bayes/OLS}'}...
             modelType =class(modelPrototype);
             switch modelType
                 case 'irf'
-                     tvmIdent = nlidentIRF ( TVM, Z, modelPrototype );
+                    tvmIdent = nlidentIRF ( TVM, Z, modelPrototype,  varargin{:});
                 case 'polynom'
-                     tvmIdent = nlidentPOLYNOM ( TVM, Z, modelPrototype );
+                    tvmIdent = nlidentPOLYNOM ( TVM, Z, modelPrototype );
                 otherwise
                     disp(['tvm: identification not supported for model  type: ' modelType ]);
             end
-          
+            
         end
         
-        function tvmIdent = nlidentIRF ( TVM, Z, modelPrototype )
+        function tvmIdent = nlidentIRF ( TVM, Z, modelPrototype, varargin )
+            % Identify a TV IRF Model
+            if nargin>3,
+                BASIS=varargin{1};
+                options={{'periodic' 'no' 'Periodic data {yes/no}'}...
+                    {'method' 'Bayes' 'Linear estimation algorithm to be used {Bayes/OLS}'}...
+                    };
+                if arg_parse_c('exact',options,varargin(2:end));
+                    return
+                end
+            end
             tvmIdent=TVM;
-             disp('estimate a TV irf');
-                    X=squeeze(double(Z(:,1,:)));
-                    Y=squeeze(double(Z(:,2,:)));
-                    dt=Z.domainIncr;
-                    nSides=modelPrototype.nSides;
-                    nLags=modelPrototype.nLags;
-                    approach=modelPrototype.irfIdMethod;
-                    conf_level=modelPrototype.irfErrorLevel;
+            disp('estimate a TV irf');
+            X=squeeze(double(Z(:,1,:)));
+            Y=squeeze(double(Z(:,2,:)));
+            dt=Z.domainIncr;
+            t=domain(Z);
+            nSides=modelPrototype.nSides;
+            nLags=modelPrototype.nLags;
+            approach=modelPrototype.irfIdMethod;
+            conf_level=modelPrototype.irfErrorLevel;
+            assign(TVM.parameterSet)
+            switch tvIdentMethod
+                case 'ensemble',
+                    
                     if strcmp(approach,'pseudo'),
                         [hIdent,bound,sing_vectors,cpu] = tvIdentEnsemble(X,Y,dt,nSides,nLags,approach,conf_level);
                     else
@@ -134,44 +173,59 @@ classdef tvm < nlm
                     end
                     if nSides ==2,
                         LagStart=-nLags*dt;
-                        TimeStart=nLags*dt;
+                        TimeStart=Z.domainStart+nLags*dt;
                     else
                         LagStart=0;
-                        TimeStart=(nLags-1)*dt;
+                        TimeStart=Z.domainStart+(nLags-1)*dt;
                     end
-                    i=modelPrototype;
-                    set(i,'nSides',nSides, 'domainIncr',dt, ...
-                        'nLags',nLags,'domainStart', LagStart, 'domainName','Lag');
-                    
-                    [nReal,nLag]=size(hIdent);
-                    I={};
-                    for iReal=1:nReal,
-                        curIRF=hIdent(iReal,:);
-                        set(i,'dataSet', curIRF);
-                        I{iReal}=i;
+                case 'basisexpansion'
+                    B=basisfunction(BASIS,t); B=double(B);
+                    [hIdent, x_pred, Extra] = tv_irf_ident_expansion(X, Y, B, nLags, nSides, dt,periodic, method);
+                    if nSides ==2,
+                        LagStart=-nLags*dt;
+                    else
+                        LagStart=0;
                     end
-                    set(tvmIdent,'tvStart',TimeStart,'tvIncr',dt,'elements',I');
+                    TimeStart=Z.domainStart;
+                otherwise
+                    error 'Bad Value for tvIdentMethod');
+            end
+            
+            i=modelPrototype;
+            set(i,'nSides',nSides, 'domainIncr',dt, ...
+                'nLags',nLags,'domainStart', LagStart, 'domainName','Lag');
+            
+            [nReal,nLag]=size(hIdent);
+            I={};
+            for iReal=1:nReal,
+                curIRF=hIdent(iReal,:);
+                set(i,'dataSet', curIRF);
+                I{iReal}=i;
+            end
+            set(tvmIdent,'tvStart',TimeStart,'tvIncr',dt,'elements',I');
         end
         
-          function tvmIdent = nlidentPOLYNOM ( TVM, Z, modelPrototype )
-              % identify a TV polynomial from an ensemble
-              tvmIdent=TVM;
-              [nSamp, nChan, nReal]=size(Z);
-              P=[];
-              for iSamp=1:nSamp
-                  z1=squeeze(Z(iSamp,1,:));
-                  z2=squeeze(Z(iSamp,2,:));
-                  z=cat(2,z1,z2)
-                  pTemp=nlident(modelPrototype,z);
-                  P{iSamp}=pTemp;
-              end
-               set(tvmIdent,'tvStart',Z.domainStart,'tvIncr',Z.domainIncr,'elements',P');             
-          end
+        
+        
+        function tvmIdent = nlidentPOLYNOM ( TVM, Z, modelPrototype )
+            % identify a TV polynomial from an ensemble
+            tvmIdent=TVM;
+            [nSamp, nChan, nReal]=size(Z);
+            P=[];
+            for iSamp=1:nSamp
+                z1=squeeze(Z(iSamp,1,:));
+                z2=squeeze(Z(iSamp,2,:));
+                z=cat(2,z1,z2)
+                pTemp=nlident(modelPrototype,z);
+                P{iSamp}=pTemp;
+            end
+            set(tvmIdent,'tvStart',Z.domainStart,'tvIncr',Z.domainIncr,'elements',P');
+        end
         
         
         
         function yPre = nlsim( TVM, xIn)
-            % Simulate the ensemble response of a TVM model
+            % yPre= nlsim( TVM, xIn) simulate a TVM model
             if TVM.tvIncr ~= xIn.domainIncr
                 error ('TV Model and input must have the same sampling rate');
             end
@@ -209,7 +263,7 @@ classdef tvm < nlm
             
             
             function y = tvIRFsim(H, X, i, nSides, dt)
-                % Simulate the response of a TV IRF
+                % Simulate the response of a TV for one element of an ensemble
                 [n,n,r]=size(X);
                 hlen = length(H);
                 z=zeros(hlen,1);

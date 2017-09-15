@@ -1,4 +1,4 @@
-function tvDemo
+function tvmDemo
 % tvmDemo - demonstrate tvm propoerties
 %% TV IRF
 %Generate an TV IRF
@@ -14,7 +14,7 @@ tvI={};
  TVM=tvm;
  
 set(TVM,'elements',tvI,'tvStart',0,'tvIncr',.01);
-figure(1);
+figure(1);clf;
 plot(TVM);
 
 x=randn(1000,1,200);
@@ -29,7 +29,7 @@ tvIdent=nlident(tvm,Z,I);
 
 simY=nlsim(tvIdent,X);
 
-figure(1);
+figure(2);clf
 subplot(3,1,1);
 plot(Y);
 title('Output');
@@ -53,7 +53,9 @@ for i=1:1000,
 end
  TVM=tvm;
  set(TVM,'elements',PI,'tvIncr',X.domainIncr);
- plot(TVM); 
+ figure (3);clf
+ plot(TVM);
+ title('TC Polyomial'); 
  
 Y=nlsim(TVM,X);
 Z=cat(2,X,Y); 
@@ -63,7 +65,7 @@ tvIdent=nlident(tvm,Z,p);
 
 simY=nlsim(tvIdent,X);
 
-figure(1);
+figure(4);clf
 subplot(3,1,1);
 plot(Y);
 title('Output');
