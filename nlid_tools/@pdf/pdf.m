@@ -49,8 +49,8 @@ classdef pdf  < nldat
                 end
                 x=double(z);
                 % Number of bins
-                if ~isnan(p.domainValues)
-                    set(p,'nBins',length(p.domainValues));
+                if ~isnan(p.domainValues(:))
+                    set(p,'nBins',length(p.domainValues(:)));
                 else
                     xMin=(min(x));
                     xMax=(max(x));
@@ -257,4 +257,6 @@ else
     
 end
 end
+
+
 
