@@ -1,15 +1,30 @@
-function figPrint(figList, fileName)
+function figPrint(figNum, fileName, printFlag, newFileFlag, pageOrient)
 %  figPrint(figList, fileName)
-% print multiple figures to a file 
-if nargin==0,
-   figLIst=get(0,'children');
+% utility routine to contorl printinig of figures
+% printFlag - logical variable; prnt if true
+% figNum - figure to print
+% fileName - name of pring file
+% newfileFlag - create new file if true, otherwise append
+if nargin<4,
+    newFileFlag=false;
+    
 end
-for i=1:length(figList),
-    figure(figList(i));
-   if i==1,
-           eval( ['print -dpsc '  fileName ';' ] );
-        else
-           eval( [' print -dpsc -append ' fileName ';' ]);
-        end
+if nargin <5,
+    pageOrient = 'portrait';
 end
+if nargin,3,
+    printFlag=true;
+end
+
+if ~printFlag,
+    return
+end
+
+if newFileFlag
+    orient(figNum,pageOrient); 
+    print (figNum, fileName, '-dpsc' ,'-bestfit');
+    
+else
+    print (figNum, fileName, '-dpsc','-append','-bestfit');
+    
 end
