@@ -291,6 +291,9 @@ classdef polynom < nltop
             set(y,'comment','power-series prediction');
             % polynom/nlsim
         end
+        function nlmtst (p)
+            polynomDemo
+        end
         function plot (p, z)
             % overload plot function for polynom objects
             % z - optional input showing orginal poly set
