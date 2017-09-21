@@ -96,7 +96,7 @@ if strcmp(periodic,'yes')
         for k=1:size(REG_M{p},2)
             BAS{p}=[BAS{p} Basis.*repmat(REG_M{p}(:,k),1,n_bas+1)];
         end
-        %staking all the matrices together
+        %stacking all the matrices together
         BASIS_USED=[BASIS_USED;BAS{p}];
     end
 elseif strcmp(periodic,'no')
@@ -129,12 +129,13 @@ end
 
 
 %estimation of TV-IRF
+vecY=Y(:);
 if strcmp(method,'Bayes')
-    [~,mu,noise_var,lk,COV]=TV_Bayes(vec(Y),[],BASIS_USED);
+    [~,mu,noise_var,lk,COV]=TV_Bayes(vecY,[],BASIS_USED);
     
 elseif strcmp(method,'OLS')
-    mu=pinv(BASIS_USED)*vec(Y);
-    noise_var=var(vec(Y)-BASIS_USED*mu);
+    mu=pinv(BASIS_USED)*vecY;
+    noise_var=var(vecY-BASIS_USED*mu);
     TEMP=BASIS_USED'*BASIS_USED;
     COV=(noise_var/Ns)*(eye(size(TEMP))/(TEMP));
     lk=NaN;
