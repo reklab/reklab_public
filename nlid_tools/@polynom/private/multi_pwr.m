@@ -1,6 +1,6 @@
 function [W, flags] = multi_pwr(V, max_order);
 %
-%  usage W = multi_herm2(V, max_order);
+%  usage W = multi_pwr(V, max_order);
 %
 %  given a collection of column vectors, V, this function returns
 %  a matrix of all of the power functions up to max_order applied
