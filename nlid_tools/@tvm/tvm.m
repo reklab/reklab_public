@@ -199,7 +199,7 @@ classdef tvm < nlm
             I={};
             for iReal=1:nReal,
                 curIRF=hIdent(iReal,:);
-                set(i,'dataSet', curIRF);
+                set(i,'dataSet', curIRF(:));
                 I{iReal}=i;
             end
             set(tvmIdent,'tvStart',TimeStart,'tvIncr',dt,'elements',I');
@@ -222,6 +222,21 @@ classdef tvm < nlm
             set(tvmIdent,'tvStart',Z.domainStart,'tvIncr',Z.domainIncr,'elements',P');
         end
         
+        function V=tvResid ( tvModel, Z);
+            simY=nlsim(tvModel,Z(:,1,:));
+            Y=Z(:,2,:);
+            subplot(3,1,1);
+            plot(Y);
+            title('Output');
+            subplot (3,1,2);
+            plot (simY);
+            title('Estimated Output');
+            subplot(3,1,3);
+            plot(Y-simY);
+            V=vaf(Y,simY,'total');
+            title(['Residuals VAF= ' num2str(V)]);
+            
+        end
         
         
         function yPre = nlsim( TVM, xIn)
