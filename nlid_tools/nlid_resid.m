@@ -102,6 +102,6 @@ if plotflag,
     T= ('Residuals' );
     title(T);
 end
-disp(Vt);
+
 
 end
