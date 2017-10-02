@@ -153,7 +153,6 @@ classdef tvm < nlm
                 end
             end
             tvmIdent=TVM;
-            disp('estimate a TV irf');
             X=squeeze(double(Z(:,1,:)));
             Y=squeeze(double(Z(:,2,:)));
             dt=Z.domainIncr;
@@ -215,7 +214,7 @@ classdef tvm < nlm
             for iSamp=1:nSamp
                 z1=squeeze(Z(iSamp,1,:));
                 z2=squeeze(Z(iSamp,2,:));
-                z=cat(2,z1,z2)
+                z=cat(2,z1,z2);
                 pTemp=nlident(modelPrototype,z);
                 P{iSamp}=pTemp;
             end
@@ -274,8 +273,7 @@ classdef tvm < nlm
                 index=index+1;
             end
             set(yPre,'dataSet',yData);
-            
-            
+       
             
             function y = tvIRFsim(H, X, i, nSides, dt)
                 % Simulate the response of a TV for one element of an ensemble
@@ -312,6 +310,10 @@ classdef tvm < nlm
                 x=double(xp); x=squeeze(x);
                 y = (flipud(H)'*x*dt)';
             end
+        end
+        
+        function nlmtst(sys)
+            tvmDemo;
         end
         
         
