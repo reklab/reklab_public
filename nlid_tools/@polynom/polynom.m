@@ -41,7 +41,7 @@ classdef polynom < nltop
                 'paramType','select','paramLimits',{'auto','full','manual'});
             p.parameterSet(3) =param('paramName','polyOrderMax','paramDefault',10,...
                 'paramHelp','maximum order to evaluate');
-            p.parameterSet(4) =param('paramName','B_spline_SD','paramDefault',NaN,...
+            p.parameterSet(4) =param('paramName','B_spline_SD','paramDefault',1,...
                 'paramHelp','Standard deviation of splines');
             p.comment='polynomial model';
             if nargin==0;
@@ -83,7 +83,8 @@ classdef polynom < nltop
         function V= basisfunction (P, x)
             % Returns basis functions for polynominal P evaluated over x
             if nargin==1,
-                x=(-1:.01:1)';
+                pRange=P.polyRange;
+                x=(pRange(1):.01:pRange(2))';
             end
             assign(P.parameterSet)
             polyOrder=P.polyOrder;
@@ -271,6 +272,10 @@ classdef polynom < nltop
                             p=multi_tcheb (x,sys.polyOrder);
                             yout=p*sys.polyCoef(:);
                         case 'b_spline'
+                            [m,n]=size(sys.polyCoef);
+                            if n ~=2 
+                                error ('Polynom - polyCoef must be a 2d matrix for B-splines');
+                            end
                             centers=sys.polyCoef(:,1);
                             p=generate_B_splines(x,centers, B_spline_SD);
                             yout=p*sys.polyCoef(:,2);
