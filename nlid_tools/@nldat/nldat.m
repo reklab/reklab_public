@@ -25,10 +25,9 @@ classdef nldat < nltop
                 end
                 
             elseif isa(z,'double')
-                [nsamp,nchan]=size(z);
+                [nsamp,nchan,nreal]=size(z);
                 if (nsamp == 1) & (nchan >10),
                     warning('Row vector. Transposing');
-                    z=z';
                 end
                 d.dataSet=z;
                 [nsamp,nchan,nreal]=size(z);
@@ -498,12 +497,11 @@ classdef nldat < nltop
         end
         
         function y = mean (x, DIM);
-            y=(x);
             if nargin==1,
                 DIM=1;
-            end
+            end        
+            y=(mean(x.dataSet,DIM));
             set(y,'comment',['Mean(' inputname(1) ',' int2str(DIM) ')' ]);
-            y.dataSet=mean(x.dataSet,DIM);
         end
         
         function h=line(x,y)
@@ -524,6 +522,12 @@ classdef nldat < nltop
                 % Wrapper of log function for nldat objects
                 z=x;
                 set (z,'dataSet',log(x.dataSet));
+            end
+            
+               function z = log10(x)
+                % Wrapper of log10 function for nldat objects
+                z=x;
+                set (z,'dataSet',log10(x.dataSet));
             end
             
             function [z, iMax]  = max (x,y, DIM);
@@ -690,7 +694,48 @@ classdef nldat < nltop
                 end
             end
             
-            function z = plus (x,y);
+       
+            
+            function z = lt (x,y);
+                % lt function for nldat variables;
+                if isnumeric(x)
+                    x=nldat(x);
+                end
+                if isnumeric(y)
+                    y=nldat(y);
+                end
+                
+                sx=size(x);
+                xchan=sx(2);
+                sy= size(y);
+                ychan=sy(2);
+                s1= [ 1 1 1];
+                if sx==sy
+                    z=x;
+                    z.dataSet= x.dataSet < y.dataSet;
+                elseif sx == s1
+                    z = y;
+                    z.dataSet= x.dataSet < y.dataSet;
+                elseif sy == s1,
+                    z = x;
+                    z.dataSet= x.dataSet < y.dataSet;
+                elseif  sx == [1 ychan 1 ]
+                    z=y;
+                    for i=1:xchan,
+                        z.dataSet(:,i,:) = x.dataSet(:,i,:) < y.dataSet(:,i,:);
+                    end
+                elseif sy == [1 xchan 1 ];
+                    z=x;
+                    for i=1:xchan,
+                        z.dataSet(:,i,:) = x.dataSet(:,i,:) < y.dataSet(:,i,:);
+                    end
+                else
+                    error ('Dimension missmatch');
+                end
+                z.comment = [x.comment ' LT ' y.comment];
+            end
+            
+             function z = plus (x,y);
                 % plus function for nldat variables;
                 if isnumeric(x)
                     x=nldat(x);
