@@ -135,6 +135,8 @@ classdef tvm < nlm
                     tvmIdent = nlidentIRF ( TVM, Z, modelPrototype,  varargin{:});
                 case 'polynom'
                     tvmIdent = nlidentPOLYNOM ( TVM, Z, modelPrototype );
+                case 'nlbl' % Hammerstein system 
+                     tvmIdent = nlidentNLBL ( TVM, Z, modelPrototype,  varargin{:});
                 otherwise
                     disp(['tvm: identification not supported for model  type: ' modelType ]);
             end
@@ -220,6 +222,65 @@ classdef tvm < nlm
             end
             set(tvmIdent,'tvStart',Z.domainStart,'tvIncr',Z.domainIncr,'elements',P');
         end
+        
+        function tvmIdent = nlidentNLBL ( TVM, Z, modelPrototype, varargin )
+            % Identify a TVNLBL Model
+            
+            tvmIdent=TVM;
+            X=squeeze(double(Z(:,1,:)));
+            Y=squeeze(double(Z(:,2,:)));
+            dt=Z.domainIncr;
+            polyPrototype=modelPrototype{1};
+            irfPrototype=modelPrototype{2};
+            polyOrder=polyPrototype.polyOrderMax
+            nSides=irfPrototype.nSides;
+            nLags=irfPrototype.nLags;
+            if nSides==1
+                M1=0;
+                M2=nLags-1;
+            else
+                 M1=round(nLags/nSides);
+                 M2=M1;
+            end          
+            tol = .01;
+               [coeffs,range,IRF,num_iterations] = tv_nlbl_ident_ensemble(X,Y,dt,polyOrder,M1,M2,tol);
+
+           
+            assign(TVM.parameterSet)
+%             switch tvIdentMethod
+%                 case 'ensemble'
+%                     [coeffs,range,IRF,num_iterations] = tv_nlbl_ident_ensemble(X,Y,dt,polyOrder,M1,M2,tol);
+                    
+                    if nSides ==2
+                        LagStart=-nLags*dt;
+                        TimeStart=Z.domainStart+nLags*dt;
+                    else
+                        LagStart=0;
+                        TimeStart=Z.domainStart+(nLags-1)*dt;
+                    end
+
+            
+            i=irfPrototype;
+            set(i,'nSides',nSides, 'domainIncr',dt, ...
+                'nLags',nLags,'domainStart', LagStart, 'domainName','Lag');
+            p=polyPrototype;
+            n=modelPrototype;
+            [nReal,nLag]=size(IRF);
+            I={};P={};
+            N={}; 
+            for iReal=1:nReal,
+                curIRF=IRF(iReal,:);
+                set(i,'dataSet', curIRF(:));
+                I{iReal}=i;
+                set(p,'polyCoef',coeffs{iReal});
+                P{iReal}=p;              
+                set(n,'elements',{p i});
+                N{iReal}=n;
+            end
+            
+            set(tvmIdent,'tvStart',TimeStart,'tvIncr',dt,'elements',N');
+        end
+        
         
         function V=tvResid ( tvModel, Z);
             simY=nlsim(tvModel,Z(:,1,:));
