@@ -5,24 +5,24 @@ function tvmDemo
 figNum=0;
 disp ('tvIRF identification');
 disp('Generate TV IRF');
-gain=zeros(200,1);
+gain=ones(200,1);
 gain=cat(1,gain,linspace(0,5,600)');
-gain=cat(1,gain, zeros(200,1));
+gain=cat(1,gain, ones(200,1));
 plot(gain)
 tvI={};
  for i=1:1000,
      tvTemp=irf2(irf,'g',gain(i));
      tvI{i}=tvTemp;
  end
- TVM=tvm;
-set(TVM,'elements',tvI,'tvStart',0,'tvIncr',.01);
+ TVirf=tvm;
+set(TVirf,'elements',tvI,'tvStart',0,'tvIncr',.01);
 figNum=figNum+1; figure(figNum);clf;
-plot(TVM);
+plot(TVirf);
 %% simulate TV responses
 disp('Simulate at TV Response');
 x=randn(1000,1,200);
 X=nldat(x,'domainIncr',.01);
-Y=nlsim(TVM,X);
+Y=nlsim(TVirf,X);
 Z=cat(2,X,Y); 
 set(Z,'chanNames',{ 'Input' 'OutPut'});
 figNum=figNum+1; figure(figNum);clf;
@@ -48,29 +48,26 @@ xlabel('Time (s)');
 
 
 
-
-
-
 %% Estimate a TV IRF using ensemble method 
 disp('TV IRF Ensemble method');
-tvIRF = tvm;
-set(tvIRF,'tvIdentMethod','ensemble'); 
-tvIRF=nlident(tvIRF, Z, I);
+tvIRFensemble = tvm;
+set(tvIRFensemble,'tvIdentMethod','ensemble'); 
+tvIRFensemble=nlident(tvIRFensemble, Z, I);
 figNum=figNum+1; figure(figNum);clf;
 
-plot(tvIRF);
+plot(tvIRFensemble);
 figNum=figNum+1; figure(figNum);clf;
 
 title('TV IRF ensemble estimate');
 figNum=figNum+1; figure(figNum);clf;
 
-tvResid(tvIRF,Z);
+tvResid(tvIRFensemble,Z);
 
 
 %% Estimate a TV IRF using basis expansion 
 disp('Estimate a TV IRF using basis expansion') 
-tvIRF = tvm;
-set(tvIRF,'tvIdentMethod','basisexpansion'); 
+tvIRFbasis = tvm;
+set(tvIRFbasis,'tvIdentMethod','basisexpansion'); 
 BF=polynom;
 set(BF,'polyType','B_spline','polyOrder',10, 'polyRange',[ 0 10],'B_spline_SD',1);
 nodeLocations = .5:1:10;
@@ -79,48 +76,48 @@ t=domain(Z);
 BF1=basisfunction(BF,t); 
 plot(BF1); 
 figNum=figNum+1; figure(figNum);clf;
-tvIRF=nlident(tvIRF, Z(:,:,1:50), I,BF,'periodic','yes','method','Bayes');
+tvIRFbasis=nlident(tvIRFbasis, Z(:,:,1:50), I,BF,'periodic','yes','method','Bayes');
 figNum=figNum+1; figure(figNum);clf;
 
-plot(tvIRF);
+plot(tvIRFbasis);
 title('TV IRF basic function  estimate');
 figNum=figNum+1; figure(figNum);clf;
-tvResid(tvIRF,Z);
+tvResid(tvIRFbasis,Z);
 subplot (3,1,1); title('Residuals for TV IRF Basis Function Estimate');
 
 
 %% TV Polynomial
 disp('TV polynomial demo');
-% Generate a TV PolynomiAL
-p=polynom('polyType','power','polyOrder',2)
+% Generate a TV Polynomial
+p=polynom('polyType','power','polyOrder',2,'polyOrderMax',3)
 PI=[];
 coef=[ 0 1 1];
 for i=1:1000,
-    coef(3)=gain(i);
+    coef(2)=1+gain(i);
      pTemp=set(p,'polyCoef',coef);
      PI{i}=pTemp;
 end
- TVM=tvm;
- set(TVM,'elements',PI,'tvIncr',X.domainIncr);
+ TVpoly=tvm;
+ set(TVpoly,'elements',PI,'tvIncr',X.domainIncr);
 figNum=figNum+1; figure(figNum);clf;
 
- plot(TVM);
+ plot(TVpoly);
  title('TV Polyomial'); 
  % Simulate response to TV polynomial
-Y=nlsim(TVM,X);
-Z=cat(2,X,Y); 
+Ypoly=nlsim(TVpoly,X);
+Zpoly=cat(2,X,Ypoly); 
 figNum=figNum+1; figure(figNum);clf;
-plot(Z);
+plot(Zpoly);
 title('Simulated TV polynmial response'); 
 
 
-%% Identify a TV polynomial
-tvIdent=nlident(tvm,Z,p);
+% Identify a TV polynomial
+TVpolyIdent=nlident(tvm,Zpoly,p);
 figNum=figNum+1; figure(figNum);clf;
-plot(tvIdent);
+plot(TVpolyIdent);
 title('Estimated TV Polynomial'); 
 %
-simY=nlsim(tvIdent,X);
+simY=nlsim(TVpolyIdent,X);
 figNum=figNum+1; figure(figNum);clf;
 subplot(3,1,1);
 plot(Y);
@@ -131,8 +128,38 @@ title('Estimated Output');
 subplot(3,1,3);
 plot(Y-simY);
 title('Residuals');
-%% TV Hammerstein Identification 
-disp('TV Hammerstein  - Still to come');
+%% TV Hammerstein Identification - ensemble method
+disp('TV Hammerstein  - In progres');
+polyElements=TVpoly.elements;
+irfElements=TVirf.elements;
+nElements=length(polyElements);
+NLBL=nlbl;
+
+for i=1:1000,
+    set(NLBL,'elements',{polyElements{i} irfElements{i}});
+    nlblElements{i}=NLBL;
+end
+TVnlbl=tvm;
+set(TVnlbl,'elements',nlblElements,'tvStart',0,'tvIncr',.01);
+y1=nlsim(TVirf,Ypoly);
+
+yNLBL=nlsim(TVnlbl,X);
+
+Znlbl=cat(2,X,yNLBL); 
+figNum=figNum+1; figure(figNum);clf;
+plot(simNLBL)
+
+
+TVnlblIdent=nlident(tvm,Zpoly,NLBL);
+yPre=nlsim(TVnlblIdent, X);
+
+
+
+
+
+
+
+
 
 
 
