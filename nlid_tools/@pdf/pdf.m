@@ -55,6 +55,10 @@ classdef pdf  < nldat
                     xMin=(min(x));
                     xMax=(max(x));
                     xRange=xMax-xMin;
+                    if xRange==0,
+                        xRange=1;
+                    end
+                        
                     delX=xRange/(nBins-1);
                     binCenters=(0:delX:xRange)+xMin;
                     p.domainValues=binCenters(:);
@@ -246,7 +250,7 @@ elseif(strcmp(option,'probability')),
 elseif(strcmp(option,'density')),
     binwidth=unique(chop(diff(dom),5));
     if length(binwidth)>1,
-        error('Different bindwidths not yet supported');
+dbqu        error('Different bindwidths not yet supported');
     end
     if dist(1) ~=0 | dist(end)~=0,
         % warning('first and last bins must be empty for density estimates');
