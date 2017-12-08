@@ -500,7 +500,7 @@ classdef nldat < nltop
             if nargin==1,
                 DIM=1;
             end        
-            y=(mean(x.dataSet,DIM));
+            y=nldat(mean(x.dataSet,DIM));
             set(y,'comment',['Mean(' inputname(1) ',' int2str(DIM) ')' ]);
         end
         
@@ -523,6 +523,13 @@ classdef nldat < nltop
                 z=x;
                 set (z,'dataSet',log(x.dataSet));
             end
+            
+            function loglog(x,varargin)
+                % wrapper for loglog
+                arg=cat(2,{ 'xmode' 'log' 'ymode' 'log' } ,varargin{:}); 
+                plot(x,arg);
+            end
+                
             
                function z = log10(x)
                 % Wrapper of log10 function for nldat objects
@@ -583,6 +590,11 @@ classdef nldat < nltop
                     end
                 end
                 set (z,'comment','min');
+            end
+            
+            function z = mod (x,y)
+                  z=x;
+                set (z,'dataSet',mod(x.dataSet, double(y)));
             end
             
             function z = minus (x,y);
@@ -875,12 +887,12 @@ classdef nldat < nltop
                     for i=1:xchan,
                         z.dataSet(:,i,:) = x.dataSet(:,i,:) ./ y.dataSet(:,i,:);
                     end
-                elseif sy == [1 xchan 1 ];
+                elseif sy == [1 xchan 1 ] | sy == [ sx(1) sx(2) 1];
                     z=x;
                     for i=1:xchan,
                         z.dataSet(:,i,:) = x.dataSet(:,i,:) ./ y.dataSet(:,i,:);
                     end
-                else
+                elseif selse
                     error ('Dimension missmatch');
                 end
                 z.comment = [ x.comment ' ./ ' y.comment];
