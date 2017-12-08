@@ -52,6 +52,10 @@ classdef spect < nldat
             elseif nargin > 2,
                 set(S,varargin);
             end
+            
+            if any(isnan(double(z))),
+                error('Signal contains NaNs');
+            end
             tempComment=S.comment;
             
             [nsamp,nchan,nreal]=size(z);
