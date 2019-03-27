@@ -35,14 +35,14 @@ classdef polynom < nltop
             % add object  specific parameters
             p.parameterSet(1) =param('paramName','polyType','paramDefault','hermite', ...
                 'paramHelp','polynomial type',...
-                'paramType','select','paramLimits',{'hermite','power','tcheb' 'B_spline'});
+                'paramType','select','paramLimits',{'hermite','power','tcheb' 'B_spline' 'laguerre'});
             p.parameterSet(2) =param('paramName','polyOrderSelectMode','paramDefault','auto',...
                 'paramHelp','order selection method',...
                 'paramType','select','paramLimits',{'auto','full','manual'});
             p.parameterSet(3) =param('paramName','polyOrderMax','paramDefault',10,...
                 'paramHelp','maximum order to evaluate');
-            p.parameterSet(4) =param('paramName','B_spline_SD','paramDefault',1,...
-                'paramHelp','Standard deviation of splines');
+            polyType=get(p,'polyType');
+            
             p.comment='polynomial model';
             if nargin==0;
                 return
@@ -52,6 +52,48 @@ classdef polynom < nltop
                 p=nlmkobj(p,pin, varargin{:});
             end
             
+        end
+        
+        function sys = set (sys, varargin)
+            % Overlaid set function for polynom objects
+            v=varargin;
+            if iscell(varargin{1}) & length(varargin{1})>1,
+                varargin=varargin{1};
+            end
+            if length(varargin)==1,
+                varargin = { varargin{1} []};
+            end
+            for i=1:2:length(varargin),
+                Prop=varargin{i};
+                Value=varargin{i+1};
+                % Check to see if it is a name is a property
+                if ismember(Prop, properties(sys)),
+                    sys.(Prop)=Value;
+                elseif ismember('parameterSet',fieldnames(sys))
+                    % Check to see if it is a parameter value
+                    % Must change so that handles parameters of different
+                    % names.
+                    ps = sys.parameterSet;
+                    outPs=setval(ps,Prop,Value);
+                    if strcmp(Prop,'polyType'),
+                        disp('polyType');
+                        switch Value
+                            case 'B_spline'
+                                outPs(4) =param('paramName','B_spline_SD','paramDefault',1,...
+                                    'paramHelp','Standard deviation of splines');
+                            case 'laguerre'
+                                outPs(4) =param('paramName','alfa','paramDefault',.5,...
+                                    'paramHelp','alpha parameter for Lagurre polynomials');
+                            otherwise
+                                outPs=outPs(1:3);
+                        end
+                    end
+                    sys.parameterSet=outPs;
+                end
+            end
+            if ~isempty(inputname(1)),
+                assignin('caller',inputname(1),sys);
+            end
         end
         
         function p= set.polyCoef (p, value)
@@ -80,12 +122,14 @@ classdef polynom < nltop
             end
         end
         
+        
         function V= basisfunction (P, x)
             % Returns basis functions for polynominal P evaluated over x
             if nargin==1,
                 pRange=P.polyRange;
                 x=(pRange(1):.01:pRange(2))';
             end
+            nSamp=length(x); 
             assign(P.parameterSet)
             polyOrder=P.polyOrder;
             polyType=get(P,'polyType');
@@ -98,6 +142,8 @@ classdef polynom < nltop
                     v=multi_tcheb(x,polyOrder);
                 case 'B_spline'
                     v=generate_B_splines ( x, P.polyCoef, B_spline_SD);
+                case 'laguerre'
+                    v=generate_laguerre_basis(nSamp, polyOrder, alfa);
             end
             V=nldat(v,'comment',['Basis functions for ' polyType ],'domainValues',x,'domainName','Input value');
         end
@@ -273,7 +319,7 @@ classdef polynom < nltop
                             yout=p*sys.polyCoef(:);
                         case 'b_spline'
                             [m,n]=size(sys.polyCoef);
-                            if n ~=2 
+                            if n ~=2
                                 error ('Polynom - polyCoef must be a 2d matrix for B-splines');
                             end
                             centers=sys.polyCoef(:,1);
@@ -355,7 +401,7 @@ classdef polynom < nltop
         
         
         
-       
+        
         
         function p = nlident (pin, z, varargin );
             % polynom/nlident - Overlaid nlident for polynom class
@@ -414,15 +460,15 @@ classdef polynom < nltop
                 case 'b_spline'
                     % set defaults centers and SD  not defined
                     if isnan(p.polyCoef),
-                        disp('B_spline Using default centers and SD'); 
+                        disp('B_spline Using default centers and SD');
                         xmin=p.polyRange(1);
                         xmax=p.polyRange(2);
                         deltx=(xmax-xmin)/p.polyOrder
-                        centers=[xmin:deltx:xmax]'; 
+                        centers=[xmin:deltx:xmax]';
                         p.polyCoef=centers;
                         B_spline_SD=deltx;
-                        set(p,'B_spline_SD',B_spline_SD); 
-                    end                  
+                        set(p,'B_spline_SD',B_spline_SD);
+                    end
                     bf=generate_B_splines(x,centers,B_spline_SD);
                     W=double(bf) ;
             end
@@ -461,7 +507,7 @@ classdef polynom < nltop
                     error('unrecognized mode');
             end
             
-            %% B spine 
+            %% B spine
             
             if strcmp(polyType,'B_spline'),
                 splineCoef=p.polyCoef;
@@ -479,163 +525,198 @@ classdef polynom < nltop
         
     end
 end
-     function B = generate_B_splines(q,centers,sd)
-            % q = domain
-            % centers = centers for splines
-            % sd - standard deviations for each spline
-            q=q(:);
-            number=length(centers);
-            B=zeros(length(q),number);
-            for i=1:number
-                B(:,i)=(1/(2*pi*sd)^(1/2))*exp(-(0.5/(sd^2))*((q-centers(i)).*(q-centers(i))));
-            end
-            
-            return
-            
-     end
-        function p = nltransform(pin,inputs)
-            
-            
-            ni = length(inputs);
-            
-            if rem(ni,2)~=0,
-                error('Property/value pairs must come in even number.')
-            end
-            
-            
-            p = pin;
-            
-            assign (pin.parameterSet);
-            for i = 1:2:ni,
-                % Set each PV pair in turn
-                Property=inputs{i};
-                Value = inputs{i+1};
-                set(p, Property,Value);
-                if  ~isnan(p.polyCoef)
-                    switch Property
-                        case 'polyOrder'
-                            % change order and pad/truncate coeff
-                            
-                            NumInputs = p.nInputs;
-                            OldOrder = pin.polyOrder;
-                            OldCoeffs = pin.polyCoef;
-                            NewCoeffs = multi_pwr(zeros(NumInputs,1),Value);
-                            if NewOrder > OldOrder
-                                OldLength = length(OldCoeffs);
-                                NewCoeffs(1:OldLength) = OldCoeffs;
-                            else
-                                NewLength = length(NewCoeffs);
-                                NewCoeffs = OldCoeffs(1:NewLength);
-                            end
-                            polyCoef = NewCoeffs;
-                            
-                        case 'PolyType'
-                            % change type and recompute coeff
-                            
-                            if strcmp(PolyType,Value)
-                                % Type is already set so do nothing
-                                break
-                            elseif p.nInputs > 1,
-                                error ('Conversion not yet implemented for multiple inputs')
-                            else
-                                Pstats = [p.polyRange(2) p.polyRange(1) p.polyMean p.polyStd];
-                                Pstats = AllStats(Pstats);
-                                cold=(piN.Coef);
-                                OldType = PolyType;
-                                cnew = poly_convert(cold, Pstats, OldType,Value);
-                                p.polyCoef=cnew;
-                            end
-                            
-                        otherwise
-                            % set behaves appropriately, so use it.
-                            
-                    end
-                end
-            end
+%%
+function B = generate_B_splines(q,centers,sd)
+% q = domain
+% centers = centers for splines
+% sd - standard deviations for each spline
+q=q(:);
+number=length(centers);
+B=zeros(length(q),number);
+for i=1:number
+    B(:,i)=(1/(2*pi*sd)^(1/2))*exp(-(0.5/(sd^2))*((q-centers(i)).*(q-centers(i))));
+end
+
+return
+
+end
+
+
+%%
+function b = generate_laguerre_basis (irf_len,max_order,alfa)
+%% This function generates the Laguerre orthonormal basis functions
+%++ Author: Ehsan Sobhani (10 April 2014)
+%++ This is based on Maremaleris book OR formula (11) of his paper titled:
+%++ "Identification of Nonlinear Biological Systems Using Laguerre Expansions of Kernels", Annals of Biomed. Eng., vol. 21, pp. 573-589, 1993.
+
+%++ The inputs are:
+% 1) irf_len (integer number of samples)
+% 2) max_order (integer). The maximum order of Laguerre expansion.
+% 3) alfa (0<alfa<1). Laguerre parameter.
+
+%++ The outputs are:
+% 1) b (real with size [irf_len,max_order+1])
+
+%=== Initialization
+b = zeros(irf_len,max_order+1);
+
+for t = 1:irf_len
+    for j = 0:max_order
+        gain = alfa^((t-j)/2) * (1-alfa)^(0.5);
+        summation = 0;
+        for k = 0:j
+            argument = (-1)^k * combination(t,k) * combination(j,k) * alfa^(j-k) * (1-alfa)^k;
+            summation = summation + argument;
         end
-        
-        
-        function PStats = AllStats(PStats)
-            % fills in missing input stats
-            
-            if isnan(PStats(1))
-                % range has not yet been specified
-                % use 3 sigma bounds around mean (if set)
-                if isnan(PStats(3))
-                    % mean not set either, assume zero mean
-                    PStats(3) = 0;
+        b(t,j+1) = gain * summation;
+    end
+end
+
+end
+%%
+function p = nltransform(pin,inputs)
+% Transform polynomial from one basis to another
+
+ni = length(inputs);
+
+if rem(ni,2)~=0,
+    error('Property/value pairs must come in even number.')
+end
+
+
+p = pin;
+
+assign (pin.parameterSet);
+for i = 1:2:ni,
+    % Set each PV pair in turn
+    Property=inputs{i};
+    Value = inputs{i+1};
+    set(p, Property,Value);
+    if  ~isnan(p.polyCoef)
+        switch Property
+            case 'polyOrder'
+                % change order and pad/truncate coeff
+                
+                NumInputs = p.nInputs;
+                OldOrder = pin.polyOrder;
+                OldCoeffs = pin.polyCoef;
+                NewCoeffs = multi_pwr(zeros(NumInputs,1),Value);
+                if NewOrder > OldOrder
+                    OldLength = length(OldCoeffs);
+                    NewCoeffs(1:OldLength) = OldCoeffs;
+                else
+                    NewLength = length(NewCoeffs);
+                    NewCoeffs = OldCoeffs(1:NewLength);
                 end
-                if isnan(PStats(4))
-                    PStats(4) = 1;
+                polyCoef = NewCoeffs;
+                
+            case 'PolyType'
+                % change type and recompute coeff
+                
+                if strcmp(PolyType,Value)
+                    % Type is already set so do nothing
+                    break
+                elseif p.nInputs > 1,
+                    error ('Conversion not yet implemented for multiple inputs')
+                else
+                    Pstats = [p.polyRange(2) p.polyRange(1) p.polyMean p.polyStd];
+                    Pstats = AllStats(Pstats);
+                    cold=(piN.Coef);
+                    OldType = PolyType;
+                    cnew = poly_convert(cold, Pstats, OldType,Value);
+                    p.polyCoef=cnew;
                 end
-                PStats(1) = PStats(3)+3*PStats(4);
-                PStats(2) = PStats(3)-3*PStats(4);
-            end
-            
-            if isnan(PStats(3))
-                % mean has not been specified
-                % let the max and min be 3 sigma around the mean.
-                PStats(3) = (PStats(1)+PStats(2))/2;
-                PStats(4) = (PStats(1)-PStats(3))/3;
-            end
-            
-            return
+                
+            otherwise
+                % set behaves appropriately, so use it.
+                
         end
-        
-        
-        function [coefs,mdls,vafs] = poly_mdls(yss,LenY,R,QtY,OrderMax,nin);
-            
-            mdls = zeros(OrderMax+1,1);
-            vafs = mdls;
-            
-            
-            max_coefs =  factorial(nin+OrderMax)/(factorial(nin)*factorial(OrderMax));
-            coefs = zeros(max_coefs,OrderMax+1);
-            
-            
-            % MDL penalty gain
-            k = log(LenY)/LenY;
-            
-            if nin == 1
-                ends = 1+[0:OrderMax]';
-            else
-                ends = zeros(OrderMax+1,1);
-                % ends go at (n+q)! / n! q!
-                ends(1) = 1;
-                for q = 1:OrderMax
-                    ends(q+1) = ends(q) * (nin+q)/q;
-                end
-            end
-            
-            RTR = R'*R;
-            
-            % compute coefs, vafs and mdls
-            for q = 0:OrderMax
-                d = ends(q+1);
-                coef = qr_solve(R,QtY,d);
-                coefs(1:d,q+1) = coef;
-                outvar = coef'*RTR(1:d,1:d)*coef;
-                resid = yss-outvar;
-                mdls(q+1) = resid*(1+k*d);
-                vafs(q+1) = 100*(outvar/yss);
-            end
-            
-            
-            return
-        end
-        
-        
-        function coef = qr_solve(R,QtY,npar)
-            % solves for npar coefficients using precomputed QR factorization
-            % intened to be used to estimate reduced order models
-            % R is the R matrix from a QR decomposition
-            % QtY is Q^T y, where Q is from the QR decomposition, and y is the output.
-            
-            QtY = QtY(1:npar);
-            R = R(1:npar,1:npar);
-            coef = R\QtY;
-            
-        end
+    end
+end
+end
+
+
+function PStats = AllStats(PStats)
+% fills in missing input stats
+
+if isnan(PStats(1))
+    % range has not yet been specified
+    % use 3 sigma bounds around mean (if set)
+    if isnan(PStats(3))
+        % mean not set either, assume zero mean
+        PStats(3) = 0;
+    end
+    if isnan(PStats(4))
+        PStats(4) = 1;
+    end
+    PStats(1) = PStats(3)+3*PStats(4);
+    PStats(2) = PStats(3)-3*PStats(4);
+end
+
+if isnan(PStats(3))
+    % mean has not been specified
+    % let the max and min be 3 sigma around the mean.
+    PStats(3) = (PStats(1)+PStats(2))/2;
+    PStats(4) = (PStats(1)-PStats(3))/3;
+end
+
+return
+end
+
+
+function [coefs,mdls,vafs] = poly_mdls(yss,LenY,R,QtY,OrderMax,nin);
+
+mdls = zeros(OrderMax+1,1);
+vafs = mdls;
+
+
+max_coefs =  factorial(nin+OrderMax)/(factorial(nin)*factorial(OrderMax));
+coefs = zeros(max_coefs,OrderMax+1);
+
+
+% MDL penalty gain
+k = log(LenY)/LenY;
+
+if nin == 1
+    ends = 1+[0:OrderMax]';
+else
+    ends = zeros(OrderMax+1,1);
+    % ends go at (n+q)! / n! q!
+    ends(1) = 1;
+    for q = 1:OrderMax
+        ends(q+1) = ends(q) * (nin+q)/q;
+    end
+end
+
+RTR = R'*R;
+
+% compute coefs, vafs and mdls
+for q = 0:OrderMax
+    d = ends(q+1);
+    coef = qr_solve(R,QtY,d);
+    coefs(1:d,q+1) = coef;
+    outvar = coef'*RTR(1:d,1:d)*coef;
+    resid = yss-outvar;
+    mdls(q+1) = resid*(1+k*d);
+    vafs(q+1) = 100*(outvar/yss);
+end
+
+
+return
+end
+
+
+function coef = qr_solve(R,QtY,npar)
+% solves for npar coefficients using precomputed QR factorization
+% intened to be used to estimate reduced order models
+% R is the R matrix from a QR decomposition
+% QtY is Q^T y, where Q is from the QR decomposition, and y is the output.
+
+QtY = QtY(1:npar);
+R = R(1:npar,1:npar);
+coef = R\QtY;
+
+end
 
 % copyright 2003, robert e kearney
 % this file is part of the nlid toolbox, and is released under the gnu
