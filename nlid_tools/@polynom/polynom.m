@@ -35,7 +35,7 @@ classdef polynom < nltop
             % add object  specific parameters
             p.parameterSet(1) =param('paramName','polyType','paramDefault','hermite', ...
                 'paramHelp','polynomial type',...
-                'paramType','select','paramLimits',{'hermite','power','tcheb' 'B_spline' 'laguerre'});
+                'paramType','select','paramLimits',{'hermite','power','tcheb' 'Bspline' 'laguerre'});
             p.parameterSet(2) =param('paramName','polyOrderSelectMode','paramDefault','auto',...
                 'paramHelp','order selection method',...
                 'paramType','select','paramLimits',{'auto','full','manual'});
@@ -66,27 +66,46 @@ classdef polynom < nltop
             for i=1:2:length(varargin),
                 Prop=varargin{i};
                 Value=varargin{i+1};
-                % Check to see if it is a name is a property
+                % Check to see if it is a name is a property and if so set
+                % it to Value
                 if ismember(Prop, properties(sys)),
                     sys.(Prop)=Value;
+                    if strcmp(Prop,'polyCoef'),
+                        sys.polyOrder=length(Value)-1;
+                    end
                 elseif ismember('parameterSet',fieldnames(sys))
                     % Check to see if it is a parameter value
                     % Must change so that handles parameters of different
                     % names.
                     ps = sys.parameterSet;
                     outPs=setval(ps,Prop,Value);
-                    if strcmp(Prop,'polyType'),
-                        disp('polyType');
+                    if ~isempty(Value) & strcmp(Prop,'polyType'),
                         switch Value
-                            case 'B_spline'
-                                outPs(4) =param('paramName','B_spline_SD','paramDefault',1,...
-                                    'paramHelp','Standard deviation of splines');
+                            case 'Bspline'
+                                % Bsplines require addtional parameters to
+                                % define them 
+                                outPs(4) =param('paramName','splineCenters','paramDefault',[0:.2:1]',...
+                                    'paramHelp','Centers of splines');
+                                outPs(5) =param('paramName','splineSD','paramDefault',.1,...
+                                    'paramHelp','Standard Deviation of Splines');
+                                sys.polyRange=[0 5];
+                                sys.polyCoef= ones(6,1);
+                                sys.polyOrder=6;
+                                outPs=setval(outPs,'polyOrderMax',sys.polyOrder);
+                                outPs=setval(outPs,'polyOrderSelectMode','full');
                             case 'laguerre'
+                                % Laguerre needs and addtional paramter to
+                                % define it 
                                 outPs(4) =param('paramName','alfa','paramDefault',.5,...
                                     'paramHelp','alpha parameter for Lagurre polynomials');
                             otherwise
                                 outPs=outPs(1:3);
                         end
+                        
+                    elseif ~isempty(Value) & strcmp(Prop,'splineCenters'),
+                        sys.polyCoef=Value*0+1;
+                        sys.polyOrder=length(Value);
+                        sys.polyRange = [ min(Value) max(Value)];
                     end
                     sys.parameterSet=outPs;
                 end
@@ -129,7 +148,7 @@ classdef polynom < nltop
                 pRange=P.polyRange;
                 x=(pRange(1):.01:pRange(2))';
             end
-            nSamp=length(x); 
+            nSamp=length(x);
             assign(P.parameterSet)
             polyOrder=P.polyOrder;
             polyType=get(P,'polyType');
@@ -140,8 +159,8 @@ classdef polynom < nltop
                     v=multi_pwr (x,polyOrder);
                 case 'tcheb'
                     v=multi_tcheb(x,polyOrder);
-                case 'B_spline'
-                    v=generate_B_splines ( x, P.polyCoef, B_spline_SD);
+                case 'Bspline'
+                    v=generate_B_splines ( x, splineCenters, splineSD );
                 case 'laguerre'
                     v=generate_laguerre_basis(nSamp, polyOrder, alfa);
             end
@@ -317,14 +336,12 @@ classdef polynom < nltop
                             end
                             p=multi_tcheb (x,sys.polyOrder);
                             yout=p*sys.polyCoef(:);
-                        case 'b_spline'
-                            [m,n]=size(sys.polyCoef);
-                            if n ~=2
-                                error ('Polynom - polyCoef must be a 2d matrix for B-splines');
-                            end
-                            centers=sys.polyCoef(:,1);
-                            p=generate_B_splines(x,centers, B_spline_SD);
-                            yout=p*sys.polyCoef(:,2);
+                        case 'bspline'
+                            p=generate_B_splines(x,splineCenters, splineSD);
+                            yout=p*sys.polyCoef;
+                        case 'laguerre'
+                            p=generate_laguerre_basis(length(x),sys.polyOrder, alfa);
+                            yout=p*sys.polyCoef;
                     end
                     Y(:,:,iReal)=yout;
                     
@@ -339,9 +356,10 @@ classdef polynom < nltop
             else
                 set(y,'dataSet',Y);
             end
-            set(y,'comment','power-series prediction');
+            set(y,'comment',[ polyType ' series prediction'],'domainValues',double(xin));
             % polynom/nlsim
         end
+        %%
         function nlmtst (p)
             polynomDemo
         end
@@ -457,8 +475,8 @@ classdef polynom < nltop
                         x(:,i)=(x(:,i) - cmean)/drange;
                     end
                     [W,f]=multi_tcheb(x,polyOrderMax);
-                case 'b_spline'
-                    % set defaults centers and SD  not defined
+                case 'bspline'
+                    % set defaults center and SD if  not defined
                     if isnan(p.polyCoef),
                         disp('B_spline Using default centers and SD');
                         xmin=p.polyRange(1);
@@ -469,8 +487,13 @@ classdef polynom < nltop
                         B_spline_SD=deltx;
                         set(p,'B_spline_SD',B_spline_SD);
                     end
-                    bf=generate_B_splines(x,centers,B_spline_SD);
+                    bf=generate_B_splines(x,splineCenters,splineSD);
                     W=double(bf) ;
+                case 'laguerre'
+                    disp('laguerre polynomials fit to ramp time data');
+                    L=generate_laguerre_basis(length(x), polyOrderMax,alfa);
+                    W=double(L);
+                    polyOrderSelectMode='full'
             end
             [Q,R] = qr(W,0);
             QtY = Q'*y;
@@ -509,10 +532,8 @@ classdef polynom < nltop
             
             %% B spine
             
-            if strcmp(polyType,'B_spline'),
-                splineCoef=p.polyCoef;
-                splineCoef(:,2)=coef;
-                set (p,'polyCoef',splineCoef);
+            if strcmp(polyType,'Bspline'),
+                set (p,'polyCoef',coef);
             else
                 set (p,'polyCoef',coef,'polyOrder',order);
                 
@@ -531,6 +552,8 @@ function B = generate_B_splines(q,centers,sd)
 % centers = centers for splines
 % sd - standard deviations for each spline
 q=q(:);
+centers=centers(:);
+sd=sd(:);
 number=length(centers);
 B=zeros(length(q),number);
 for i=1:number
