@@ -9,8 +9,8 @@ function [wsls , wstp] =nlmtst(i)
 
 z=nlid_sim ('N2L');
 % wkernel = Lee-Schetzen
-wsls=wseries(z,'nlags',32,'method','LS');
-wstp=wseries(z,'nlags',32,'method','Toeplitz');
+wsls=wseries(z,'nLags',32,'method','LS');
+wstp=wseries(z,'nLags',32,'method','Toeplitz');
 
 figure(1);
 plot(wsls);

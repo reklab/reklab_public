@@ -83,7 +83,7 @@ classdef polynom < nltop
                         switch Value
                             case 'Bspline'
                                 % Bsplines require addtional parameters to
-                                % define them 
+                                % define them
                                 outPs(4) =param('paramName','splineCenters','paramDefault',[0:.2:1]',...
                                     'paramHelp','Centers of splines');
                                 outPs(5) =param('paramName','splineSD','paramDefault',.1,...
@@ -95,7 +95,7 @@ classdef polynom < nltop
                                 outPs=setval(outPs,'polyOrderSelectMode','full');
                             case 'laguerre'
                                 % Laguerre needs and addtional paramter to
-                                % define it 
+                                % define it
                                 outPs(4) =param('paramName','alfa','paramDefault',.5,...
                                     'paramHelp','alpha parameter for Lagurre polynomials');
                             otherwise
@@ -477,18 +477,20 @@ classdef polynom < nltop
                     [W,f]=multi_tcheb(x,polyOrderMax);
                 case 'bspline'
                     % set defaults center and SD if  not defined
-                    if isnan(p.polyCoef),
-                        disp('B_spline Using default centers and SD');
-                        xmin=p.polyRange(1);
-                        xmax=p.polyRange(2);
-                        deltx=(xmax-xmin)/p.polyOrder
-                        centers=[xmin:deltx:xmax]';
-                        p.polyCoef=centers;
-                        B_spline_SD=deltx;
-                        set(p,'B_spline_SD',B_spline_SD);
-                    end
-                    bf=generate_B_splines(x,splineCenters,splineSD);
-                    W=double(bf) ;
+                    t=domain(z);
+                    xMin=min(t);
+                    xMax=max(t); 
+                    p.polyRange(1)=xMin;
+                    p.polyRange(2)=xMax;
+                    deltx=(xMax-xMin)/(p.polyOrder-1)
+                    splineCenters=[xMin:deltx:xMax]';
+                    splineSD=deltx;
+                    set(p,'splineCenters',splineCenters);
+                    set(p,'splineSD',splineSD);
+                    polyOrderMax=length(splineCenters); 
+                    set(p,'polyOrderMax',polyOrderMax);
+                    bf=generate_B_splines(t,splineCenters,splineSD);
+                    W=double(bf);
                 case 'laguerre'
                     disp('laguerre polynomials fit to ramp time data');
                     L=generate_laguerre_basis(length(x), polyOrderMax,alfa);
@@ -534,6 +536,7 @@ classdef polynom < nltop
             
             if strcmp(polyType,'Bspline'),
                 set (p,'polyCoef',coef);
+                set (p,'polyOrder',order); 
             else
                 set (p,'polyCoef',coef,'polyOrder',order);
                 
@@ -569,7 +572,7 @@ end
 function b = generate_laguerre_basis (irf_len,max_order,alfa)
 %% This function generates the Laguerre orthonormal basis functions
 %++ Author: Ehsan Sobhani (10 April 2014)
-%++ This is based on Maremaleris book OR formula (11) of his paper titled:
+%++ This is based on Marmaleris book OR formula (11) of his paper titled:
 %++ "Identification of Nonlinear Biological Systems Using Laguerre Expansions of Kernels", Annals of Biomed. Eng., vol. 21, pp. 573-589, 1993.
 
 %++ The inputs are:

@@ -14,7 +14,7 @@ function fig_mod (h, varargin)
 if nargin ==1,
    varargin = { 'axis_line_width' 1.5 ...
          'label_size' 18 ...
-         'line_width' 1 ...
+         'linewidth' 1 ...
          'marker_size' 6  ...
          'tick_label_size' 14 };
 end
@@ -33,7 +33,7 @@ options = { {'axis_line_width' 1.5 'Width of axes lines'} ...
       {'figure_type' NaN 'set defaults for figure [slide/journal]' } ...
       {'label_size' NaN 'font size for label'}...
       {'page_layout' NaN 'page layout {portrait/landscape'}...
-      {'line_width' NaN 'width of lines'}...
+      {'linewidth' NaN 'width of lines'}...
       {'line_color' NaN 'line  color'}...
       {'marker_size' NaN 'marker size'}...
       {'position' NaN 'posiiton of plot [ul/bl/ur/br]' }...
@@ -72,7 +72,7 @@ arg_parse (options, varargin);
 if ~isnan(figure_type),
    axis_line_width =1.5;
    label_size= 18;
-   line_width= 2 ;
+   linewidth= 2 ;
    markersize= 6 ;
    tick_label_size=14;
    switch figure_type
@@ -314,15 +314,15 @@ if ~isnan(xlabel_pos),
    if (hl >0),
       for hi=1:hl,
          if(strcmp(get(ha(hi),'type'),'line'));
-            if ~isnan(line_width),
-               set(ha(hi),'Linewidth',line_width);
+            if ~isnan(linewidth),
+               set(ha(hi),'Linewidth',linewidth);
             end
             if ~isnan(marker_size),
                set(ha(hi),'markersize',marker_size);
             end
-            if all(get(ha(hl),'color') == [0 0 1]),
+            %if all(get(ha(hl),'color') == [0 0 1]),
                %              set(h,'color',[1 1 1]);
-            end
+            % end
             if ~isnan(line_color),
                    set(ha(hi),'color',line_color)
 

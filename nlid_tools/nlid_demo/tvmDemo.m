@@ -17,19 +17,19 @@ tvI={};
  TVirf=tvm;
 set(TVirf,'elements',tvI,'tvStart',0,'tvIncr',.01);
 figNum=figNum+1; figure(figNum);clf;
-plot(TVirf);
+plot(TVirf); title('Simuulated TV IRF'); 
 %% simulate TV responses
 disp('Simulate at TV Response');
 x=randn(1000,1,200);
 X=nldat(x,'domainIncr',.01);
 Y=nlsim(TVirf,X);
 Z=cat(2,X,Y); 
-set(Z,'chanNames',{ 'Input' 'OutPut'});
+set(Z,'chanNames',{ 'Input' 'OutPut'},'comment','Simulated TV trial');
 figNum=figNum+1; figure(figNum);clf;
 
 plot(Z);
 
-%% Estimate at TI IRF
+%% Estimate a TI IRF
 disp('TI IRF');
 figNum=figNum+1; figure(figNum);clf;
 I=irf;

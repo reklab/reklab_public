@@ -72,7 +72,7 @@ end
 c = g* wn*c3.*c1 ./ (c4);
 
 C=irf;
-incr=get(T,'domainIncr');
+incr=t(2)-t(1);
 set(C,'dataSet',c','domainIncr',incr);
 % The partial derivative equations generate "intermediate" complex results
 % which combine to give a real results, but due to round off error, the

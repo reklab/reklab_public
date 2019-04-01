@@ -1,4 +1,4 @@
-function D= flb2mat_m (fname, option, caseNum)
+function D= flb2mat (fname, option, caseNum)
 % FLBTOMAT_M.M ...
 %
 %  read data from a  FILELB file
@@ -77,7 +77,4 @@ switch lower(option)
         error([' mat2flb option not defined:' option]);
 end
 fclose(fid);
-
-
-
 return

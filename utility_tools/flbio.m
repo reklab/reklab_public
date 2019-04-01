@@ -170,11 +170,25 @@ else
     D.domainIncr = fread(fid,1,'single');
     D.domainStart = fread(fid,1,'single');
     stringLen=fread(fid,1,'int32');
-    D.comment=char(fread(fid,stringLen,'char'))';
+    if stringLen>0 
+        disp(stringLen);      
+    [ x, count] =fread(fid,stringLen,'char');
+    disp(['Comment: values read ' num2str(count)]);
+    D.comment=char(x)'; 
     
+    else
+        D.comment='DEFAULT';
+    end
+    disp(['Record Location: ' num2str(ftell(fid))]); 
     for iChan=1:D.nChan,
-        stringLen=fread(fid,1,'int32');
+        [stringLen, count]=fread(fid,1,'int32');
+        if stringLen>0
         D.chanName{iChan}=char(fread(fid,stringLen,'char'))';
+        else
+edit mat2flb            D.chanName{iChan}='DEFAULT';
+             disp(ftell(fid)); 
+        end
+            
     end
     D.chanMin =fread(fid,D.nChan,'float64');
     D.chanMax =fread (fid,D.nChan,'float64');
@@ -193,7 +207,10 @@ switch D.chanFormat
     case 4
         formatSpec='float';
 end
-tempC= fread(fid, nSamp, formatSpec);
+[tempC, count]= fread(fid, nSamp, formatSpec);
+if (count<=1),
+    error ('Nothing read');
+end
 C = reshape (tempC, D.chanLen, D.nChan, D.nReal);
 D.Data=C;
 return

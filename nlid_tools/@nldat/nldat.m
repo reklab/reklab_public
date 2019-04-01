@@ -517,6 +517,9 @@ classdef nldat < nltop
             end
         end
             
+        
+         
+       
             
             function z = log(x)
                 % Wrapper of log function for nldat objects
@@ -692,7 +695,7 @@ classdef nldat < nltop
                 [nSap,nChan,nReal]=size(x);
            
                  for i=1:nReal,
-                f(:,1,i)=  unwrap(angle(x.dataSet(:,1,i)));
+                f(:,1,i)=  (phase(x.dataSet(:,1,i)));
                  end
                 z.dataSet=f;
                 z.comment=[ 'PHASE of ' x.comment];
@@ -1045,7 +1048,7 @@ classdef nldat < nltop
                 end
             end
             
-            function y= stairs (x)
+            function [xval,yval]= stairs (x)
                 % options not yet implements
                 [nsamp,nchan,nreal]=size(x);
                 yval = x.dataSet;
@@ -1057,9 +1060,9 @@ classdef nldat < nltop
                 if nargout==0,
                 stairs (xval,yval);
                 else
-                    [x1,y1]=stairs(xval,yval);
-                    y=x;
-                    set(y,'dataSet',y1,'domainValues',x1);
+                    [xval,yval]=stairs(xval,yval);
+%                     y=x;
+%                     set(y,'dataSet',y1,'domainValues',x1);
                 end
             end
             

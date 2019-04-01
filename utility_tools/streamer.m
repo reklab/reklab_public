@@ -1,7 +1,8 @@
 function handle = streamer(TitleString,yPos)
 %  STREAMER  Titles for an entire figure.
-% 	     STREAMER('text') adds text at the top of the current figure,
-% 	     going across subplots.
+% 	     STREAMER('text', yPos) adds text at the top of the current figure,
+% 	     going across subplots. 
+% [ypos] - optional postion of text
 % 
 % 	     See also XLABEL, YLABEL, ZLABEL, TEXT, TITLE.
 %

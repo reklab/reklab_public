@@ -1,4 +1,4 @@
-% Demo_502  - demosntrationfor 502
+% Demo_502  - demonstration of identification for 502
 
 %% Tool box Demo
 nlid_toolbox_Demo

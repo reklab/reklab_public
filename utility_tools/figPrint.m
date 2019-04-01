@@ -1,13 +1,16 @@
-function figPrint(figNum, fileName, printFlag, newFileFlag, pageOrient)
-%  figPrint(figList, fileName)
-% utility routine to contorl printinig of figures
+function figPrint(figNum, fileName, printFlag, newFileFlag, pageOrient, formatType)
+%  figPrint(figNum, fileName, printFlag, newFileFlag, pageOrient, formatType)
+% utility routine to control printinig of figures
 % printFlag - logical variable; prnt if true
 % figNum - figure to print
 % fileName - name of pring file
 % newfileFlag - create new file if true, otherwise append
+% formatType - output format as defined in matlab documentation [-dpsc ]
 if nargin<4,
-    newFileFlag=false;
-    
+    newFileFlag=false; 
+end
+if nargin <6,
+    formatType = '-dpsc';
 end
 if nargin <5,
     pageOrient = 'portrait';
@@ -22,9 +25,9 @@ end
 
 if newFileFlag
     orient(figNum,pageOrient); 
-    print (figNum, fileName, '-dpsc' ,'-bestfit');
+    print (figNum, fileName, formatType,'-bestfit');
     
 else
-    print (figNum, fileName, '-dpsc','-append','-bestfit');
+    print (figNum, fileName, formatType,'-append','-bestfit');
     
 end

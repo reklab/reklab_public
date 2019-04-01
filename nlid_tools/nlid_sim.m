@@ -93,13 +93,18 @@ switch option
         comment='L1';
         M=I1;
     case 'H1'
-        [irf1]=fkzw(t,[1 .75 5*2*pi]);
+        [irf1]=fkzw(t,[1 .75 15*2*pi]);
         I1=irf;
         set(I1,'dataSet',irf1,'domainIncr',domain_incr);
         Y = U - nlsim(I1,U);
         set (Y,'comment', 'One-side low pass');
         comment='L1';
         M=I1;
+    case 'H2'
+        [B,A]=butter(1,.2,'high');
+        Y=filter(U,B,A);
+        set(Y,'comment','Bessel filter');
+           
     case 'L2'
         Y = nlsim(I2,U);
         M=I2;

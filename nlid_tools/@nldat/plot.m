@@ -16,26 +16,26 @@ function plot (d, varargin)
 %         { 'xpanwidth' NaN 'width of pan window' } ...
 %         {'xmode' 'linear' 'x axes mode [linear/log' } ...
 %         {'ymode' 'linear' 'y axes mode [linear/log/db' } ...
-%         
-% 
+%
+%
 % % Copyright 1999-2003, Robert E Kearney
-% This file is part of the nlid toolbox, and is released under the GNU 
-% General Public License For details, see copying.txt and gpl.txt 
+% This file is part of the nlid toolbox, and is released under the GNU
+% General Public License For details, see copying.txt and gpl.txt
 
 options={{'plotmode' 'line' 'plot type (line/xy/Super/bar/stem)'} ...
-        {'help_flag' 0 'display help (0=No/1=yes)'} ...
-          {'linecolor' '' 'L_ine color'} ...
-           {'LineWidth' 0.5 'Line color'} ...
-        {'nh' NaN 'Number of horizontal plots'} ...
-        {'nv' NaN 'Number of vertical plots'} ...
-        {'nplt' 1 'Plot Number' } ...
-        {'realizationMode' 'super' 'mode for plotting realizations (super/offset/mesh/waterfall)' } ...
-         {'realizationOffset' 1 'offset for plotting realizations' } ...
-        { 'xpanzoom' false 'enable linked zoom and pan for all axes'} ...
-        { 'xpanwidth' NaN 'width of pan window' } ...
-        {'xmode' 'linear' 'x axes mode [linear/log' } ...
-        {'ymode' 'linear' 'y axes mode [linear/log/db' } ...
-        
+    {'help_flag' 0 'display help (0=No/1=yes)'} ...
+    {'linecolor' '' 'L_ine color'} ...
+    {'LineWidth' 0.5 'Line color'} ...
+    {'nh' NaN 'Number of horizontal plots'} ...
+    {'nv' NaN 'Number of vertical plots'} ...
+    {'nplt' 1 'Plot Number' } ...
+    {'realizationMode' 'super' 'mode for plotting realizations (super/offset/mesh/waterfall)' } ...
+    {'realizationOffset' 1 'offset for plotting realizations' } ...
+    { 'xpanzoom' false 'enable linked zoom and pan for all axes'} ...
+    { 'xpanwidth' NaN 'width of pan window' } ...
+    {'xmode' 'linear' 'x axes mode [linear/log' } ...
+    {'ymode' 'linear' 'y axes mode [linear/log/db' } ...
+    
     };
 if nargin==2 & strcmp(varargin{1},'?'),
     arg_help('nldat/plt',options);
@@ -86,35 +86,39 @@ end
 plotmode=lower(plotmode);
 if strcmp(plotmode,'xy'),
     for i=1:2:nchan,
-        plot(x(:,i,:),x(:,i+1,:),'.')      
+        plot(x(:,i,:),x(:,i+1,:),'.')
     end
     xlabel(d.chanNames{1});
     ylabel(d.chanNames{2});
+        title(d.comment);
 elseif strcmp(plotmode,'super'),
     plot (t,x);
     xlabel(d.domainName);
     yunits = d.chanUnits;
     if ~isempty(yunits)
-      ylabel(d.chanUnits);
+        ylabel(d.chanUnits);
     end
     title (d.comment);
-
+    
     % this next hack produces a legend with all of the channel names
     % harvested from the ChanNames cell array.
     numchan = size(x,2);
     cmd = 'legend(''';
     for i = 1:numchan
-      cmd = [cmd  d.chanNames{i} ''','''];
+        cmd = [cmd  d.chanNames{i} ''','''];
     end
     cmd = [cmd(1:end-1) '''NorthEast'')'];
     eval(cmd);
-    % end of legend hack.    
+    % end of legend hack.
+        title(d.comment);
     
     
 elseif strcmp(plotmode,'bar'),
     bar (t,x,1);
+        title(d.comment);
 elseif strcmp(plotmode,'stem'),
     stem(t,x);
+        title(d.comment);
 else
     %
     % Line plots
@@ -130,31 +134,31 @@ else
         end
         xd = squeeze(x(:,i,:));
         if nreal==1,
-            nlc = length(linecolor); 
+            nlc = length(linecolor);
             if nlc>0,
                 plot (t,xd,linecolor(max(nlc,i)));
             else
                 plot (t,xd,'linewidth',LineWidth);
             end
-           
+            
             if strcmp(xmode,'log'),
-            xlabel([ 'Log ' d.domainName]);
-        else
-            xlabel(d.domainName);
+                xlabel([ 'Log ' d.domainName]);
+            else
+                xlabel(d.domainName);
             end
             switch ymode
                 case 'log'
-                      ylabel([' log (' names{i} ')']);
+                    ylabel([' log (' names{i} ')']);
                 case 'db'
-                      ylabel([names{i} ' dB']);
+                    ylabel([names{i} ' dB']);
                 otherwise
-                      ylabel(names{i});
+                    ylabel(names{i});
             end
-       
-        
+            
+            
             
         elseif nreal > 1,
-              y=(1:nreal);
+            y=(1:nreal);
             if strcmp(realizationMode,'surf'),
                 surf(y,t,xd);
             elseif strcmp(realizationMode,'mesh');
@@ -168,17 +172,20 @@ else
                 
                 plot (t,xd);
             elseif strcmp(realizationMode,'super');
-                 nlc = length(linecolor); 
-            if nlc>0,
-                plot (t,xd,linecolor(max(nlc,i)));
-            else
-                plot (t,xd);
-            end
+                nlc = length(linecolor);
+                if nlc>0,
+                    plot (t,xd,linecolor(max(nlc,i)));
+                else
+                    plot (t,xd);
+                end
             end
         end
+        if i==1,
+            title(d.comment);
+        end
         
-      
-         
+        
+        
     end
     if xpanzoom,
         xAxisPanZoom (gcf);
@@ -186,12 +193,12 @@ else
     if ~isnan(xpanwidth),
         xStart=get(d,'domainStart');
         xEnd=xStart+xpanwidth;
-    set (gca,'xlim', [ xStart xEnd]);
+        set (gca,'xlim', [ xStart xEnd]);
     end
-          title(d.comment);
 
-    end
- 
     
+end
+
+
 end
 %	.../@nldat/plot

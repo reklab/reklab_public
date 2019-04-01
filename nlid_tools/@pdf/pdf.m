@@ -250,7 +250,7 @@ elseif(strcmp(option,'probability')),
 elseif(strcmp(option,'density')),
     binwidth=unique(chop(diff(dom),5));
     if length(binwidth)>1,
-dbqu        error('Different bindwidths not yet supported');
+b        error('Different bindwidths not yet supported');
     end
     if dist(1) ~=0 | dist(end)~=0,
         % warning('first and last bins must be empty for density estimates');

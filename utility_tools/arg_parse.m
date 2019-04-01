@@ -1,8 +1,17 @@
 function error_flag = arg_parse ( options, varargin)
 % arg_parse ( options, varargin) -Parse and decode variable number of inputs
-% options must be cell array of form:
-% { {options1 default1} {option2 default2} ... } 
-% $Revision: 1.5 $
+% options defines a set of variables whose values are initialized in the
+% calling workspace
+% must be cell array of form:
+% { {optName optDeauflt1 optHelp1help1} {option2 default2 helText2} ... } 
+%  where:
+%   optNamei    - is a string with the name of the variable
+%   optDefaulti - is the default value for the variable
+%   opthelpi    - is the help string for the variable 
+% varargin  is a cell array of name value pairs specifying values for one or more  variables 
+% 
+% Example: 
+% options = { { 'var' 1 'variable #1} { 
 
 % Copyright 2000, Robert E Kearney
 % This file is part of the nlid toolbox, and is released under the GNU 

@@ -1,4 +1,4 @@
-function [c,dcda] = fgzw(t,params)
+whichfunction [c,dcda] = fgzw(t,params)
 % compute 2-nd order IRF for k,z,w
 % [c dcda] = fkzw(t,a)
 % fgzw computes a 2'nd order  impulse response and its partial
