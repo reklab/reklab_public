@@ -6,7 +6,7 @@ sys = 'N3HP'
 disp('hk - test');
 [z,m]=nlid_sim (sys);
 NHK=nlbl;
-set(NHK,'idMethod','hk','nLagLE',32,'maxOrderNLE',3,'displayFlag',true,'threshNSE',.001);
+set(NHK,'idMethod','hk','displayFlag',true,'threshNSE',.001);
 NHK=nlident(NHK,z);
 figure(1); plot(NHK); 
 figure(2);
@@ -16,7 +16,7 @@ nlid_resid(NHK,z);
 
 disp('nlbl identificaton using sls');
 NSLS=nlbl;
-set(NSLS,'idMethod','sls', 'nIterMax', 10, 'nLagLE', 32,'maxOrderNLE',3,'displayFlag',true, ...
+set(NSLS,'idMethod','sls', 'nIterMax', 10, 'displayFlag',true, ...
     'nIterMax', 100);
 NSLS=nlident(NSLS,z);figure (1)
 figure(3);
@@ -27,7 +27,7 @@ nlid_resid(NSLS,z);;
 %% subspace method
 disp('nlbl identification using subspace method');
 NSS=nlbl;
-set(NSS,'idMethod','subspace','nLagLE',32,'maxOrderNLE',3,'displayFlag', true);
+set(NSS,'idMethod','subspace','displayFlag', true);
 NSS=nlident(NSS,z);
 figure (5);
 plot(NSS)
