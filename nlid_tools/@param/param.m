@@ -208,7 +208,10 @@ classdef param
             
             for i=1:2:length(varargin),
                 name = varargin{i};
-                value = varargin{i+1};
+                value=[];
+                if length(varargin)>i,
+                    value = varargin{i+1};
+                end
                 j=pindex(Pin,name);
                 if j ==0,
                     error (['Parameter name not found:' name]);
