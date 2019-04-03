@@ -1,4 +1,4 @@
-function system= hammer_subspace (z,ps)
+function system= hammer_subspace (z,N)
 % This function estimates a Hammerstein between input and output stored in columns of z.
 % This function uses MOESP subspace approach
 % 
@@ -36,7 +36,10 @@ function system= hammer_subspace (z,ps)
 %      return
 % end
 %% Initialization
+ps=N.parameterSet;
 assign(ps);
+p=N.elements{1,1};
+maxOrderNLE=p.polyOrderMax
 it = 1000; % Maximum number of iterations 
 %z = z - mean(z);
 ts = get(z,'domainIncr');
