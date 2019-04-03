@@ -2,59 +2,52 @@ classdef lnbl < nlm
     % lnbl - linear-nonlinear block model class for NLID toolbox
     
     
+    % idMethod - identification method
+    %   busgang
+    %   hk implements Hunter-Korenberg interation for Wiener cascade models.
+    %       See: I.W. Hunter and M.J. Korenberg, The identification of nonlinear 
+    %       biological systems: Wiener and Hammerstein cascade models.
+    %       Biological Cybernetics, 55:135-144, 1986.
+    %   phk implements Paulin-Hunter-Korenberg interation for Wiener cascade models.
+% 
+%            See M.G. Paulin, A method for constructing data-based models of spiking 
+%           neurons using a dynamic linear-static nonlinear cascade.
+%           Biological Cybernetics, 69:67-76, 1993.
+%   and
+%           M.J. Korenberg and I.W. Hunter,  Two methods for identifying Wiener 
+%           cascades having noninvertible static nonlinearities.
+%           Annals of Biomedical Engineering, 27(6):793-804, 1999.
+%   lm -  nonlinear optimization method for Wiener cascade fitting.
+% uses a Levenberg-Marquardt second-order gradient descent search.
+%
+    %
+    % initMethod - mehtod used to get inital estimate for linear element 
+    %   corel - input-ouput cross-coreelation function
+    %   fil - input output impulse response function 
+    %   slice2 - random slice of second order correlation function 
+    %   slice3 - random slice of third-order correlation function 
+    %   eigen - eigen value decomposition of 
+    %   gen_eigen - generalize eigne alue decoposition of secondorder
+    %   wiener kernel
+    
+    %% Note: To set paramters of the LE and NLE change them in the elements
+    
     properties
         
     end
     
     methods
         function ln = lnbl  (a,varargin)
-            % Add object  specific parameters
-            ln.parameterSet(1)=param('paramName','lnIdMethod', ...
+            ln.parameterSet(1)=param('paramName','idMethod', ...
                 'paramDefault','lm',...
                 'paramHelp', 'Iterative method used to refine initial estimate',...
                 'paramType','select',...
-                'paramLimits', {'bussgang', 'hk', 'phk', 'lm'});
-            ln.parameterSet(2)= param('paramName','lnInitMethod', ...
-                'paramDefault','eigen',...
-                'paramHelp', 'Initial identification method',...
-                'paramType','select',...
-                'paramLimits',{'correl','fil','slice2','slice3','eigen','gen_eigen'});
-            ln.parameterSet(3) = param('paramName','nMaxIts',...
-                'paramDefault',20,...
-                'paramHelp', 'Maximum number of iterations',...
-                'paramType','number',...
-                'paramLimits',[1 1000]);
-            ln.parameterSet(4) = param('paramName','iterationTolerance',...
-                'paramDefault',0.01,...
-                'paramHelp', '% VAF Improvement required to continue HK iteration',...
-                'paramType','number',...
-                'paramLimits', [0 100]);
-            
-            ln.parameterSet(5) = param('paramName','updateGain','paramDefault',1,'paramHelp',...
-                'Gain applied to error in update (alpha)', 'paramType','number',...
-                'paramLimits',[0  inf]);
-            
-            %  lm parameters
-            
-            ln.parameterSet(6)=param('paramName','threshNMSE','paramDefault',.01,'paramHelp',...
-                'NMSE for success','paramType','number','paramLimits',[0 1]);
-            ln.parameterSet(7)=param('paramName','accel','paramDefault',.8,'paramHelp',...
-                'ridge multiplied by accell after successful update',...
-                'paramType','number','paramLimits', [0.001 0.999]);
-            ln.parameterSet(8)=param('paramName','decel','paramDefault',2,'paramHelp',...
-                'ridge multipled by devel after unsuccessful update',...
-                'paramType','number','paramLimits', [1.0001 inf]);
-            ln.parameterSet(9)=param('paramName','delta','paramDefault',10,'paramHelp',...
-                'initial size of ridge added to Hessian','paramType','number',...
-                'paramLimits',[0 inf]);
+                'paramLimits', {'busgang', 'hk', 'phk', 'lm'});
+            setidMethod( ln,'lm');
             ln.comment='LN Model';
             i=irf;
             t=polynom('polyType','tcheb');
             lnps=ln.parameterSet;
-            ips=get(i,'parameterSet');
-            pps=get(t,'parameterSet');
-            L=[ lnps ips pps];
-            ln.parameterSet=L;
             set(ln,'elements', { i t });
             if nargin==0;
                 return
@@ -83,15 +76,16 @@ classdef lnbl < nlm
                     z = nldat(z,'domainIncr',Ts);
                 end
                 subsys = bl.elements;
-                P=getParamValStruct(bl.parameterSet); 
+                P=getParamValStruct(bl.parameterSet);
                 i = subsys{1,1};  % IRF
                 p = subsys{1,2};  % Polynomial
                 x=z(:,1);
                 y=z(:,2);
-                hlen=get(bl,'nLags');
-                set(i,'nLags',hlen, ...
-                    'irfPseudoInvMode',get(bl,'irfPseudoInvMode'));
-                switch P.lnInitMethod
+             
+                hlen=get(i,'nLags');
+%                 set(i,'nLags',hlen, ...
+%                     'irfPseudoInvMode',get(bl,'irfPseudoInvMode'));
+                switch P.initMethod
                     case 'correl'
                         phi = cor('kernOrder',1,'nLags',hlen);
                         phi = nlident(phi,z);
@@ -113,14 +107,12 @@ classdef lnbl < nlm
                     case 'gen_eig'
                         h_est = wiener_2(z,i);
                     otherwise
-                        error(['unrecognized initialization method': lnInitMethod]);
+                        error(['unrecognized initialization method': initMethod]);
                 end
                 
                 
                 x_est = nlsim (h_est,x);
                 z1 = cat(2,x_est,y);
-                set (p,'polyOrderMax',get(bl,'polyOrderMax'),...
-                    'polyOrderSelectMode', get(bl,'polyOrderSelectMode'));
                 m_est = nlident(p,z1);
                 yp = nlsim(m_est,x_est);
                 vf = vaf(y,yp);
@@ -129,9 +121,9 @@ classdef lnbl < nlm
                 set (bl,'elements', { h_est m_est});
                 
                 
-                method=get(bl,'lnIdMethod');
+                method=get(bl,'idMethod');
                 switch method
-                    case 'bussgang'
+                    case 'busgang'
                         set(bl,'comment','LN model identified using Busgang''s theorm');
                     case 'hk'
                         bl = hk_ident(bl,z);
@@ -148,7 +140,7 @@ classdef lnbl < nlm
             end
             function h = cor_slice(h,z,order)
                 
-              P=getParamValStruct(h.parameterSet);
+                P=getParamValStruct(h.parameterSet);
                 ud = double(z(:,1));
                 yd = double(z(:,2));
                 N = length(ud);
@@ -188,8 +180,80 @@ classdef lnbl < nlm
                 set(h,'dataSet',hd);
             end
         end
+        
+        function sys= set(sys, varargin)
+            sysname=inputname(1);
+            % Set method first so that parameters are properly defined
+            iMethod=find(strcmp(varargin,'idMethod'));
+            if ~isempty(iMethod),
+                if length(varargin)>=iMethod+1,
+                    sys=setidMethod(sys,varargin{iMethod+1});
+                else
+                    sys.parameterSet=setval(sys.parameterSet,varargin)
+                end
+            end
+            set@nltop(sys, varargin{:});
+            assignin('caller',sysname,sys);
+        end
+        function sys= setidMethod( ln,newMethod);
+            methodList= { 'busgang' 'hk' 'phk' 'lm' };
+            if isempty(newMethod) | ~any( strcmp(newMethod, methodList));,
+                disp('Not a valid option');
+                disp (['Options are: [' strjoin(methodList) ']' ]);
+                return
+            end
+            ln.parameterSet(2)= param('paramName','initMethod', ...
+                'paramDefault','eigen',...
+                'paramHelp', 'Initial identification method',...
+                'paramType','select',...
+                'paramLimits',{'correl','fil','slice2','slice3','eigen','gen_eigen'});
+            ln.parameterSet(3) = param('paramName','nMaxIts',...
+                'paramDefault',20,...
+                'paramHelp', 'Maximum number of iterations',...
+                'paramType','number',...
+                'paramLimits',[1 1000]);
+            switch newMethod
+                case 'hk'
+                    ln.parameterSet(4) = param('paramName','iterationTolerance',...
+                        'paramDefault',0.01,...
+                        'paramHelp', '% VAF Improvement required to continue HK iteration',...
+                        'paramType','number',...
+                        'paramLimits', [0 100]);
+                    ln.parameterSet=ln.parameterSet(1:4);
+                case 'phk'
+                    ln.parameterSet(4) = param('paramName','iterationTolerance',...
+                        'paramDefault',0.01,...
+                        'paramHelp', '% VAF Improvement required to continue HK iteration',...
+                        'paramType','number',...
+                        'paramLimits', [0 100]);
+                    ln.parameterSet(5) = param('paramName','updateGain','paramDefault',1,'paramHelp',...
+                        'Gain applied to error in update (alpha)', 'paramType','number',...
+                        'paramLimits',[0  inf]);
+                    ln.parameterSet=ln.parameterSet(1:5);
+                case 'lm'
+                    j=length(ln.parameterSet); 
+                    ln.parameterSet(j+1)=param('paramName','threshNMSE','paramDefault',.01,'paramHelp',...
+                        'NMSE for success','paramType','number','paramLimits',[0 1]);
+                    ln.parameterSet(j+2)=param('paramName','accel','paramDefault',.8,'paramHelp',...
+                        'ridge multiplied by accell after successful update',...
+                        'paramType','number','paramLimits', [0.001 0.999]);
+                    ln.parameterSet(j+3)=param('paramName','decel','paramDefault',2,'paramHelp',...
+                        'ridge multipled by devel after unsuccessful update',...
+                        'paramType','number','paramLimits', [1.0001 inf]);
+                    ln.parameterSet(j+4)=param('paramName','delta','paramDefault',10,'paramHelp',...
+                        'initial size of ridge added to Hessian','paramType','number',...
+                        'paramLimits',[0 inf]);
+                otherwise
+                    
+            end
+            
+            sys=ln;;
+            
+            
+        end
+        
     end
-    
 end
+
 
 
