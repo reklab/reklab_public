@@ -31,7 +31,9 @@ y = data(:,2);
 SSE=y'*y;
 Ts = uy.domainIncr;
 N = length(u);
-hlen = get(hammer,'nLagLE');
+i=hammer.elements{1,2};
+
+hlen = i.nLags;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       Get Initial Model and do some Error Checking        %
