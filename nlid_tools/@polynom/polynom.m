@@ -14,11 +14,8 @@ classdef polynom < nltop
     %   'full' - polynomial order is set to polyOrderMax
     %   'manual' - polynomial order is selected interactively.
     
-    % NOTE: B-splines need to add nlident and sim options.
-    % for B_splines the polyCoef is a matrix of the form:
-    %   polycoef(polyOrder,2) where
-    %   polycoef(n,1) - centers
-    %   polycoef(n,2) - coefficients
+    % Note that Bsplines and laguerre currently only support linearly
+    % incresing domain values
     properties
         polyCoef= nan;
         nInputs=1;
@@ -492,6 +489,11 @@ classdef polynom < nltop
                     bf=generate_B_splines(t,splineCenters,splineSD);
                     W=double(bf);
                 case 'laguerre'
+                    t=domain(z);
+                    xMin=min(t);
+                    xMax=max(t); 
+                    p.polyRange(1)=xMin;
+                    p.polyRange(2)=xMax;
                     disp('laguerre polynomials fit to ramp time data');
                     L=generate_laguerre_basis(length(x), polyOrderMax,alfa);
                     W=double(L);
