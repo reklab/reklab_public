@@ -126,7 +126,7 @@ switch option
         M=lnbl; set(M,'elements',{I1 P2});
         comment='LN2 data set';
     case 'LN3'
-        x = nlsim(I2,U);             % filter with the first L
+        x = nlsim(I1,U);             % filter with the first L
         Y= nlsim(P3,x);
         M=lnbl; set(M,'elements',{I1 P3});
         comment='LN3 data set';
