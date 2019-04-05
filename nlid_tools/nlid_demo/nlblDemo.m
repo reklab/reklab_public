@@ -2,11 +2,18 @@ function i=nlblDemo(i)
 % test of NLBL  identification
 %% hk - method
 clear all
-sys = 'N3HP'
+sys = 'N2L'
 disp('hk - test');
 [z,m]=nlid_sim (sys);
 NHK=nlbl;
 set(NHK,'idMethod','hk','displayFlag',true,'threshNSE',.001);
+% Set umber of lags in IRF
+i=NHK{1,2};
+set(i,'nLags',50);
+NHK{1,2}=i;
+
+
+
 NHK=nlident(NHK,z);
 figure(1); plot(NHK); 
 figure(2);
