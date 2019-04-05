@@ -56,6 +56,8 @@ classdef nltop
                     %                 else
                     %                     error([ Prop ' is not the name of a valid property or parameter']);
                     %
+                else
+                    error([ Prop  ' is not a property or a paramrter']);
                 end
             end
             if ~isempty(inputname(1)),
