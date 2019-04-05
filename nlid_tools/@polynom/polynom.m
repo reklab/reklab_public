@@ -100,7 +100,7 @@ classdef polynom < nltop
                         end
                         
                     elseif ~isempty(Value) & strcmp(Prop,'splineCenters'),
-                        sys.polyCoef=Value*0+1;
+                        %sys.polyCoef=Value*0+1;
                         sys.polyOrder=length(Value);
                         sys.polyRange = [ min(Value) max(Value)];
                     end
@@ -113,6 +113,15 @@ classdef polynom < nltop
         end
         
         function p= set.polyCoef (p, value)
+            assign(p.parameterSet);
+            if strcmp(polyType,'Bspline'),   
+                % There is a mismatch between # of coefficient and spline
+                % definitions. 
+                if length(value)~=length(splineCenters)
+                   error ('Number of coefficients does not match spline definition');
+                end
+            end
+            
             if ndims(value)>2 | ~isreal(value) ,
                 error('coefficients must be a real numbers.')
             end
@@ -230,6 +239,8 @@ classdef polynom < nltop
                         x(:,i)=(x(:,i) - cmean)/drange;
                     end
                     [w,f]=multi_tcheb(x,order);
+                otherwise
+                    error(['hessian not supported for polyType:' polyType]);
             end
             
             
@@ -270,6 +281,8 @@ classdef polynom < nltop
                         x(:,i)=(x(:,i) - cmean)/drange;
                     end
                     [j,f]=multi_tcheb(x,order);
+                otherwise
+                    error(['jacobian not support for polyType:' polyType])
                     
             end
         end
@@ -474,9 +487,9 @@ classdef polynom < nltop
                     [W,f]=multi_tcheb(x,polyOrderMax);
                 case 'bspline'
                     % set defaults center and SD if  not defined
-                    t=domain(z);
+                    t=double(z(:,1));
                     xMin=min(t);
-                    xMax=max(t); 
+                    xMax=max(t);
                     p.polyRange(1)=xMin;
                     p.polyRange(2)=xMax;
                     deltx=(xMax-xMin)/(p.polyOrder-1)
@@ -484,14 +497,14 @@ classdef polynom < nltop
                     splineSD=deltx;
                     set(p,'splineCenters',splineCenters);
                     set(p,'splineSD',splineSD);
-                    polyOrderMax=length(splineCenters); 
+                    polyOrderMax=length(splineCenters);
                     set(p,'polyOrderMax',polyOrderMax);
                     bf=generate_B_splines(t,splineCenters,splineSD);
                     W=double(bf);
                 case 'laguerre'
-                    t=domain(z);
+                    t=double(z(:,1));
                     xMin=min(t);
-                    xMax=max(t); 
+                    xMax=max(t);
                     p.polyRange(1)=xMin;
                     p.polyRange(2)=xMax;
                     disp('laguerre polynomials fit to ramp time data');
@@ -538,7 +551,7 @@ classdef polynom < nltop
             
             if strcmp(polyType,'Bspline'),
                 set (p,'polyCoef',coef);
-                set (p,'polyOrder',order); 
+                set (p,'polyOrder',order);
             else
                 set (p,'polyCoef',coef,'polyOrder',order);
                 
@@ -552,6 +565,7 @@ classdef polynom < nltop
     end
 end
 %%
+
 function B = generate_B_splines(q,centers,sd)
 % q = domain
 % centers = centers for splines
