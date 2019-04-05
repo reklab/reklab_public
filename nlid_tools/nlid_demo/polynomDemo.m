@@ -18,7 +18,7 @@ for iType=1:nType,
      plot(B);
     streamer(titleStr,.90); 
 end
-
+figNum=iType+1;
 %% Fit powet,tcheb and hermite to a cubic polynomial 
 
 nx=3; ny=2;
@@ -39,17 +39,19 @@ F=2;
 for t=1:3,
     p=[];
     % Estimate polynomial
-    figure(t);clf
+    figure(figNum);clf
+    figNum=figNum+1;
     curType=pTypes{t};
     p=polynom(z,'polyType',curType,'polyOrder',10,'nInputs',1);
     subplot (nx,ny,1);
     plot(p);
     title ([ ' Estimated ' curType ])
     % show prediction
-    subplot (nx,ny,2);
-    
+    subplot (nx,ny,2);    
     yPre=nlsim(p,z(:,1));
     plot(z(:,2));
+    T=nldat(domain(z(:,1)));
+    set(yPre,'domainValues',T); 
     h=line(yPre); set(h,'color','r');
     title (['Prediction for estimated: ' curType])
     % Create polynomial apriori
@@ -63,6 +65,7 @@ for t=1:3,
     subplot (nx,ny,4);
     yPre1=nlsim(p1,z(:,1));
     plot(z(:,2));
+    set(yPre1,'domainValues',T); 
     h=line(yPre1); set(h,'color','r');
      title (['Prediction for apriori: ' curType])
     % Derivative
@@ -72,13 +75,17 @@ for t=1:3,
     streamer(curType,.9); 
 end
 
-%%
+%% Fit splines 
 
-for t=4:5,
+T=nldat([0:.01:1]','domainIncr',.01);
+IRF=fgzw(T,[1 .5 10]);
+plot(IRF)
+z=cat(2,T,IRF); 
+curType='laguerre'
     p=[];
     % Estimate polynomial
-    figure(t);clf
-    curType=pTypes{t};
+   figure(figNum);clf
+   figNum=figNum+1;
     p=polynom(z,'polyType',curType,'polyOrder',10,'nInputs',1);
     subplot (nx,ny,1);
     plot(p);
@@ -87,13 +94,14 @@ for t=4:5,
     subplot (nx,ny,2);
     
     yPre=nlsim(p,z(:,1));
-    plot(z(:,2));
+    set(yPre,'domainValues',T);
+    plot(z(:,2))    
     h=line(yPre); set(h,'color','r');
     title (['Prediction for estimated: ' curType])
     % Create polynomial apriori
-    ;
     % test a priori generation and simulation
-    p1=polynom('polyType',curType,'polyCoef',p.polyCoef);
+    p1=polynom('polyType',curType);
+    set(p1,'alfa',p.alfa, 'polyCoef',p.polyCoef);
     set(p1,'polyMean',mean(x),'polyStd',std(x),'polyRange',[ min(x) max(x)]');
     subplot (nx,ny,3); plot(p1);
         title ([ ' a priori ' curType ])
@@ -101,6 +109,7 @@ for t=4:5,
     subplot (nx,ny,4);
     yPre1=nlsim(p1,z(:,1));
     plot(z(:,2));
+    set(yPre1,'domainValues',T); 
     h=line(yPre1); set(h,'color','r');
      title (['Prediction for apriori: ' curType])
     % Derivative
@@ -108,8 +117,56 @@ for t=4:5,
     plot (ddx(p));
     title('derivative'); 
     streamer(curType,.9); 
-end
+
 %%
+%% Fit Bsplines 
+x= (-10:.01:10)';
+y= 10 + 5*x +2*x.^2 + .1*x.^3;
+noise=randn(length(x),1)*10;
+yNoise=y+noise;
+z=cat(2,x,yNoise);
+z=nldat(z,'domainIncr',.01);
+
+curType='Bspline'
+    p=[];
+    % Estimate polynomial
+    figure(figNum);
+    figNum=figNum+1;
+    
+    p=polynom(z,'polyType',curType,'polyOrder',10,'nInputs',1);
+    subplot (nx,ny,1);
+    plot(p);
+    title ([ ' Estimated ' curType ])
+    % show prediction
+    subplot (nx,ny,2);
+    
+    yPre=nlsim(p,z(:,1));
+    T=nldat(domain(z));  
+    set(yPre,'domainValues',T);
+    plot(z(:,2))    
+    h=line(yPre); set(h,'color','r');
+    title (['Prediction for estimated: ' curType])
+    % Create polynomial apriori
+    ;
+    % test a priori generation and simulation
+    p1=polynom('polyType',curType);
+    set(p1,'splineCenters',p.splineCenters,'splineSD',p.splineSD, 'polyCoef',p.polyCoef);
+    set(p1,'polyMean',mean(x),'polyStd',std(x),'polyRange',[ min(x) max(x)]');
+    subplot (nx,ny,3); plot(p1);
+        title ([ ' a priori ' curType ])
+    % prediction of a apriori polynomal
+    subplot (nx,ny,4);
+    yPre1=nlsim(p1,z(:,1));
+    plot(z(:,2));
+    set(yPre1,'domainValues',T); 
+    h=line(yPre1); set(h,'color','r');
+     title (['Prediction for apriori: ' curType])
+    % Derivative
+    subplot(nx,ny,5);
+    plot (ddx(p));
+    title('derivative'); 
+    streamer(curType,.9); 
+    %%
 return
 
 
