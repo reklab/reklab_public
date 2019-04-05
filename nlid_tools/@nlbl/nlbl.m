@@ -69,7 +69,7 @@ classdef nlbl < nlm
             i=irf;
             t=polynom('polyType','tcheb','polyOrderSelectMode','full');
             nl.elements ={ t i };
-          
+            nl=setIdMethod(nl,'hk'); 
             if nargin==0;
                 return
             elseif nargin==1,
