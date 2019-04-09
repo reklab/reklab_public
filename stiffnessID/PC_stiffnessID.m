@@ -6,7 +6,7 @@ function [hIntrinsic, mReflex, nlmStiff, VAFT, VAFi, VAFr, tqI, tqR, tqT]= PC_st
 % Optional argume name/value pairs are:
 % 
 % Define options, default values and help 
-options={{'reflex_id_method' 'sls' 'method for identification of reflex pathway (MbyZ/TIC/ScanType)'} ...
+options={{'reflex_id_method' 'sls' 'method for identification of reflex pathway [hk; sls rect]'} ...
         {'decimation_ratio' 10 'ratio to decimate data bt'} ...
         {'reflex_irf_len' 1000 'length of reflex IRF in ms'} ...
         {'reflex_nl_ordermax' 8 'maximum order for reflex nonlinearity'} ...
@@ -23,9 +23,20 @@ ts=get(z,'domainIncr');
 nlag_reflex_irf= ceil(reflex_irf_len/(ts*1000*decimation_ratio));
 mReflex=nlbl;
 if strcmpi(reflex_id_method,'hk'),
-    set(mReflex,'idMethod','hk','nLagLE',nlag_reflex_irf, 'maxOrderNLE',reflex_nl_ordermax);
+    P=mReflex{1,1};
+    set(P,'polyOrderMax',reflex_nl_ordermax);
+    I=mReflex{1,2}; 
+    set(I,'nLags',nlag_reflex_irf);
+    
+    set(mReflex,'idMethod','hk','elements',{ P I});
 elseif strcmpi(reflex_id_method,'sls'),
-    set(mReflex,'idMethod','sls', 'displayFlag',false,'nIterMax',10,'nLagLE',nlag_reflex_irf, 'maxOrderNLE',reflex_nl_ordermax);
+     P=mReflex{1,1};
+    set(P,'polyOrderMax',reflex_nl_ordermax);
+    I=mReflex{1,2}; 
+    set(I,'nLags',nlag_reflex_irf);
+    
+    
+    set(mReflex,'idMethod','sls', 'displayFlag',false,'nIterMax',10,'elements',{P I});
 elseif strcmpi(reflex_id_method,'rect'),
     mReflex=irf;
     set (mReflex,'nSides',1,'nLags',nlag_reflex_irf,'irfIdMethod',irf_mode);
@@ -103,4 +114,5 @@ end
 %mel=get(mReflex,'elements');
 % mddt=nlmsym(sym('ddt(x)'));
 nlmStiff=nlm;
-set(nlmStiff,'elements', { hIntrinsic ; mReflex } );
+comment=['Parallel Cascade Reflex Model Identified using:' reflex_id_method];
+set(nlmStiff,'elements', { hIntrinsic ; mReflex },'comment' ,comment);

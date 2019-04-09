@@ -102,18 +102,20 @@ if n>0
     tqI_r = trq - tqI;
     tqI = nldat(tqI,'domainIncr',ts*decimation_ratio);
     zReflex = cat(2,vel,nldat(tqI_r,'domainIncr',ts*decimation_ratio));
+    reflex= nlbl('idMethod','subspace','nDelayInput',...
+        delay/ts/decimation_ratio,'threshNSE',10^-5,'displayFlag',false,'hankleSize', ...
+        hankle_size,'orderLE',orderselectmethod);
+    P=reflex{1,1};
+    set(P,'polyOrderMax', order); 
+    reflex{1,1}=P;
+
     
     if isnumeric(orderselectmethod)
-        reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',...
-        delay/ts/decimation_ratio,'maxOrderNLE', ...
-        order,'threshNSE',10^-5,'displayFlag',false,'hankleSize', ...
-        hankle_size,'orderSelectMethodLE','preset','orderLE',orderselectmethod);
-    
+        reflex=nlident(reflex,zReflex, 'orderSelectMethodLE','preset','orderLE',orderselectmethod)
+ 
     else
-        reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',...
-        delay/ts/decimation_ratio,'maxOrderNLE', ...
-        order,'threshNSE',10^-5,'displayFlag',false,'hankleSize', ...
-        hankle_size,'orderSelectMethodLE',orderselectmethod);
+        reflex = nlbl(reflex,zReflex)
+
     end    
     
     set(reflex,'comment','Identified reflex Hammerstein');
