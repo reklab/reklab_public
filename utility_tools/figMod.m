@@ -332,7 +332,7 @@ if ~isnan(xlabel_pos),
       end
       % }}}
    else
-      disp('no option')
+      %disp('no option')
    end
 end
 

@@ -15,7 +15,7 @@ end
 if nargin <5,
     pageOrient = 'portrait';
 end
-if nargin,3,
+if nargin<3,
     printFlag=true;
 end
 
@@ -25,7 +25,7 @@ end
 
 if newFileFlag
     orient(figNum,pageOrient); 
-    print (figNum, fileName, formatType,'-bestfit');
+    print (figNum, fileName, formatType);
     
 else
     print (figNum, fileName, formatType,'-append','-bestfit');
