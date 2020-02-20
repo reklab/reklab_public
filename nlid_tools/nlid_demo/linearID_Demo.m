@@ -46,7 +46,7 @@ subplot (2,2,2);
 SU=spect(U,'nFFT',100);
 set(U,'comment','Input Spectrum','domainName','sec');
 plot (SU);title('Spectrum');
-fig_mod(1,'title_size',14);
+figMod(1,'title_size',14);
 subplot (2,2,2);
 CU=cor (U,'nSides',2);
 plot(CU);title('Autocorrelation');
@@ -145,21 +145,21 @@ end
         xlabel('');
         
         subplot (4,1,2);
-        plot (zPlot(50:550,2),'line_color','r');
+        plot (zPlot(50:550,2),'lineColor','r');
         ylabel('Output');
         title('');
         xlabel('');
         
         subplot (4,1,3);
-        plot (zPlot(50:550,3),'line_color','g');
+        plot (zPlot(50:550,3),'lineColor','g');
         ylabel('Predicted');
         title('');
         subplot (4,1,4);
-        plot (zPlot(50:550,2)-zPlot(50:550,3),'line_color','g');
+        plot (zPlot(50:550,2)-zPlot(50:550,3),'lineColor','g');
         ylabel('Residuals');
         title('');
           streamer(fullTitle,.90);
-        fig_mod(4,'title_size',12);
+        figMod(4,'title_size',12);
         
     end
 function plotFR
