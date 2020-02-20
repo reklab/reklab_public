@@ -664,6 +664,9 @@ classdef nldat < nltop
                 xchan=sx(2);
                 sy= size(y);
                 ychan=sy(2);
+                
+                
+                
                 s1= [ 1 1 1];
                 if sx==sy
                     z=x;
@@ -695,7 +698,7 @@ classdef nldat < nltop
                 [nSap,nChan,nReal]=size(x);
            
                  for i=1:nReal,
-                f(:,1,i)=  (phase(x.dataSet(:,1,i)));
+                f(:,1,i)=  unwrap(angle(x.dataSet(:,1,i)));
                  end
                 z.dataSet=f;
                 z.comment=[ 'PHASE of ' x.comment];
@@ -812,6 +815,12 @@ classdef nldat < nltop
                     end
                     s=strvcat(s,s1);
                 end
+            end
+            
+            function z=times(x,y)
+                z=x;
+                z.dataSet=x.dataSet.*y.dataSet;
+                z.comment='x times y';
             end
             
             function z = real(x);
