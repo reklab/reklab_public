@@ -43,7 +43,7 @@ classdef lnbl < nlm
                 'paramHelp', 'Iterative method used to refine initial estimate',...
                 'paramType','select',...
                 'paramLimits', {'busgang', 'hk', 'phk', 'lm'});
-            setidMethod( ln,'lm');
+            ln= setidMethod( ln,'lm');
             ln.comment='LN Model';
             i=irf;
             t=polynom('polyType','tcheb');
