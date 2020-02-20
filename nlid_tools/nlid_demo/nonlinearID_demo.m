@@ -32,7 +32,7 @@ pltflg=false;
 
 [z,M]=nlid_sim (model_type,x,'plotFlg',pltflg);
 %%
-% generate noise currupted output
+% generate noise corrupted output
 %
 y=double(z(:,2));
 noise=randn(length(y),1);
@@ -64,7 +64,8 @@ demo_plot(i,z, comment);
 comment='LN Model';
 disp(comment);
 ln=lnbl;
-ln=nlident(ln,z, 'nLags',nLags); 
+ln{1,1}.nLags=nLags;
+ln=nlident(ln,z); 
 demo_plot(ln,z,comment);
 
 %%  Weiner series from ln estimate
@@ -84,7 +85,9 @@ demo_pause;
 %
 comment='NL Model';
 disp(comment);
-nl=nlbl(z,'nLagLE',nLags);
+nl=nlbl;
+nl{1,2}.nLags=nLags;
+nl=nlbl(z)
 disp(comment);
 demo_plot(nl,z,'NL Model Predictions');
 
