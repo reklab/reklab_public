@@ -78,14 +78,17 @@ switch option
         I=irf;
         switch option
             case 'LP1'
-                set(I,'Data',irfLP', 'DomainIncr',domain_incr);
+                set(I,'dataSet',irfLP', 'domainIncr',domain_incr);
                 Y=nlsim(I,U);
+          
             case 'HP1'
                 irfHP=-irfLP;
                 irfHP(1)=-sum(irfHP);
                 set(I,'domainIncr',domain_incr,'dataSet',irfHP');
                 Y=nlsim(I,U);
+           
         end
+        M=I;
         
     case 'L1'
         Y = nlsim(I1,U);
