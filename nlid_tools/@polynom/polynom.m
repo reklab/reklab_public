@@ -170,7 +170,15 @@ classdef polynom < nltop
                 case 'laguerre'
                     v=generate_laguerre_basis(nSamp, polyOrder, alfa);
             end
-            V=nldat(v,'comment',['Basis functions for ' polyType ],'domainValues',x,'domainName','Input value');
+            V=nldat(v,'comment',['Basis functions for ' polyType 'polynomials'],'domainValues',x,'domainName','Input value');
+            [nsamp,nchan]=size(V);
+            for i=1:nchan,
+                chanName{i}=[' Basis ' num2str(i-1)];
+            end
+            V.chanNames=chanName;
+            
+            
+            
         end
         
         function mdot = ddx(m);
