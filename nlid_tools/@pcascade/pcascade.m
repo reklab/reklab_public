@@ -110,7 +110,7 @@ classdef pcascade < nlm
                     Ts=get(z,'domainIncr');
                 else
                     subsys = get(pc,'elements');
-                    f1 = bank{1,1};
+                    f1 = pc{1,1};
                     Ts = get(f1,'domainIncr');
                     z = nldat(z,'domainIncr',Ts);
                 end
@@ -156,11 +156,12 @@ classdef pcascade < nlm
                 P = getParamValStruct(pc.parameterSet);
                 
                 pcPath = lnbl;
-                set(pcPath,'nLags',P.nLags,'polyOrderMax',P.polyOrderMax, ...
+                set(pcPath{1},'nLags',P.nLags)
+                set(pcPath{2},'polyOrderMax',P.polyOrderMax, ...
                     'polyOrderSelectMode','auto');
                 % try a first-order pathway
                 
-                set(pcPath,'lnInitMethod','fil');
+                set(pcPath,'initMethod','fil');
                 resid = y - yest;
                 ur = cat(2,u(hlen+1:N),resid(hlen+1:N));
                 pcPath = nlident(pcPath,ur);
@@ -191,9 +192,9 @@ classdef pcascade < nlm
                 end
                 
                 if generalized
-                    set(pcPath,'lnInitMethod','gen_eig');
+                    set(pcPath,'initMethod','gen_eig');
                 else
-                    set(pcPath,'lnInitMethod','eigen','lnIdMethod','lm');
+                    set(pcPath,'initMethod','eigen','idMethod','lm');
                    PINV_ORDER = hlen;
                 end
                 
@@ -240,7 +241,7 @@ classdef pcascade < nlm
                 Ts = get(z,'domainIncr');
                 pcPath = lnbl;
                 set(pcPath,'nLags',P.nLags,'polyOrderMax',P.polyOrderMax, ...
-                    'lnIdMethod','bussgang');
+                    'idMethod','bussgang');
                 subsys = get(pcPath,'elements');
                 h = subsys{1};
                 m = subsys{2};
