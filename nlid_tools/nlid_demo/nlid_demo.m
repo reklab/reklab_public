@@ -99,6 +99,9 @@ set(pc,'nPaths',5,'polyOrderMax',5,'nLags',nLags);
 pc=nlident(pc,z);
 set (pc,'comment','Parallel cascade model');
 demo_plot(pc,z,comment);
+
+
+
 %plot(wseries(pc));
 
 % wkernel = Lee-Schetzen
@@ -160,16 +163,7 @@ end
 
 
 function demo_pause
-figure(1);
-p1=get(gcf,'position');
-p2=p1;
-p2(1)=p1(3)-100;
-p2(2)=p1(4)-25;
-p2(3)= 80;
-p2(4)=20;
-h = uicontrol('Position',p2,'String','Continue',...
-    'Callback','uiresume(gcbf)', 'backgroundcolor','red');
-uiwait(gcf);clf
+i=input_l('Continue','y');
 end
 end
 
