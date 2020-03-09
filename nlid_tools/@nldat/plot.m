@@ -172,9 +172,9 @@ else
                 
                 plot (t,xd);
             elseif strcmp(realizationMode,'super');
-                nlc = length(linecolor);
+                nlc = length(lineColor);
                 if nlc>0,
-                    plot (t,xd,linecolor(max(nlc,i)));
+                    plot (t,xd,lineColor(max(nlc,i)));
                 else
                     plot (t,xd);
                 end
