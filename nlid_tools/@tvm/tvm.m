@@ -224,7 +224,7 @@ classdef tvm < nlm
         end
         
         function tvmIdent = nlidentNLBL ( TVM, Z, modelPrototype, varargin )
-            % Identify a TVNLBL Model
+            % Identify a TV NLBL Model
             
             tvmIdent=TVM;
             X=squeeze(double(Z(:,1,:)));
