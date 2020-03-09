@@ -116,7 +116,7 @@ classdef nltop
             Value=A;
             sTemp=S;
             if length(sTemp)== 2,
-                disp('warning nlm/subsasgn may not work for this stucture');
+                %disp('warning nlm/subsasgn may not work for this stucture');
                 newA=subsref(A,sTemp(1));
                 sTemp=sTemp(2);
                 B= subsasgn( newA, sTemp, B);
@@ -126,7 +126,11 @@ classdef nltop
                     Value = set(A,S(1).subs,B);
                 case '{}'
                     i=S(1).subs{1};
+                    if length(S(1).subs)==1,
+                        j=1;
+                    else
                     j=S(1).subs{2};
+                    end
                     A.elements{i,j}=B;
                     Value=A;
                 otherwise
