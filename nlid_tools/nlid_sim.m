@@ -6,18 +6,31 @@ function [Z,M,  zFull] = nlid_sim (option,U,varargin)
 %  z - simulated data set
 %  m - model simulated 
 %  zFull - input, noise free output, noise
+% inputs: 
 %	option 	= system type
 %       LP1 - firat order  low pass
 %       HP1 - first order high pass
 %       L1 - one-sided low pass filter
-%	u 			= input signal
-
-%  varargin
-% pltflg [true/false]	= plot model simulated
-% 'nsmo' '0' ' tnumber of times to smooth [0-N]'} ...
-% 'delay_time' 0 'Output delay (sec))'} ...
-% 'domain_incr' .01 'Sampling increment (sec))'} ...
-% 'noise_level' 0 'Noise std/output STD'
+%       H1 - seocond-order high pass
+%       H2 - Bessel high pass
+%       L2 - second-order low pass
+%       LNRECT - Wiener system - second order low-opass followed by full wave rectifier
+%       LN2 - Wiender system with quadratic nonlinearity
+%       LN3 - Wiener systems with cubiv nonlinerity
+%       N2L - Hammerstein system with quadratic nonlinearity
+%       N3L - Hammerstien system with cubic nonlinearity.
+%       N3HP - Hammerstein system:  cubic nonlinearity + HP filter
+%       PC - parallel cascade model
+%       POLY - static nonlineariy
+%       STATIC_LINEAR  - static linear system
+%       Cuber - cuber 
+%   U - input signal 
+%   varargin
+%       pltflg [true/false]	= plot model simulated
+%       'nsmo' '0' ' tnumber of times to smooth [0-N]'} ...
+%       'delay_time' 0 'Output delay (sec))'} ...
+%       'domain_incr' .01 'Sampling increment (sec))'} ...
+%       'noise_level' 0 'Noise std/output STD'
 % $Revisions: %
 % Copyright 2003, Robert E Kearney and David T Westwick
 % This file is part of the nlid toolbox, and is released under the GNU
