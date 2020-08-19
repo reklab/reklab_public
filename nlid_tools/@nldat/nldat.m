@@ -502,18 +502,23 @@ classdef nldat < nltop
             end        
             y=nldat(mean(x.dataSet,DIM));
             set(y,'comment',['Mean(' inputname(1) ',' int2str(DIM) ')' ]);
+            if DIM==3,
+                set(y,'domainIncr',x.domainIncr,'domainName',x.domainName, 'domainStart',x.domainStart);
+            end
         end
         
-        function h=line(x,y)
-            %  h=line(x,y)
+        function h=line(x,y,varargin)
+            %  h=line(x,y,varargin)
             if nargin==1,
                 % Nldat wrapper to line
                 [nrow,ncol,nreal]=size(x);
                 for i=1:ncol,
                     h(i)=line(domain(x),x.dataSet(:,ncol,1));
+                    set(h(i),varargin(:)); 
                 end
             else
                 h=line(double(x),double(y));
+                set(h,varargin(:));
             end
         end
             
@@ -1048,8 +1053,8 @@ classdef nldat < nltop
                         if isa(nTemp,'segdat')
                             onsetpointer = get(nTemp,'onsetPointer');
                             seglength = get(nTemp,'segLength');
-                            set(nTemp,'onsetPointer', onsetpointer (:,S(i).subs{2}));
-                            set(nTemp,'segLength' , seglength (:,S(i).subs{2}));
+                            iset(nTemp,'onsetPointer', onsetpointer (S(i).subs{2}));
+                            set(nTemp,'segLength' , seglength (S(i).subs{2}));
                         end
                     end
                     
