@@ -83,7 +83,7 @@ classdef nltop
                 elseif any(strcmp(Property,fieldnames(sys))),
                     Value=sys.(Property);
                 else
-                    error (['Property not defined:' Property]);
+                    dbquiterror (['Property not defined:' Property]);
                 end
             end
             
