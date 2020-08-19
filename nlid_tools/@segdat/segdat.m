@@ -32,8 +32,8 @@ classdef segdat<nldat
                     S.(fields{i})=a.(fields{i});
                 end
                 [nSamp,nChan]=size(a);
-                set(S,'onsetPointer',ones(1,nChan));
-                set (S,'segLength', nSamp*ones(1,nChan));
+                set(S,'onsetPointer',1);
+                set (S,'segLength', nSamp);
                 if nargin > 1,
                     set (S,varargin{:});
                 end
@@ -70,17 +70,15 @@ classdef segdat<nldat
         function plot(S)
             colors=colororder;
             if (size(S,2)==1) && ((size(S,3)==1))
-                S_nldat = nldat(get(S,'dataSet'),'domainIncr',get(S,'domainIncr'),'chanNames'...
-                    ,get(S,'chanNames'),'chanUnits',get(S,'chanUnits'),'domainName',get(S,'domainName')...
-                    ,'comment',get(S,'comment'));
-                plot(S_nldat)
+                S_nldat=nldat(S);
+               % plot(S_nldat)
                 hold on
-                numSegment = length(get(S,'segLength'));
+                numSegment = segCount(S);
                 onsetPointer = get(S,'onsetPointer');
                 segLength = get(S,'segLength');
                 for i = 1 : numSegment
-                    S_nldat_Segment = S_nldat(onsetPointer(i):onsetPointer(i)+segLength(i)-1,:);
-                    plot(S_nldat_Segment,'lineColor',colors(i,:))
+                    sSeg=segGet(S,i);
+                    plot(sSeg,'lineColor',colors(i,:))
                 end
                 legend('Original Record','Segmented Data')
             else
@@ -88,14 +86,22 @@ classdef segdat<nldat
             end
         end
         
-        function Z = segcat (Zin, varargin)
+        function Z = segCat (Zin, varargin)
             % Concatonate segdat objects - only for dim 1.
             % only works for nonoverlapping segments
-            % error checking very eak
-            Z=Zin;
+            % error checking very weak
+            if isa(Zin,'nldat');
+                Z=segdat(Zin);
+            else
+                Z=Zin;
+            end
+                
             nSeg=nargin-1;
             for i=1:nSeg
                 V=varargin{i};
+                if isa(V,'nldat'),
+                   V=segdat(V);
+                end
                 Z.dataSet=cat(1,Z.dataSet, V.dataSet);
                 Z.domainStart=cat(1,Z.domainStart,V.domainStart);
                 curSegLen=get(Z,'segLength');
@@ -225,6 +231,7 @@ classdef segdat<nldat
         end
         function out = nldat(data)
             % returns concatonated segments as a nldat object
+            
             errorcheck(data);
             [~,nchan,~] =size(data);
             onsetpointer = get(data,'onsetPointer');
@@ -233,22 +240,30 @@ classdef segdat<nldat
             elseif  any(~(mean(seglength')==seglength(:,1)'))
                 error('All channels in each  data segment must have equal segment lengths')
             end
-            onsetpointer_new = zeros(size(onsetpointer));
-            seglength_new = zeros(size(onsetpointer));
-            endpointer = onsetpointer + seglength - 1;
-            dataset = get(data,'dataSet');
-            d = zeros(sum(seglength(:,1)),nchan);
-            for i = 1: nchan
-                pointer = 1;
-                for j = 1 : size(onsetpointer,1)
-                    onsetpointer_new(j,i) = pointer;
-                    seglength_new(j,i) = length(dataset(onsetpointer(j,i):endpointer(j,i),i));
-                    d(onsetpointer_new(j,i):onsetpointer_new(j,i)+seglength_new(j,i)-1,i) = dataset(onsetpointer(j,i):endpointer(j,i),i);
-                    pointer = pointer + seglength_new(j,i);
-                end
+            nSeg=segCount(data);
+            [nSamp,nChan,nReal]=size(data);
+            domainIncr=data.domainIncr; 
+            newDomain=[];; 
+            j=0;
+            if nSeg==1,
+                newDomain=nan;
+            else
+            for iSeg=1:nSeg,
+                iStart=onsetpointer(iSeg);
+                curSegLen=seglength(iSeg);
+                domainStart=data.domainStart(iSeg);
+                xTemp=domainStart+([1:curSegLen]-1)*domainIncr;
+                newDomain=cat(1,newDomain,xTemp(:));
             end
-            out = nldat(d,'chanNames',data.chanNames,'chanUnits',data.chanUnits,'domainIncr',data.domainIncr,'domainName',data.domainName,'domainValues',data.domainValues,'dataSize',data.dataSize,'comment',data.comment);
+            end
+            dataset = get(data,'dataSet');
+           out = nldat(dataset,'chanNames',data.chanNames,'chanUnits',data.chanUnits, ...
+                'domainIncr',data.domainIncr,'domainName',data.domainName,'domainStart',data.domainStart, ...
+                'domainValues',newDomain, ...
+                'dataSize',data.dataSize,'comment',data.comment);
         end
+        
+        
         function v = vaf(data1,data2)
             [~,nchan1,~] =size(data1);
             [~,nchan2,~] =size(data2);
