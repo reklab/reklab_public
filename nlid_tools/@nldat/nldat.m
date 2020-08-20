@@ -507,18 +507,16 @@ classdef nldat < nltop
             end
         end
         
-        function h=line(x,y,varargin)
+        function h=line(x,y)
             %  h=line(x,y,varargin)
             if nargin==1,
                 % Nldat wrapper to line
                 [nrow,ncol,nreal]=size(x);
                 for i=1:ncol,
                     h(i)=line(domain(x),x.dataSet(:,ncol,1));
-                    set(h(i),varargin(:)); 
                 end
             else
                 h=line(double(x),double(y));
-                set(h,varargin(:));
             end
         end
             
