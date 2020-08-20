@@ -45,29 +45,28 @@ classdef segdat<nldat
                 error('cat must have at least three input arguments');
             end
             Z = varargin{1};
-            z = double(varargin{1});
-            onsetpointer = double(get(Z,'onsetPointer'));
-            seglength = double(get(Z,'segLength'));
-            domainStart=get(Z,'domainStart'); 
+            [nSamp,nChan,nReal]=size(Z); 
             Z.comment = [ 'cat' int2str(DIM) ' ' inputname(2)  ];
             
             for i = 2 : nargin - 1
-                y = varargin{i};
-                z = cat(DIM, z , double(y));
-                onsetpointer = cat(DIM,onsetpointer,newOnset);
-                seglength = cat(DIM,seglength,get(y,'segLength'));
-                Z.comment = [Z.comment ',' inputname(i+1)];
-                switch DIM
-                    case 1
-                        domainStart=cat(1,domainStart,y.domainStart);
-                    case 2
-                        Z.chanNames=cat(2,Z.chanNames,y.chanNames);
+                curZ=varargin{i};
+                [nSampCur, nChanCur, nRealCur]=size(curZ); 
+                if DIM==1,
+                    Z=segCat(Z,varargin{i});
+                elseif DIM==2,
+                    if nSamp ~= nSampCur
+                        error ('Number of samples must be equal if adding channels');
+                    end
+                    Z.dataSet=cat(2,Z.dataSet,curZ.dataSet);
+                    Z.chanNames=cat (1,Z.chanNames,curZ.chanNames); 
+                else
+                    error ([' DIM = ' numstr(DIM) ' not yet supported']);
                 end
+                Z.comment = [Z.comment ',' inputname(i+1)];
+                
             end
-            set(Z,'dataSet',z,'onsetPointer',onsetpointer,'segLength',seglength, ...
-                'domainStart',domainStart);
         end
-        function plot(S)
+                  function plot(S)
             colors=colororder;
             if (size(S,2)==1) && ((size(S,3)==1))
                 S_nldat=nldat(S);
@@ -146,7 +145,7 @@ classdef segdat<nldat
                 subplot (nChan,1,iChan);
             for iSeg=1:nSeg,
                 sTemp=segGet(S,iSeg);
-                line(domain(sTemp),sTemp(:,iChan));
+                line(sTemp(:,iChan));
             end
             end
         end
@@ -189,46 +188,29 @@ classdef segdat<nldat
             for i = 1: nchan
                 pointer = 1;
                 for j = 1 : size(onsetpointer,1)
-                    d_temp = decimate(dataset(onsetpointer(j,i):endpointer(j,i),i),decimation_ratio);
-                    onsetpointer_new(j,i) = pointer;
-                    seglength_new(j,i) = length(d_temp);
-                    d(onsetpointer_new(j,i):onsetpointer_new(j,i)+seglength_new(j,i)-1,i) = d_temp;
-                    pointer = pointer + seglength_new(j,i);
+                    d_temp = decimate(dataset(onsetpointer(j):endpointer(j),i),decimation_ratio);
+                    onsetpointer_new(j) = pointer;
+                    seglength_new(j) = length(d_temp);
+                    d(onsetpointer_new(j):onsetpointer_new(j)+seglength_new(j)-1) = d_temp;
+                    pointer = pointer + seglength_new(j);
                 end
             end
             set(out,'dataSet',d,'onsetPointer',onsetpointer_new,'segLength',seglength_new);
         end
         function out = ddt(data)
             errorcheck(data);
-            [~,nchan,~] =size(data);
-            onsetpointer = get(data,'onsetPointer');
-            seglength = get(data,'segLength');
-            if size(seglength,2)==1
-            elseif  any(~(mean(seglength')==seglength(:,1)'))
-                error('All data channels must have equal segment lengths')
-            end
-            onsetpointer_new = zeros(size(onsetpointer));
-            seglength_new = zeros(size(onsetpointer));
-            endpointer = onsetpointer + seglength - 1;
-            ts = get(data,'domainIncr');
-            out = data;
-            dataset = get(data,'dataSet');
-            d = zeros(sum(seglength(:,1)),nchan);
-            for i = 1: nchan
-                pointer = 1;
-                for j = 1 : size(onsetpointer,1)
-                    d_temp = dataset(onsetpointer(j,i):endpointer(j,i),i);
-                    d_temp = nldat(d_temp,'domainIncr',ts);
-                    d_temp = ddt(d_temp);
-                    d_temp = d_temp.dataSet;
-                    onsetpointer_new(j,i) = pointer;
-                    seglength_new(j,i) = length(d_temp);
-                    d(onsetpointer_new(j,i):onsetpointer_new(j,i)+seglength_new(j,i)-1,i) = d_temp;
-                    pointer = pointer + seglength_new(j,i);
+            nSeg=segCount(data);
+            for iSeg=1:nSeg
+                xTmp=segGet(data,iSeg);
+                xdt=ddt(xTmp); 
+                if iSeg==1,
+                    out=segdat(xdt);
+                else
+                    out=segCat(out,xdt);
                 end
-            end
-            set(out,'dataSet',d,'onsetPointer',onsetpointer_new,'segLength',seglength_new);
+            end           
         end
+        
         function out = nldat(data)
             % returns concatonated segments as a nldat object
             
@@ -279,7 +261,7 @@ classdef segdat<nldat
             [~,nchan,~] = size(data);
             onsetpointer = get(data,'onsetPointer');
             seglength = get(data,'segLength');
-            if ~(size(onsetpointer,1) == size(seglength,1))
+            if ~(size(onsetpointer) == size(seglength))
                 error('onsetPointer and segLength must have equal dimension')
             end
             if ~isempty(find(seglength<0, 1))
@@ -290,11 +272,11 @@ classdef segdat<nldat
                 error('At least segment exceeds the data range')
             end
             for k = 1: nchan
-                for i = 1 : length(onsetpointer(:,k))
-                    for j = 1 : length(onsetpointer(:,k))
+                for i = 1 : length(onsetpointer(:))
+                    for j = 1 : length(onsetpointer(:))
                         if i == j
                             break;
-                        elseif (onsetpointer(j,k)<=onsetpointer(i,k))&&(onsetpointer(i,k)<=endpointer(j,k))
+                        elseif (onsetpointer(j)<=onsetpointer(i))&&(onsetpointer(i)<=endpointer(j))
                             warning(['In channel ',num2str(k),', segment ',num2str(i),' & segment',num2str(j),' overlap.'])
                         end
                     end
