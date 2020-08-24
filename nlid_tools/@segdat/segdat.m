@@ -94,22 +94,29 @@ classdef segdat<nldat
             else
                 Z=Zin;
             end
-                
-            nSeg=nargin-1;
-            for i=1:nSeg
+            nInput=nargin-1;
+            for i=1:nInput
                 V=varargin{i};
                 if isa(V,'nldat'),
                    V=segdat(V);
                 end
-                Z.dataSet=cat(1,Z.dataSet, V.dataSet);
-                Z.domainStart=cat(1,Z.domainStart,V.domainStart);
-                curSegLen=get(Z,'segLength');
-                newSegLen=get(V,'segLength');
+                nSegCurInput=segCount(V);
+                
+                for jSeg=1:nSegCurInput,
+                    curV=segGet(V,jSeg);
+               
+               
+                Z.domainStart=cat(1,Z.domainStart,curV.domainStart);
+                curLength=length(Z);
+                newSegLen=length(curV);
+                curSegLen=get(Z,'segLength'); 
                 updateSegLen=cat(1,curSegLen, newSegLen);
                 curOnset=get(Z,'onsetPointer');
-                newOnset=sum(curSegLen,1)+curOnset;
+                newOnset=curLength+1;
                 updateOnset=cat(1,curOnset,newOnset); 
+                 Z.dataSet=cat(1,Z.dataSet, V.dataSet);
                 set(Z,'onsetPointer',updateOnset,'segLength',updateSegLen);
+                end
             end
         end
                 
