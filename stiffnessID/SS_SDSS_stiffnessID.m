@@ -34,17 +34,17 @@ if arg_parse(options,varargin);
 reflexPathID = 1;%Set to 1 to identify the reflex pathway
 ts = get(z,'domainIncr');
 segmentOnsetPointer = get(z,'onsetPointer');
-inputSegmentOnsetPointer = segmentOnsetPointer (:,1);
-outputSegmentOnsetPointer = segmentOnsetPointer (:,2);
+inputSegmentOnsetPointer = segmentOnsetPointer (:)
+outputSegmentOnsetPointer = segmentOnsetPointer (:);
 segmentLength = get(z,'segLength');
-inputSegmentLength = segmentLength (:,1);
-outputSegmentLength = segmentLength (:,2);
+inputSegmentLength = segmentLength (:);
+outputSegmentLength = segmentLength (:);
 if ~( isequal(inputSegmentOnsetPointer,outputSegmentOnsetPointer) &&...
         isequal(inputSegmentLength,outputSegmentLength))
     error('The input and output segment onset pointers and lengths must be equal')
 else
-    segmentOnsetPointer = segmentOnsetPointer(:,1);
-    segmentLength = segmentLength(:,1);
+    segmentOnsetPointer = segmentOnsetPointer(:);
+    segmentLength = segmentLength(:);
 end
 %% Preparing data for identification
 dataSet = get(z,'dataSet');
@@ -190,6 +190,7 @@ if ~isempty(N)
             'maxOrderNLE',maxordernle,'threshNSE',threshold,'hankleSize',hanklesize, ...
             'orderSelectMethodLE','preset','orderLE',2);
         if ~isempty(reflex{2}.A)
+            zReflex.domainStart=(zReflex.onsetPointer-1)*zReflex.domainIncr; 
                 tqR = nlsim(reflex,zReflex);
                 tqI = nldat(tqI,'domainIncr',ts,'chanNames','Torque (Nm)','comment','Intrinsic Torque');
                 set(tqR,'chanNames','Torque (Nm)','comment','Reflex Torque');
