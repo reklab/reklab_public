@@ -1051,7 +1051,7 @@ classdef nldat < nltop
                         if isa(nTemp,'segdat')
                             onsetpointer = get(nTemp,'onsetPointer');
                             seglength = get(nTemp,'segLength');
-                            iset(nTemp,'onsetPointer', onsetpointer (S(i).subs{2}));
+                            set(nTemp,'onsetPointer', onsetpointer (S(i).subs{2}));
                             set(nTemp,'segLength' , seglength (S(i).subs{2}));
                         end
                     end
