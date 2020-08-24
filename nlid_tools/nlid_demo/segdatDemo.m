@@ -2,7 +2,7 @@ function  segdatDemo ()
 % segdatDemo
 % Demonstrate segdat and its functions
 clear all
-%% Generate a simple segdat obeject by concatonating two nldat objects
+%% Generate a simple segdat oeject by concatonating two nldat objects
 S=segdat;
 X=nldat(ones(1000,1),'domainIncr',.001);
 XS=segdat(X);
