@@ -9,11 +9,11 @@ if ~(ts == domainIncr)
     error('Input-output and system sampling rate mismatch')
 end
 in_onsetPointer = get(z,'onsetPointer');
-onsetPointer = in_onsetPointer (:,2);
-in_onsetPointer = in_onsetPointer (:,1);
+onsetPointer = in_onsetPointer (:);
+in_onsetPointer = in_onsetPointer (:);
 in_segLength = get(z,'segLength');
-segLength = in_segLength (:,2);
-in_segLength = in_segLength (:,1);
+segLength = in_segLength (:);
+in_segLength = in_segLength (:);
 if ~( isequal(onsetPointer,in_onsetPointer) &&  isequal(in_segLength,segLength))
     error('The input and output onset pointer and length must be equal..')
 end
