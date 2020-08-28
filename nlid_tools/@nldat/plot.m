@@ -136,7 +136,7 @@ else
         if nreal==1,
             nlc = length(lineColor);
             if nlc>0,
-                plot (t,xd,lineColor(max(nlc,i)));
+                plot (t,xd,'color',lineColor)
             else 
                 plot (t,xd,'linewidth',LineWidth);
             end

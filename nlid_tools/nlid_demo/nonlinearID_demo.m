@@ -19,7 +19,7 @@ if nargin == 0,
 end
 
 %% default input signal is unit variance white noise
-if nargin <2,
+   if nargin <2,
     x=randn (1000,1);
     x=nldat(x,'domainIncr',.01);
 end

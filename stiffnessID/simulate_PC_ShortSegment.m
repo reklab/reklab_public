@@ -2,9 +2,10 @@ function [trqIntrinsicPredict,trqReflexPredict,trqTotalPredict,idVAF,posMeasured
 %This function simulates the PC system to segdat inputs
 %It identifies initial conditions as part of the simulation
 decimationRatio = 1;
-position = z(:,1);
+zn=nldat(z)
+position = zn(:,1);
 position = position - mean(position);
-torque = z(:,2);
+torque = zn(:,2);
 torque = torque - mean(torque);
 torque = get(torque,'dataSet');
 samplingTimeIntrinsic = get(intrinsic,'domainIncr');
@@ -25,17 +26,17 @@ elseif ~(samplingTimeData == samplingTimeSystem)
 end
 
 segmentOnsetPointer = get(z,'onsetPointer');
-inputSegmentOnsetPointer = segmentOnsetPointer (:,1);
-outputSegmentOnsetPointer = segmentOnsetPointer (:,2);
+inputSegmentOnsetPointer = segmentOnsetPointer (:);
+outputSegmentOnsetPointer = segmentOnsetPointer (:);
 segmentLength = get(z,'segLength');
-inputSegmentLength = segmentLength (:,1);
-outputSegmentLength = segmentLength (:,2);
+inputSegmentLength = segmentLength (:);
+outputSegmentLength = segmentLength (:);
 if ~( isequal(inputSegmentOnsetPointer,outputSegmentOnsetPointer) &&...
         isequal(inputSegmentLength,outputSegmentLength))
     error('The input and output segment onset pointers and lengths must be equal')
 else
-    segmentOnsetPointer = segmentOnsetPointer(:,1);
-    segmentLength = segmentLength(:,1);
+    segmentOnsetPointer = segmentOnsetPointer(:);
+    segmentLength = segmentLength(:);
 	segmentEndpointer = segmentOnsetPointer + segmentLength - 1;
 
 end
@@ -82,7 +83,10 @@ tqIResidual = trqMeasured - trqIntrinsicPredict;
 trqIntrinsicPredict = segdat(trqIntrinsicPredict,'domainIncr',samplingTime,'chanNames','Torque (Nm)','comment','Intrinsic Torque','onsetPointer',switch_time(1:end-1),'segLength',segLength);
 tqIResidual = segdat(tqIResidual,'domainIncr',samplingTime,'chanNames','Torque (Nm)','comment','Intrinsic Torque','onsetPointer',switch_time(1:end-1),'segLength',segLength);
 zReflex = cat(2,velocitySegments,tqIResidual);
+zReflex.domainStart=(zReflex.onsetPointer-1)*zReflex.domainIncr;
 trqReflexPredict = nlsim(reflex,zReflex);
+trqIntrinsicPredict.domainStart=trqReflexPredict.domainStart;
+trqMeasured.domainStart=trqReflexPredict.domainStart;
 trqTotalPredict = trqIntrinsicPredict + trqReflexPredict;
 idVAF = vaf(trqMeasured,trqTotalPredict);
 end

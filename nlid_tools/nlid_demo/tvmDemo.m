@@ -1,5 +1,5 @@
 function tvmDemo
-% tvmDemo - demonstration of tv idetification unsing nlid_tools
+%% tvmDemo - demonstration of tv idetification unsing nlid_tools
 %% TV IRF
 %%Generate an TV IRF
 figNum=0;
@@ -15,7 +15,7 @@ tvI={};
      tvI{i}=tvTemp;
  end
  TVirf=tvm;
-set(TVirf,'elements',tvI,'tvStart',0,'tvIncr',.0
+set(TVirf,'elements',tvI,'tvStart',0,'tvIncr',.01);
 figNum=figNum+1; figure(figNum);clf;
 plot(TVirf); title('Simuulated TV IRF'); 
 %% simulate TV responses
@@ -51,7 +51,7 @@ figNum=figNum+1; figure(figNum);clf;
 
 plot(tvIRFensemble);
 title('Estimtated TVIRf'); 
-figNum=figNum+1; figure(figNum);clf;
+
 
 title('TV IRF ensemble estimate');
 figNum=figNum+1; figure(figNum);clf;
@@ -70,6 +70,7 @@ nodeLocations = .5:1:10;
 set(BF,'splineCenters',nodeLocations(:));
 t=domain(Z);
 BF1=basisfunction(BF,t); 
+figNum=figNum+1; figure(figNum);clf;
 plot(BF1); 
 figNum=figNum+1; figure(figNum);clf;
 tvIRFbasis=nlident(tvIRFbasis, Z(:,:,1:nTrials), I,BF,'periodic','yes','method','Bayes');

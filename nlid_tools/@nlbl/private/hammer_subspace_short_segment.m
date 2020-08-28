@@ -1,7 +1,7 @@
 function system_nlbl = hammer_subspace_short_segment (z,ps)
 %This function estimates a hammerstein system based on short segments of input
 %and output
-%system= hammer_subspace_short_segment (z)
+%system= hammer_subspace_short_segment (z,ps)
 %This routine is based on the following work:
 %Kian Jalaleddini, Ferryl Alley, Robert E Kearney, "Identification of
 %Hammerstein Systems from Short Segments of Data: Application to Stretch
@@ -20,15 +20,15 @@ function system_nlbl = hammer_subspace_short_segment (z,ps)
 %  end
 %%
 plotMode = 0;
-assign(ps);
+assign(ps.parameterSet);
 condition = 1;
 ts = get(z,'domainIncr');
 in_onsetPointer = get(z,'onsetPointer');
-onsetPointer = in_onsetPointer (:,2);
-in_onsetPointer = in_onsetPointer (:,1);
+onsetPointer = in_onsetPointer (:);
+in_onsetPointer = in_onsetPointer (:);
 in_segLength = get(z,'segLength');
-segLength = in_segLength (:,2);
-in_segLength = in_segLength (:,1);
+segLength = in_segLength (:);
+in_segLength = in_segLength (:);
 if ~( isequal(onsetPointer,in_onsetPointer) &&  isequal(in_segLength,segLength))
     error('The input and output onset pointer and length must be equal..')
 end
