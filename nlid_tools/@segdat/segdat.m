@@ -17,8 +17,8 @@ classdef segdat<nldat
             elseif isa(a,'double')
                 S.dataSet = a;
                 [nSamp,nChan]=size(a);
-                set(S,'onsetPointer',ones(1,nChan));
-                set(S,'segLength',nSamp*ones(1,nChan));
+                set(S,'onsetPointer',1);
+                set(S,'segLength',nSamp);
                 
                 if nargin > 1,
                     set (S,varargin{:});
@@ -32,8 +32,8 @@ classdef segdat<nldat
                     S.(fields{i})=a.(fields{i});
                 end
                 [nSamp,nChan]=size(a);
-                set(S,'onsetPointer',ones(1,nChan));
-                set (S,'segLength', nSamp*ones(1,nChan));
+                set(S,'onsetPointer',1);
+                set (S,'segLength', nSamp);
                 if nargin > 1,
                     set (S,varargin{:});
                 end
@@ -48,7 +48,7 @@ classdef segdat<nldat
             z = double(varargin{1});
             onsetpointer = double(get(Z,'onsetPointer'));
             seglength = double(get(Z,'segLength'));
-            domainStart=get(Z,'domainStart'); 
+            domainStart=get(Z,'domainStart');
             Z.comment = [ 'cat' int2str(DIM) ' ' inputname(2)  ];
             
             for i = 2 : nargin - 1
@@ -88,7 +88,7 @@ classdef segdat<nldat
             end
         end
         
-        function Z = segcat (Zin, varargin)
+        function Z = segCat (Zin, varargin)
             % Concatonate segdat objects - only for dim 1.
             % only works for nonoverlapping segments
             % error checking very eak
@@ -96,18 +96,22 @@ classdef segdat<nldat
             nSeg=nargin-1;
             for i=1:nSeg
                 V=varargin{i};
-                Z.dataSet=cat(1,Z.dataSet, V.dataSet);
-                Z.domainStart=cat(1,Z.domainStart,V.domainStart);
+                if isa(V,'nldat'),
+                    V=segdat(V);
+                end
+                
                 curSegLen=get(Z,'segLength');
                 newSegLen=get(V,'segLength');
                 updateSegLen=cat(1,curSegLen, newSegLen);
                 curOnset=get(Z,'onsetPointer');
-                newOnset=sum(curSegLen,1)+curOnset;
-                updateOnset=cat(1,curOnset,newOnset); 
+                newOnset=get(V,'onsetPointer')+length(Z);
+                updateOnset=cat(1,curOnset,newOnset);
+                Z.dataSet=cat(1,Z.dataSet, V.dataSet);
+                Z.domainStart=cat(1,Z.domainStart,V.domainStart);
                 set(Z,'onsetPointer',updateOnset,'segLength',updateSegLen);
             end
         end
-                
+        
         
         function n = segCount(S)
             % reutrns number of segments in a segdat object
@@ -117,18 +121,20 @@ classdef segdat<nldat
         
         function N = segGet(S,segNum)
             % Return segment of segdat object as a nldat object
+            N=nldat;
             nSeg=segCount(S);
             if (segNum>nSeg)
                 error('too many segments')
             end
-            nTmp=nldat(S);
+            dataSet=S.dataSet;
             segLen=get(S,'segLength');
-            
-            segStartPointer=[ 0 ; cumsum(segLen(:,1))]+1;
-            sStart=segStartPointer(segNum);
-            sEnd=segStartPointer(segNum+1)-1;            
-            N=nTmp(sStart:sEnd,:);
-            N.comment=(['Segment ' num2str(segNum) '  of segdat object']); 
+            onsetPointer=get(S,'onsetPointer');
+            sStart=onsetPointer(segNum);
+            sEnd=onsetPointer(segNum)+segLen(segNum)-1;
+            N.dataSet=dataSet(sStart:sEnd,:);
+            set(N, 'chanNames', S.chanNames,'chanUnits',S.chanNames, 'domainIncr',S.domainIncr, ...
+                'domainName',S.domainName);
+            N.comment=(['sSegment ' num2str(segNum) '  of segdat object']);
             N.domainStart=S.domainStart(segNum);
         end
         
@@ -138,13 +144,15 @@ classdef segdat<nldat
             [nSamp,nChan]=size(S);
             for iChan=1:nChan,
                 subplot (nChan,1,iChan);
-            for iSeg=1:nSeg,
-                sTemp=segGet(S,iSeg);
-                line(domain(sTemp),sTemp(:,iChan));
-            end
+                for iSeg=1:nSeg,
+                    sTemp=segGet(S,iSeg);
+                    line(domain(sTemp),sTemp(:,iChan));
+                end
+                xlabel(S.domainName);
+                ylabel(S.chanNames{iChan});
             end
         end
-            
+        
         
         function d =domain(S)
             % Overlaid domain function for segdat objects;
@@ -158,11 +166,11 @@ classdef segdat<nldat
                 end
             end
         end
-            
-                    
-                
-            
-            
+        
+        
+        
+        
+        
         function out = decimate(data,decimation_ratio)
             errorcheck(data);
             [~,nchan,~] =size(data);
@@ -241,10 +249,10 @@ classdef segdat<nldat
             for i = 1: nchan
                 pointer = 1;
                 for j = 1 : size(onsetpointer,1)
-                    onsetpointer_new(j,i) = pointer;
-                    seglength_new(j,i) = length(dataset(onsetpointer(j,i):endpointer(j,i),i));
-                    d(onsetpointer_new(j,i):onsetpointer_new(j,i)+seglength_new(j,i)-1,i) = dataset(onsetpointer(j,i):endpointer(j,i),i);
-                    pointer = pointer + seglength_new(j,i);
+                    onsetpointer_new(j) = pointer;
+                    seglength_new(j) = length(dataset(onsetpointer(j):endpointer(j)));
+                    d(onsetpointer_new(j):onsetpointer_new(j)+seglength_new(j)-1) = dataset(onsetpointer(j):endpointer(j),i);
+                    pointer = pointer + seglength_new(j);
                 end
             end
             out = nldat(d,'chanNames',data.chanNames,'chanUnits',data.chanUnits,'domainIncr',data.domainIncr,'domainName',data.domainName,'domainValues',data.domainValues,'dataSize',data.dataSize,'comment',data.comment);
@@ -275,11 +283,11 @@ classdef segdat<nldat
                 error('At least segment exceeds the data range')
             end
             for k = 1: nchan
-                for i = 1 : length(onsetpointer(:,k))
-                    for j = 1 : length(onsetpointer(:,k))
+                for i = 1 : length(onsetpointer)
+                    for j = 1 : length(onsetpointer)
                         if i == j
                             break;
-                        elseif (onsetpointer(j,k)<=onsetpointer(i,k))&&(onsetpointer(i,k)<=endpointer(j,k))
+                        elseif (onsetpointer(j)<=onsetpointer(i))&&(onsetpointer(i)<=endpointer(j))
                             warning(['In channel ',num2str(k),', segment ',num2str(i),' & segment',num2str(j),' overlap.'])
                         end
                     end
