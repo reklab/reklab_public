@@ -374,7 +374,7 @@ classdef polynom < nltop
             else
                 set(y,'dataSet',Y);
             end
-            set(y,'comment',[ polyType ' series prediction'],'domainValues',double(xin));
+            set(y,'comment',[ polyType ' series prediction']);
             % polynom/nlsim
         end
         %%
