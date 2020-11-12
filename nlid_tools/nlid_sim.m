@@ -75,7 +75,7 @@ set(I1,'dataSet',irf1,'domainIncr',domain_incr);
 I2=irf;set(I2,'dataSet',irf2,'domainIncr',domain_incr);
 P2=polynom;
 set(P2,'polyType','power','polyCoef',[10 25 10 ]');
-P3=polynom('polyType','power','polyCoef',[200 50 -10 5]');
+P3=polynom('polyType','power','polyCoef',[0 50 -10 5]');
 
 
 %  And the coefficients of the Nonlinearity are...
@@ -172,6 +172,10 @@ switch option
         comment='NL Quadratic data set';
         %LNL
     case 'LNL'
+        
+        
+        
+        
         x=nlsim(I1,U);
         z=nlsim(P3,x);
         Y=nlsim(I2,z);
