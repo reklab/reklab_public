@@ -248,10 +248,7 @@ elseif(strcmp(option,'cdf')),
 elseif(strcmp(option,'probability')),
     dist = dist / scale;
 elseif(strcmp(option,'density')),
-    binwidth=unique(chop(diff(dom),5));
-    if length(binwidth)>1,
-b        error('Different bindwidths not yet supported');
-    end
+    binwidth=min(unique(chop(diff(dom),5)));
     if dist(1) ~=0 | dist(end)~=0,
         % warning('first and last bins must be empty for density estimates');
     end
