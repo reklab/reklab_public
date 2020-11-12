@@ -162,6 +162,10 @@ classdef lnlbl < nlm
             
         end
         
+        function nlmtst( N)
+            lnlDemo;
+        end
+        
         function hs = smo (h, npass);
             % smo for nlnbl objects
             hs=h;
@@ -252,13 +256,19 @@ u = uy(:,1);
 y = uy(:,2);
 
 Ts = get(u,'domainIncr');
-order = get(m,'polyOrderMax');
+order = m.polyOrderMax';
 hlen = get(g,'nLags');
 x = nlsim(h,u);
 
 hdata = cat(2,x,y);
-mh = nlbl(hdata,'idMethod',method,'polyOrderMax',order,'nLags',hlen,...
-    'iterationTolerance',0.01);
+mh=nlbl;
+p=mh.elements{1};
+set(p,'polyOrderMax',order);
+l=mh.elements{2};
+l.nLags=hlen;
+mh.elements= { p l};
+mh = nlbl(hdata,'idMethod',method,...
+    'threshNSE',0.01);
 hblocks = get(mh,'elements');
 m = hblocks{1};
 g = hblocks{2};
