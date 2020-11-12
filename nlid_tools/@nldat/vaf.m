@@ -31,6 +31,9 @@ elseif nargin ==2,
     y=subsref(xTemp,S);        
     end
 end
+if nargin <3,
+    DIM='total';
+end
 if ~ismember(DIM,{'sample' 'total' 'realization'});
     error (['Bad value specified for DIM: ' DIM]);
 end
