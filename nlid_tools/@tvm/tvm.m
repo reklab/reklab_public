@@ -108,7 +108,6 @@ classdef tvm < nlm
                 error('model type not supported');
                 
             end
-            
         end
         
         function tvmIdent = nlident ( TVM, Z, modelPrototype, varargin)
