@@ -1,4 +1,4 @@
-function error_flag = arg_parse ( options, varargin)
+ function error_flag = arg_parse ( options, varargin)
 % arg_parse ( options, varargin) -Parse and decode variable number of inputs
 % options defines a set of variables whose values are initialized in the
 % calling workspace
