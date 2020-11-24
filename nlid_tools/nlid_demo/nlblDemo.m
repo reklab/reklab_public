@@ -62,7 +62,7 @@ NS=smo(NHK); plot (NS)
 % subref
 disp(NHK.idMethod)
 % parameter value
-disp(NHK.nLagLE)
+disp(NHK{1,2}.nLags)
 % test set
 disp('nlblDemo done'); 
 % nlbl/nlmtst
