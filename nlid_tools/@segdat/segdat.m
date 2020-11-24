@@ -19,7 +19,6 @@ classdef segdat<nldat
                 [nSamp,nChan]=size(a);
                 set(S,'onsetPointer',1);
                 set(S,'segLength',nSamp);
-                
                 if nargin > 1,
                     set (S,varargin{:});
                 end
@@ -37,6 +36,8 @@ classdef segdat<nldat
                 if nargin > 1,
                     set (S,varargin{:});
                 end
+            else
+                 set (S,{a varargin{:}});
             end
             
         end
