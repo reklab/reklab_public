@@ -26,7 +26,7 @@ classdef nldat < nltop
                 
             elseif isa(z,'double')
                 [nsamp,nchan,nreal]=size(z);
-                if (nsamp == 1) & (nchan >10),
+                if (nsamp == 1) & (nchan >10)
                     warning('Row vector. Transposing');
                 end
                 d.dataSet=z;
@@ -922,22 +922,22 @@ classdef nldat < nltop
             if nargin<3,
                 nIterMax=1000; % number of unsuccesful interations
             end
-            nIterTotalMax=10^6; 
-                
+            nIterTotalMax=10^6;
+            
             nSamp=length(X);
             nLags=get(ACin,'nLags');
             Y=X;
-            bestAC=cor(Y, 'nLags',nLags); 
-            bestVAF=double(vaf(ACin,bestAC,'total')); 
+            bestAC=cor(Y, 'nLags',nLags);
+            bestVAF=double(vaf(ACin,bestAC,'total'));
             jCount=1;
             for i=1:nIterTotalMax,
                 iPerm=randperm(nSamp,2);
                 newY=Y;
-                newY.dataSet=Y.dataSet; 
+                newY.dataSet=Y.dataSet;
                 newY.dataSet(iPerm)=newY.dataSet(flip(iPerm));
                 newAC=cor(newY, 'nLags',nLags);
                 curVAF= double(vaf(ACin,newAC,'total'));
-                jCount=jCount+1; 
+                jCount=jCount+1;
                 if curVAF>bestVAF,
                     %disp(['Best VAF: ' num2str(bestVAF) ' curVAF =' num2str(curVAF) ' jCount:' num2str(jCount)]);
                     Y=newY;
@@ -946,13 +946,13 @@ classdef nldat < nltop
                     jCount=0;
                 end
                 if bestVAF>vafLimit,
-                    disp('VAF limit reached'); 
+                    disp('VAF limit reached');
                     break
                 end
                 if jCount>nIterMax,
-                     disp('Unsuccessfull iteration limit reached'); 
+                    disp('Unsuccessfull iteration limit reached');
                     break
-                end          
+                end
             end
         end
         
@@ -1013,6 +1013,46 @@ classdef nldat < nltop
             y.dataSet=yd;
             y.comment = [ 'SMOOTHED ' x.comment];
         end
+        
+        function [S, varargout]= spectrogram (N, varargin)
+            % S = tvdat object with TV Fourier transform
+            % varargout {1} = P power sepctrum
+            % varargout {2}= Fc
+            % varargout [3} = Tc;
+            % nldat wrapper for spectrogram
+            % Note that the f,t outputs are returned as aprt of S
+            optionList= { { 'window' [] 'window to divide the signal into sgements'} ...
+                {'noverlap' [] 'number of samples of overlap between sgements'} ...
+                {'nfft' [] 'numberof DFT points'} };
+            flag=arg_parse(optionList, varargin); 
+            fSamp=1/N.domainIncr;
+            [s,f,t,p,Fc,Tc]=spectrogram(N.dataSet,window,noverlap,nfft,fSamp);
+             [nrow,ncol]=size(s);
+             s1=reshape(s,nrow,1,ncol);
+             S=tvdat(s1);
+             S.realDomainValues=t;
+             S.domainValues=f;
+             S.domainName='Frequency (Hz)';
+             S.chanNames={'Fourier transform'}; 
+             if nargout>=1,
+              p1=reshape(p,nrow,1,ncol);
+             P=tvdat(p1);
+             P.realDomainValues=t;
+             P.domainValues=f;
+             P.domainName='Frequency (Hz)';
+             P.chanNames(1)={'Power spectrum'}; 
+             varargout{1}=P;                 
+             end
+             if nargout>=2,
+                 varargout{2}=Fc;
+             end
+             if nargout>=3,
+                 varargout{3}=Tc;  
+             end
+        end
+        
+        
+        
         
         function y = squeeze(x);
             % squeeze for nldat objects
