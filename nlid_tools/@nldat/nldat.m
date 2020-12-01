@@ -289,12 +289,12 @@ classdef nldat < nltop
             y.comment = ['DECIMATED ' d.comment ];
         end
         
-        function Zout=detrend(ZIn)
+        function Zout=detrend(ZIn,varargin)
             Zout=ZIn;
             [nsamp,nchan,nreal]=size(ZIn);
             for i=1:nchan,
                 for j=1:nreal,
-                    Zout.dataSet(:,i,j)=detrend(ZIn.dataSet(:,i,j));
+                    Zout.dataSet(:,i,j)=detrend(ZIn.dataSet(:,i,j),varargin{:});
                 end
             end
             Zout.comment =[ ZIn.comment '; detrend'];
@@ -302,7 +302,6 @@ classdef nldat < nltop
         
         function d = domain(x);
             % returns domain vlaues for nldat object
-            
             [nsamp,nchan,nreal]=size(x);
             if isnan(x.domainValues),
                 d= ((1:nsamp)-1)*x.domainIncr + x.domainStart;
