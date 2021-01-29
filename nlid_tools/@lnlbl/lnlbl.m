@@ -93,7 +93,7 @@ classdef lnlbl < nlm
             end
         end
         
-        function bl  = nlident (bl, z, varargin)
+    function bl  = nlident (bl, z, varargin)
             % Identify a lnlbl
             if nargin > 2
                 set (bl,varargin);
@@ -261,14 +261,16 @@ hlen = get(g,'nLags');
 x = nlsim(h,u);
 
 hdata = cat(2,x,y);
-mh=nlbl;
-p=mh.elements{1};
-set(p,'polyOrderMax',order);
-l=mh.elements{2};
-l.nLags=hlen;
-mh.elements= { p l};
-mh = nlbl(hdata,'idMethod',method,...
+
+mh = nlbl;
+bl=mh.elements;
+bl{2}=g;
+set(mh,'elements',bl);
+
+
+mh=nlident(mh,hdata,'idMethod',method,...
     'threshNSE',0.01);
+
 hblocks = get(mh,'elements');
 m = hblocks{1};
 g = hblocks{2};
