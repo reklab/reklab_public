@@ -1,6 +1,6 @@
 classdef lnlbl < nlm
     % lnlbl - linear-nonlinear-linear block model class for NLID toolbox.
-     
+    
     properties
     end
     
@@ -18,74 +18,38 @@ classdef lnlbl < nlm
                 'paramType','select',...
                 'paramLimits',{'kernels','self','order1'});
             
-            LNL.parameterSet(3)=param('paramName','nLags1', ...
-                'paramDefault',NaN,...
-                'paramHelp',  'Number of lags in first linear element' ,...
-                'paramType','number', ...
-                'paramLimits', [0 1000]);
             
-            LNL.parameterSet(4)=param('paramName','nSides1', ...
-                'paramDefault',1,...
-                'paramHelp',  'Number of sides in first linear element' ,...
-                'paramType','number', ...
-                'paramLimits', [1 2 ]);
-            
-            LNL.parameterSet(5)=param('paramName','polyOrderMax', ...
-                'paramDefault',2,...
-                'paramHelp','Maximum order for polynomisl nonlinearity' ,...
-                'paramType','number', ...
-                'paramLimits', [0 10]);
-            
-            LNL.parameterSet(6)=param('paramName','nLags2', ...
-                'paramDefault',NaN,...
-                'paramHelp','Number of lags in second linear element' ,...
-                'paramType','number', ...
-                 'paramLimits', [0 1000]);
- 
-             LNL.parameterSet(7)=param('paramName','nSides2', ...
-                'paramDefault',1,...
-                'paramHelp',  'Number of sides in second linear element' ,...
-                'paramType','number', ...
-                'paramLimits', [1 2 ]);
-      
-            
-            LNL.parameterSet(8)=param('paramName','pseudoInvMode', ...
-                'paramDefault','full', ...
-                'paramHelp', 'pseudo-inverse order selection mode ', ...
-                'paramType','select',...
-                'paramLimits',{'full','auto','manual'});
-            
-            LNL.parameterSet(9) = param('paramName','hkTolerance', ...
+            LNL.parameterSet(3) = param('paramName','hkTolerance', ...
                 'paramDefault',0.01, ...
                 'paramHelp','Improvement required to continue iteration', ...
                 'paramType','number',...
                 'paramLimits', [0 100]);
             
-            LNL.parameterSet(10) = param('paramName','nhkMaxIts', ...
+            LNL.parameterSet(4) = param('paramName','nhkMaxIts', ...
                 'paramDefault',20, ...
                 'paramHelp','Maximum number of iterations', ...
                 'paramType',   'number',...
                 'paramLimits',[1 1000]);
             
-            LNL.parameterSet(11) = param('paramName','nhkMaxInner', ...
+            LNL.parameterSet(5) = param('paramName','nhkMaxInner', ...
                 'paramDefault',10, ...
                 'paramHelp','Maximum number of iterations between Hammerstein updates',...
                 'paramType','number', ...
                 'paramLimits',[1 100]);
             
-            LNL.parameterSet(12)=param('paramName','hkAccel', ...
+            LNL.parameterSet(6)=param('paramName','hkAccel', ...
                 'paramDefault',0.8, ...
                 'paramHelp','ridge multiplied by decel after unsuccessful update',...
                 'paramType','number', ...
                 'paramLimits', [0.001 0.999]);
             
-            LNL.parameterSet(13)=param('paramName','hkDecel', ...
+            LNL.parameterSet(7)=param('paramName','hkDecel', ...
                 'paramDefault',2, ...
                 'paramHelp','ridge size multipled by accel after successful update',...
                 'paramType','number', ...
                 'paramLimits', [1.0001 inf]);
             
-            LNL.parameterSet(14)=param('paramName','hkInitialStep', ...
+            LNL.parameterSet(8)=param('paramName','hkInitialStep', ...
                 'paramDefault',10,'paramHelp',...
                 'initial stepsize','paramType','number',...
                 'paramLimits',[0 inf]);
@@ -106,23 +70,13 @@ classdef lnlbl < nlm
             end
         end
         
-    function bl  = nlident (bl, z, varargin)
+        function bl  = nlident (bl, z, varargin)
             % Identify a lnlbl
             if nargin > 2
                 set (bl,varargin);
             end
             if isa(z,'nldat') | isa(z,'double')
-                % if numlags is undefined, for either block, set a sensible default.
-                numlags=get(bl,'nLags1');
-                if isnan(numlags'),
-                    numlags= max(32,length(z)/100);
-                    set(bl,'nLags1',numlags);
-                end
-                numlags=get(bl,'nLags2');
-                if isnan(numlags'),
-                    numlags= max(32,length(z)/100);
-                    set(bl,'nLags2',numlags);
-                end
+                
                 if isa(z,'nldat')
                     Ts=get(z,'domainIncr');
                 else
@@ -133,19 +87,13 @@ classdef lnlbl < nlm
                 end
                 subsys = get(bl,'elements');
                 g = subsys{1};  % First IRF
+                g=nlident(g,z);
                 p = subsys{2};  % Polynomial
                 h = subsys{3};  % Second IRF
-                
-                glen = get(bl,'nLags1');
-                gSides=get(bl,'nSides1');
-                hlen = get(bl,'nLags2');
-                hSides=get(bl,'nSides2'); 
-                mode = get(bl,'pseudoInvMode');
-                set(g,'nLags',glen,'irfPseudoInvMode',mode,'nSides',gSides);
-                set(h,'nLags',hlen,'irfPseudoInvMode',mode,'nSides',hSides);
-                order = get(bl,'polyOrderMax');
-                set(p,'polyOrderMax', order);
+                h=nlident(h,z);
                 set(bl,'elements',{g p h});
+                
+                
                 
                 
                 x=z(:,1);
@@ -215,14 +163,8 @@ blocks = get(m0,'elements');
 h = blocks{1};
 m = blocks{2};
 g = blocks{3};
+memory = length(g)+length(h); 
 
-hlen = get(m0,'nLags1');
-hSides=get(m0,'nSides1');
-glen = get(m0,'nLags2');
-gSides=get(m0,'nSides2'); 
-memory = hlen+glen;
-set(h,'nLags',hlen,'nSides',hSides);
-set(g,'nLags',glen,'nSides',gSides);
 
 % estimate first order kernel
 k1 = h;
@@ -248,18 +190,23 @@ tau = (Ts/2.2)*(t90-t10);
 
 t = domain(k1)';
 if k1.nSides==1,
-if tau > 0 
-    hh = exp(-t/tau)/Ts;
-else
-    hh = [zeros(length(k1),1)];
-    hh(1)=1/Ts;
-end
-else
+    domainStart=0;
+    if tau > 0
+        hh = exp(-t/tau)/Ts;
+    else
+        hh = [zeros(length(k1),1)];
+        hh(1)=1/Ts;
+    end
+else 
     hh=zeros(length(k1),1);
     hh(k1.nLags+1)=1/Ts;
     
 end
-set(h,'dataSet',hh,'domainIncr',Ts);
+if h.nSides==2,
+    domainStart=-k1.nLags*Ts;
+    memory=floor((memory-1)/2);
+end
+set(h,'dataSet',hh,'domainIncr',Ts, 'nLags',k1.nLags,'domainStart',domainStart );
 set(g,'domainIncr',Ts);
 set(m0,'elements',{h m g});
 m0 = BestHammer(m0,uy,'hk');
@@ -287,9 +234,8 @@ x = nlsim(h,u);
 hdata = cat(2,x,y);
 
 mh = nlbl;
-bl=mh.elements;
-bl{2}=g;
-set(mh,'elements',bl);
+
+set(mh,'elements',{m g});
 
 
 mh=nlident(mh,hdata,'idMethod',method,...
@@ -344,8 +290,8 @@ step_size = get(m0,'hkInitialStep');
 mh = nlbl;
 set(mh,'elements',{m g});
 Ts = get(u,'domainIncr');
-N = length(double(u));
-hlen = length(double(h));
+N = length(u);
+hlen = length(h);
 
 testout = nlsim(m0,u);
 err = y - testout;
