@@ -73,14 +73,21 @@ classdef irf < kern
         function t = domain(I),
             nLags=length(I.dataSet);
             nSides=get(I,'nSides');
-            dt=I.domainIncr;
-            t=[0:nLags-1]*dt;
-            if nSides==2,
-                t= t-((nLags-1)/2)*dt;
+            nLags=get(I,'nLags');
+            if nSides==1,
+                N=nLags;
+                startT=0;
+            else
+                N=nLags*2+1;
+               startT=-nLags*I.domainIncr; 
+            end
+            for i=1:N,
+                t(i)=startT+ (i-1)*I.domainIncr;
             end
             
-            
         end
+        
+        
         function F = fresp(I)
             % Convert an IRF to frequency response
             F=fresp;
@@ -350,12 +357,12 @@ classdef irf < kern
                 x=x(:,1,:);
                 [nsamp,nchan,nreal]=size(x);
                 [nsampFilter, nchanFilter,nrealFilter]= size(filter);
-   % check that realizations are reasonable
-    if nreal==nrealFilter | nreal==1 | nrealFilter==1,
-        nRealMax=max(nreal,nrealFilter);
-    else
-        error ('Number of realizatins in IRF and input are not compatible');
-    end
+                % check that realizations are reasonable
+                if nreal==nrealFilter | nreal==1 | nrealFilter==1,
+                    nRealMax=max(nreal,nrealFilter);
+                else
+                    error ('Number of realizatins in IRF and input are not compatible');
+                end
                 for i=1:nchan,
                     for j=1:nRealMax,
                         jFilter=min(j,nrealFilter);
