@@ -15,7 +15,11 @@ plot(IM); streamer ('Estimated LNL Model');
 figure(3); clf
 
 [R, V, yp]=nlid_resid(IM,Z,'plotflag',true)
-
-
+% Estimate model with two sided IRfs 
+IM=lnlbl;
+set(IM,'nSides1',2,'nSides2',2); 
+IM=nlident(IM,Z);
+figure(2);clf;
+plot(IM); streamer ('Estimated LNL Model');
 end
 
