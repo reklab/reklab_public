@@ -79,7 +79,7 @@ classdef segdat<nldat
                 segLength = get(S,'segLength');
                 for i = 1 : numSegment
                     sSeg=segGet(S,i);
-                    plot(sSeg,'lineColor',colors(i,:))
+                    plot(sSeg)
                 end
              
             else
@@ -106,7 +106,7 @@ classdef segdat<nldat
             iMax=idx4domain(dMin, domainIncr, dMax);
             zd=nan(iMax,1);
             ptr1=idx4domain(dMin,domainIncr,d1);
-            zd(ptr1,:)=Z1.dataSet(:,:);
+            zd(ptr1,:)=n1(:,:);
             ptr2=idx4domain(dMin,domainIncr,d2);
             iOverlap=intersect(ptr1,ptr2);
             comment=['segcat(' name1 ',' name2 ')'];
@@ -116,7 +116,7 @@ classdef segdat<nldat
                 comment=['segcat:' name2 ' overlaps ' name1 ' from ' num2str(overlapStart) ...
                     ':' num2str(overlapEnd)];
             end
-            zd(ptr2,:)=Z2.dataSet(:,:);
+            zd(ptr2,:)=n2(:,:);
             set (n1,'domainStart',dMin,'dataSet',zd, 'comment' ,comment);
             Z=segdat(n1);        
         end
@@ -240,6 +240,7 @@ classdef segdat<nldat
             end
             set(out,'dataSet',d,'onsetPointer',onsetpointer_new,'segLength',seglength_new);
         end
+        
         function out = ddt(data)
             errorcheck(data);
             nSeg=segCount(data);
@@ -254,6 +255,20 @@ classdef segdat<nldat
             end
         end
         
+        function sOut = medfilt1 (sIn, varargin)
+            nSeg=segCount(sIn);
+            for iSeg=1:nSeg,
+                curSeg=segGet(sIn,iSeg);
+                curFilt=medfilt1(curSeg,varargin); 
+                if iSeg==1,
+                    sOut=segdat(curFilt);
+                else
+                    sOut=segCat(sOut,curFilt);
+                end
+            end
+        end
+            
+            
         function out = nldat(data)
             % returns concatonated segments as a nldat object with separations filled with
             % nan for missing data
@@ -341,33 +356,31 @@ segCnt=0;
 segStart=1;
 nLen=length(dataSet);
 % Find start and end of segments
-for iCur=1:nLen-1,
-    curVal=dataSet(iCur,1);
-    nextVal=dataSet(iCur+1,1);
-    if iCur==1 & ~isnan(curVal) % Start of first section
-        segCnt=1;
-        segStart(segCnt)=iCur;
-    elseif isnan(curVal) & ~isnan(nextVal) % start of a section
+c=categorical;
+c(1:nLen)='good';
+iNan=find(isnan(dataSet));
+c(iNan)='nan';
+e=cseq2eseq(c);
+ne=length(e);
+seqCnt=0;
+onsetPointer=0;
+newDataSet=[];
+nDomain=domain(N);
+for ie=1:ne,
+    if e(ie).type=='good'
         segCnt=segCnt+1;
-        segStart(segCnt)=iCur+1;
-    elseif ~isnan(curVal) & isnan(nextVal) % End of a section
-        segEnd(segCnt)=iCur;
-    elseif iCur==nLen-1;
-        segEnd(segCnt)=iCur+1;
+        domainStart(segCnt)=nDomain(e(ie).start);
+        onsetPointer(segCnt)=length(newDataSet)+1;
+        segLength(segCnt)=e(ie).length;
+        newDataSet=cat(1,newDataSet, dataSet(e(ie).start:e(ie).end));
     end
 end
-nDomain=domain(N);
-domainStart=nDomain(segStart);
-segLength=segEnd-segStart+1;
-onsetPointer(1)=1;
-for i=2:segCnt,
-    onsetPointer(i)=onsetPointer(i-1)+segLength(i-1);
-end
+
 S=segdat;
 i=find(isnan(dataSet));
 dataSet(i,:)=[];
 set(S,'chanNames',N.chanNames, 'chanUnits',N.chanUnits, 'domainIncr',N.domainIncr, ...
-    'domainStart',domainStart,'domainValues',nan, 'dataSet', dataSet, ...
+    'domainStart',domainStart,'domainValues',nan, 'dataSet', newDataSet, ...
     'dataSize', size(dataSet),'comment',N.comment, ...
     'onsetPointer', onsetPointer,'segLength',segLength);
 end
