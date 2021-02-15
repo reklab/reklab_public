@@ -506,6 +506,25 @@ classdef nldat < nltop
             end
         end
         
+        function z = medfilt1 (x, varargin)
+            % filter function for nldat variables;
+            % z = filter(x, B,A);
+            % filter is applied to each realization of all channels in data set
+            
+            [nsamp, nchan, nreal]=size(x);
+            z=x;
+            set(z,'comment','filtered data ');
+            for ichan=1:nchan,
+                for ireal=1:nreal,
+                    if nargin==1
+                        z.dataSet(1:end,ichan,ireal)=medfilt1(x.dataSet(1:end,ichan,ireal),varargin);
+                    elseif nargin==2,
+                        z.dataSet(1:end,ichan,ireal)=medfilt1(x.dataSet(1:end,ichan,ireal),varargin);
+                    end
+                end
+            end
+        end
+        
         function h=line(x,y)
             %  h=line(x,y,varargin)
             if nargin==1,
