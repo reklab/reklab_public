@@ -121,6 +121,16 @@ classdef irf < kern
                 'comment','Second order irf');
         end
         
+        function l = length(I)
+            nSides=get(I,'nSides');
+            nLags=get(I,'nLags');
+            
+            if nSides==1
+                l=nLags;
+            else
+                l=nLags*2 + 1;
+            end
+        end
         function I=nlmtst(i)
             irfDemo
         end
