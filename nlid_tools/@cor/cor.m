@@ -40,7 +40,7 @@ classdef cor < kern
             A=nldat(A);
             if nargin < 2,
                 disp('nlident takes two inputs for cor objects: cor, Z' );
-            elseif nargin > 2,
+           elseif nargin > 2,
                 set(C,varargin{:});
             end
             tempComment=C.comment;
