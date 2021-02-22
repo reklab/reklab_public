@@ -9,6 +9,7 @@ plot(M);
 title('Simulated LNL model');
 %%%Iniialize paramters of model elements
 IM=lnlbl;
+set(IM,'initMethod','kernels'); 
 i1=irf;set(i1,'nLags',51,'nSides',1);
 p=polynom;set(p,'polyType','tcheb'); 
 i2=irf; set(i2,'nLags',51,'nSides',1);
@@ -16,6 +17,8 @@ IM.elements= {i1 p i2};
 IM=nlident(IM,Z);
 figure(2);clf;
 plot(IM); streamer ('Estimated LNL Model');
+
+
 %% Predicted and observed outpus 
 figure(3); clf
 
