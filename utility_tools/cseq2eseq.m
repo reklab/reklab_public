@@ -25,7 +25,7 @@ else
     diffX=diff(x);
     iChange=find(diffX~=0);
     nEvent=length(iChange);
-    
+    event=eseq;
     if nEvent==0,
         event(1).start=1;
         event(1).end=length(cSeq);
