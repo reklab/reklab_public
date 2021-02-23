@@ -146,7 +146,7 @@ classdef eseq
                         event(1).startIdx=1;
                         event(1).endIdx=length(cSeq);
                         event(1).type=cSeq(1) ;
-                        event(1).nSamp=event(1).endIdx-event(1).endIdx+1;
+                        event(1).nSamp=event(1).endIdx-event(1).startIdx+1;
                         return
                     end
                     
@@ -154,6 +154,7 @@ classdef eseq
                     event(1).startIdx=1;
                     event(1).endIdx=iChange(1);
                     event(1).type=cSeq(1) ;
+                    event(1).nSamp=iChange(1);
                     
                     
                     for iEvent=2:nEvent

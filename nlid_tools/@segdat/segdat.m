@@ -183,7 +183,6 @@ classdef segdat<nldat
             nSeg= segCount(S);
             [nSamp,nChan]=size(S);
             for iChan=1:nChan,
-                subplot (nChan,1,iChan);
                 for iSeg=1:nSeg,
                     sTemp=segGet(S,iSeg);
                     line(domain(sTemp),sTemp(:,iChan));
@@ -294,7 +293,7 @@ classdef segdat<nldat
             end
             out = nldat(outData,'chanNames',data.chanNames,'chanUnits',data.chanUnits, ...
                 'domainIncr',data.domainIncr,'domainName',data.domainName,'domainStart',domainStart, ...
-                'domainValues',nan,'comment','nldat(segdat)');
+                'domainValues',nan,'comment',data.comment);
         end
         
         
@@ -360,7 +359,7 @@ c=categorical;
 c(1:nLen)='good';
 iNan=find(isnan(dataSet));
 c(iNan)='nan';
-e=cseq2eseq(c);
+e=eseq(c);
 ne=length(e);
 seqCnt=0;
 onsetPointer=0;
@@ -369,10 +368,10 @@ nDomain=domain(N);
 for ie=1:ne,
     if e(ie).type=='good'
         segCnt=segCnt+1;
-        domainStart(segCnt)=nDomain(e(ie).start);
+        domainStart(segCnt)=nDomain(e(ie).startIdx);
         onsetPointer(segCnt)=length(newDataSet)+1;
-        segLength(segCnt)=e(ie).length;
-        newDataSet=cat(1,newDataSet, dataSet(e(ie).start:e(ie).end));
+        segLength(segCnt)=e(ie).nSamp;
+        newDataSet=cat(1,newDataSet, dataSet(e(ie).startIdx:e(ie).endIdx));
     end
 end
 
