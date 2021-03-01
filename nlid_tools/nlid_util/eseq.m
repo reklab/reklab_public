@@ -54,14 +54,14 @@ classdef eseq
             end
         end
         
-        function d=domain(eseq)
-            % return a cell array of domain values for an event sequence
+        function d=domain(eseq, domainStart,domainIncr)
+            %  d=domain(eseq, domainStart,domainIncr) return a cell array of domain values for an event sequence
             d={};
             nEvent=length(eseq);
             for iEvent=1:nEvent,
                 eCur=eseq(iEvent);
                 x=[eCur.startIdx:eCur.endIdx]-1;
-                curDomain=eCur.domainStart+x*eCur.domainIncr;
+                curDomain=domainStart+x*domainIncr;
                 d{iEvent}=curDomain;
             end
         end
@@ -128,9 +128,7 @@ classdef eseq
                         e=cseq2eseq(cSeq{i}, i);
                         event{i,1}=e;
                     end
-                else
-                    
-                    
+                else                                       
                     if nargin==1,
                         caseNum=-1;
                     end
@@ -163,7 +161,7 @@ classdef eseq
                         event(iEvent).type=cSeq(iChange(iEvent));
                         event(iEvent).nSamp=event(iEvent).endIdx-event(iEvent).startIdx+1;
                     end
-                    
+                    % Last event 
                     event(nEvent+1).startIdx=iChange(nEvent)+1;
                     event(nEvent+1).endIdx=length(cSeq);
                     event(nEvent+1).type=cSeq(end);
