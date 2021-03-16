@@ -96,7 +96,11 @@ classdef nltop
             for iS=1:length(S),
                 switch S(iS).type
                     case '.',
+                        if isstruct(Value),
+                            Value=Value.(S(iS).subs);
+                        else
                         Value = get(Value, S(iS).subs);
+                        end
                     case '{}'
                         nDim=length(S(iS).subs);
                         if nDim==1,
