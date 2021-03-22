@@ -1069,8 +1069,22 @@ classdef nldat < nltop
              end
         end
         
-        
-        
+        function S = spectLS(x, varargin)
+            % Generates Lomb-Scargle spectrum periodogram for nldat object
+            optionList= { { 'fmax' [] 'maximum frequency in the periodogram'} };
+            arg_parse(optionList, varargin); 
+            if isempty(fmax)
+                [p,f]=plomb(x.dataSet,domain(x));
+            else
+                [p,f]=plomb(x.dataSet,domain(x),fmax);
+            end
+            S=spect;
+            S.dataSet=p;
+            S.domainValues=f;
+            S.chanNames='Gxx';
+            S.domainName='Frequency (Hz)';
+            S.domainIncr=[];
+        end
         
         function y = squeeze(x);
             % squeeze for nldat objects

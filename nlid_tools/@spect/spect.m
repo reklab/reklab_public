@@ -123,6 +123,34 @@ classdef spect < nldat
           
         end
         
+        function A = powArea(Sin,varargin)
+            optionList= { { 'fmin' 0 'lower limit of the band'}, ...
+                { 'fmax' [] 'upper limit of the band'}...
+                {'min_flag' false 'include the lower limit in area'},...
+                {'max_flag' false 'include the upper limit in area'}};
+            arg_parse(optionList, varargin); 
+            
+            p=Sin.dataSet;
+            f=Sin.domainValues;
+            if isempty(fmax)
+                fmax=max(f);
+            end
+            
+            % Includes or not lower limit in area
+            if min_flag
+                idx_band=(f>=fmin);
+            else
+                idx_band=(f>fmin);
+            end
+            % Includes or not upper limit in area
+            if max_flag
+                idx_band=idx_band&(f<=fmax);
+            else
+                idx_band=idx_band&(f<fmax);
+            end
+            
+            A=trapz(f(idx_band),p(idx_band));
+        end
         
     end
     
