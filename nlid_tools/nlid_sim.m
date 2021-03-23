@@ -235,4 +235,9 @@ set(zFull,'chanNames',{'zin' 'yout' 'noise'});
 
 
 set (Z, 'chanNames', { 'zin' 'zout' } );
-set (Z,'comment',comment,'domainName','Time (s)');
+set (Z,'comment',option,'domainName','Time (s)');
+
+
+
+
+
