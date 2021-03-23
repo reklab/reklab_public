@@ -124,37 +124,73 @@ classdef spect < nldat
         end
         
         function A = powArea(Sin,varargin)
-            optionList= { { 'fmin' 0 'lower limit of the band'}, ...
+            % Estimates the power are for determined bands, it can handle
+            % multiple bands at the same time as long as the parameters
+            % have the same size
+            optionList= { { 'fmin' [] 'lower limit of the band'}, ...
                 { 'fmax' [] 'upper limit of the band'}...
-                {'min_flag' false 'include the lower limit in area'},...
-                {'max_flag' false 'include the upper limit in area'}};
+                {'min_flag' [] 'include the lower limit in area'},...
+                {'max_flag' [] 'include the upper limit in area'}};
             arg_parse(optionList, varargin); 
+            
+            % Check the size of each parameter
+            nLims=[size(fmin(:),1),size(fmax(:),1),size(min_flag(:),1),size(max_flag(:),1)];
+            % Make sure that the parameters have the same size
+            U=unique(nLims(nLims>0));
+            if length(U)>1
+                error('All the parameters must have the same size')
+            end
             
             p=Sin.dataSet;
             f=Sin.domainValues;
+            % Empty parameters are set to default values
+            if isempty(fmin)
+                fmin=zeros(U,1);
+            end
             if isempty(fmax)
-                fmax=max(f);
+                fmax=max(f)*ones(U,1);
+            end
+            if isempty(min_flag)
+                min_flag=false(U,1);
+            end
+            if isempty(max_flag)
+                max_flag=false(U,1);
             end
             A=nldat;
+            comment=repmat({'power area in the band '},U,1);
+            chan=cell(1,size(Sin,2));
+            for i=1:size(Sin,2)
+                chan{i}=['A' num2str(i)];
+            end
             
             % Includes or not lower limit in area
-            if min_flag
-                idx_band=(f>=fmin);
-                set(A,'comment',['power area in the band ' num2str(fmin)  '<=f' ]);
-            else
-                idx_band=(f>fmin);
-                set(A,'comment',['power area in the band ' num2str(fmin)  '<f' ]);
-            end
-            % Includes or not upper limit in area
-            if max_flag
-                idx_band=idx_band&(f<=fmax);
-                set(A,'comment',[A.comment '<=' num2str(fmax)]);
-            else
-                idx_band=idx_band&(f<fmax);
-                set(A,'comment',[A.comment '<' num2str(fmax)]);
+            idx_band=false(size(f,1),U);
+            pow=zeros(U,size(p,2),size(p,3));
+            
+            % For each defined band
+            for i=1:U
+                if min_flag(i)
+                    idx_band(:,i)=(f>=fmin(i));
+                    comment{i}=[comment{i} num2str(fmin(i))  '<=f' ];
+                else
+                    idx_band(:,i)=(f>fmin(i));
+                    comment{i}=[comment{i} num2str(fmin(i))  '<f' ];
+                end
+                % Includes or not upper limit in area
+                if max_flag(i)
+                    idx_band(:,i)=idx_band(:,i)&(f<=fmax(i));
+                    comment{i}=[comment{i} '<=' num2str(fmax(i))];
+                else
+                    idx_band(:,i)=idx_band(:,i)&(f<fmax(i));
+                    comment{i}=[comment{i} '<' num2str(fmax(i))];
+                end
+                pow(i,:,:)=trapz(f(idx_band(:,i)),p(idx_band(:,i),:,:));
             end
             
-            A.dataSet=trapz(f(idx_band),p(idx_band,:,:));
+            A.dataSet=pow;
+            A.comment=comment;
+            A.chanNames=chan;
+            A.domainName='Area';
         end
         
     end
