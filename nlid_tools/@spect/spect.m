@@ -135,21 +135,26 @@ classdef spect < nldat
             if isempty(fmax)
                 fmax=max(f);
             end
+            A=nldat;
             
             % Includes or not lower limit in area
             if min_flag
                 idx_band=(f>=fmin);
+                set(A,'comment',['power area in the band ' num2str(fmin)  '<=f' ]);
             else
                 idx_band=(f>fmin);
+                set(A,'comment',['power area in the band ' num2str(fmin)  '<f' ]);
             end
             % Includes or not upper limit in area
             if max_flag
                 idx_band=idx_band&(f<=fmax);
+                set(A,'comment',[A.comment '<=' num2str(fmax)]);
             else
                 idx_band=idx_band&(f<fmax);
+                set(A,'comment',[A.comment '<' num2str(fmax)]);
             end
             
-            A=trapz(f(idx_band),p(idx_band));
+            A.dataSet=trapz(f(idx_band),p(idx_band,:,:));
         end
         
     end

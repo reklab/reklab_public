@@ -308,7 +308,7 @@ classdef nldat < nltop
             else
                 d=x.domainValues;
             end
-            d=d(:);
+%             d=d(:);
         end
         
         
@@ -504,6 +504,28 @@ classdef nldat < nltop
             if DIM==3,
                 set(y,'domainIncr',x.domainIncr,'domainName',x.domainName, 'domainStart',x.domainStart);
             end
+        end
+        
+        function [ApEn] = ApEn(x)
+            % Approximate Entropy of nldat object, each channel and
+            % realization is treated independently.
+            [~,nchan,nreal]=size(x);
+            ApEn=nan(1,nchan,nreal);
+            % Initialize variables
+            x=double(x);
+            for i=1:nchan
+                for j=1:nreal
+                    
+                    % Removes useless samples
+                    x_temp=x(:,i,j);
+                    x_temp(isnan(x_temp))=[];
+
+                    % Estimate ApEn
+                    ApEn(1,i,j)=approximateEntropy(x_temp);
+                end
+            end
+            ApEn=nldat(ApEn);
+            set(ApEn,'comment',['Approximate Entropy(' inputname(1)  ')' ]);
         end
         
         function z = medfilt1 (x, varargin)
@@ -1072,16 +1094,36 @@ classdef nldat < nltop
         function S = spectLS(x, varargin)
             % Generates Lomb-Scargle spectrum periodogram for nldat object
             optionList= { { 'fmax' [] 'maximum frequency in the periodogram'} };
-            arg_parse(optionList, varargin); 
-            if isempty(fmax)
-                [p,f]=plomb(x.dataSet,domain(x));
-            else
-                [p,f]=plomb(x.dataSet,domain(x),fmax);
+            arg_parse(optionList, varargin);
+            
+            [nsamp,nchan,nreal]=size(x);
+            P=nan(2*nsamp,nchan,nreal);
+
+            X=x.dataSet;
+            T=domain(x);
+            
+            chan=cell(1,nchan);
+            
+            for i=1:nchan
+                for j=1:nreal
+                    if isempty(fmax)
+                        [p,f]=plomb(X(:,i,j),T);
+                    else
+                        [p,f]=plomb(X(:,i,j),T,fmax);
+                    end
+                    P(1:length(p),i,j)=p;
+                end
+                chan{i}=['Gxx' num2str(i)];
             end
+            % remove nan samples
+            flag=(sum(sum(isnan(P),3),2)==nreal*nchan);
+            P(flag,:,:)=[];
+            
             S=spect;
-            S.dataSet=p;
+            S.dataSet=P;
             S.domainValues=f;
-            S.chanNames='Gxx';
+            
+            S.chanNames=chan;
             S.domainName='Frequency (Hz)';
             S.domainIncr=[];
         end
