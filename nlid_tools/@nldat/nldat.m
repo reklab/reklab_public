@@ -308,7 +308,7 @@ classdef nldat < nltop
             else
                 d=x.domainValues;
             end
-%             d=d(:);
+            d=d(:);
         end
         
         
