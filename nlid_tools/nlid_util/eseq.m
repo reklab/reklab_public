@@ -19,11 +19,19 @@ classdef eseq
     
     
     methods
-        function e = eseq(a)
+        function e = eseq(a, domainStart,domainIncr)
             if nargin==0
                 return
-            elseif isa(a,'categorical')
-                e=eseq.cseq2eseq(a);
+            end
+            if nargin<3
+                domainIncr=1;
+            end
+            if nargin<2
+                domainStart=0;
+            end
+            
+            if isa(a,'categorical')
+                e=eseq.cseq2eseq(a, domainStart, domainIncr);
             else
                 error ('Invlaid input type');
             end
@@ -55,7 +63,7 @@ classdef eseq
         end
         
         function d=domain(e)
-            %  d=domain(eseq, domainStart,domainIncr) return a cell array of domain values for an event sequence
+            %  d=domain(eseq) return a cell array of domain values for an event sequence
             d={};
             nEvent=length(e);
             for iEvent=1:nEvent,
@@ -88,89 +96,103 @@ classdef eseq
                         continue
                     else
                         if e1Cur.type==e2Cur.type
-                        iInter=iInter+1;
-                        eInter(iInter,1).startIdx=max(e1CurStart, e2CurStart);
-                        eInter(iInter,1).endIdx=min(e1CurEnd,e2CurEnd);
-                        eInter(iInter,1).type=e1Cur.type;
+                            iInter=iInter+1;
+                            eInter(iInter,1).startIdx=max(e1CurStart, e2CurStart);
+                            eInter(iInter,1).endIdx=min(e1CurEnd,e2CurEnd);
+                            eInter(iInter,1).type=e1Cur.type;
                         end
                     end
                 end
             end
         end
-             function h=line(e)
-                [c,d]=cseq(e);
-                line(d,c);
-                
-             end
+        function h=line(e)
+            [c,d]=cseq(e);
+            line(d,c);
             
-            
-            function plot(e)
-                [c,d]=cseq(e);
-                plot (d,c,'o');
-                
-            end
         end
-
         
-        methods (Static)
-            function event =cseq2eseq(cSeq)
-                %catSignal2Events - convert a categorical sequence  to event sequence
-                % Input: cSig - categorical signal
-                % output
-                % event - structure with fields
-                % event.type
-                % event.startIdx
-                % event.endIdx,
-                % event.length - event length in samples
-                if iscell(cSeq),
-                    n=length(cSeq);
-                    for i=1:n,
-                        e=cseq2eseq(cSeq{i}, i);
-                        event{i,1}=e;
-                    end
-                else                                       
-                    if nargin==1,
-                        caseNum=-1;
-                    end
-                    
-                    nSamp=length(cSeq);
-                    x=double(cSeq);
-                    diffX=diff(x);
-                    iChange=find(diffX~=0);
-                    nEvent=length(iChange);
-                    event=eseq;
-                    
-                    if nEvent==0,
-                        event(1).startIdx=1;
-                        event(1).endIdx=length(cSeq);
-                        event(1).type=cSeq(1) ;
-                        event(1).nSamp=event(1).endIdx-event(1).startIdx+1;
-                        return
-                    end
-                    
-                    
-                    event(1).startIdx=1;
-                    event(1).endIdx=iChange(1);
-                    event(1).type=cSeq(1) ;
-                    event(1).nSamp=iChange(1);
-                    
-                    
-                    for iEvent=2:nEvent
-                        event(iEvent).startIdx=event(iEvent-1).endIdx+1;
-                        event(iEvent).endIdx=iChange(iEvent);
-                        event(iEvent).type=cSeq(iChange(iEvent));
-                        event(iEvent).nSamp=event(iEvent).endIdx-event(iEvent).startIdx+1;
-                    end
-                    % Last event 
-                    event(nEvent+1).startIdx=iChange(nEvent)+1;
-                    event(nEvent+1).endIdx=length(cSeq);
-                    event(nEvent+1).type=cSeq(end);
-                    event(nEvent+1).nSamp=event(nEvent+1).endIdx-event(nEvent+1).startIdx+1;
-                    event=event';
-                    
-                    
-                end
-            end
+        
+        function plot(e)
+            [c,d]=cseq(e);
+            plot (d,c,'o');
+            
         end
     end
     
+    
+    methods (Static)
+        function event =cseq2eseq(cSeq, domainStart, domainIncr)
+            %catSignal2Events - convert a categorical sequence  to event sequence
+            % Input: cSig - categorical signal
+            % output
+            % event - structure with fields
+            % event.type
+            % event.startIdx
+            % event.endIdx,
+            % event.length - event length in samples
+            if nargin<3
+                domainIncr=1;
+            end
+            if nargin<2
+                domainStart=0;
+            end
+            
+            if iscell(cSeq),
+                n=length(cSeq);
+                for i=1:n,
+                    e=cseq2eseq(cSeq{i}, i);
+                    event{i,1}=e;
+                end
+            else
+                if nargin==1,
+                    caseNum=-1;
+                end
+                
+                nSamp=length(cSeq);
+                x=double(cSeq);
+                diffX=diff(x);
+                iChange=find(diffX~=0);
+                nEvent=length(iChange);
+                event=eseq;
+                
+                if nEvent==0,
+                    event(1).domainStart=domainStart;
+                    event(1).domainIncr=domainIncr;
+                    event(1).startIdx=1;
+                    event(1).endIdx=length(cSeq);
+                    event(1).type=cSeq(1) ;
+                    event(1).nSamp=event(1).endIdx-event(1).startIdx+1;
+                    return
+                end
+                
+                event(1).domainStart=domainStart;
+                event(1).domainIncr=domainIncr;
+                event(1).startIdx=1;
+                event(1).endIdx=iChange(1);
+                event(1).type=cSeq(1) ;
+                event(1).nSamp=iChange(1);
+                
+                
+                for iEvent=2:nEvent
+                    event(iEvent).domainStart=domainStart;
+                    event(iEvent).domainIncr=domainIncr;
+                    event(iEvent).startIdx=event(iEvent-1).endIdx+1;
+                    event(iEvent).endIdx=iChange(iEvent);
+                    event(iEvent).type=cSeq(iChange(iEvent));
+                    event(iEvent).nSamp=event(iEvent).endIdx-event(iEvent).startIdx+1;
+                end
+                % Last event
+                event(nEvent+1).domainStart=domainStart;
+                event(nEvent+1).domainIncr=domainIncr;
+                event(nEvent+1).startIdx=iChange(nEvent)+1;
+                event(nEvent+1).endIdx=length(cSeq);
+                event(nEvent+1).type=cSeq(end);
+                event(nEvent+1).nSamp=event(nEvent+1).endIdx-event(nEvent+1).startIdx+1;
+                event=event';
+                
+                
+            end
+        end
+    end
+end
+

@@ -56,7 +56,7 @@ classdef segdat<nldat
             d2=domain(S2);
             domainStart=min(min(d1),min(d2));
             domainEnd=max(max(d1),max(d2));
-            
+           
             idxMax=idx4domain(domainStart, domainIncr, domainEnd);
             domainVector=domainStart:domainIncr:domainEnd;
             valueVector(:,1)=domainVector*0;
@@ -71,9 +71,9 @@ classdef segdat<nldat
             if ~isempty(idxIntersect)
                 catVector(idxIntersect)='3';
             end
-            e=eseq(catVector);
+            e=eseq(catVector, domainStart,domainIncr);
             
-            eDomain=domain(e,domainStart,domainIncr);
+            eDomain=domain(e);
             % Generate concatonated segdat
             segNum=0;
             domainStart=[];
