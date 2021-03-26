@@ -54,14 +54,14 @@ classdef eseq
             end
         end
         
-        function d=domain(eseq, domainStart,domainIncr)
+        function d=domain(e)
             %  d=domain(eseq, domainStart,domainIncr) return a cell array of domain values for an event sequence
             d={};
-            nEvent=length(eseq);
+            nEvent=length(e);
             for iEvent=1:nEvent,
-                eCur=eseq(iEvent);
+                eCur=e(iEvent);
                 x=[eCur.startIdx:eCur.endIdx]-1;
-                curDomain=domainStart+x*domainIncr;
+                curDomain=eCur.domainStart+x*eCur.domainIncr;
                 d{iEvent}=curDomain;
             end
         end

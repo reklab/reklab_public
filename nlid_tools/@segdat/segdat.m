@@ -54,8 +54,8 @@ classdef segdat<nldat
             s2Data=double(S2);
             catVector =categorical;
             d2=domain(S2);
-            domainStart=min( [d1' d2']);
-            domainEnd=max([d1' d2']);
+            domainStart=min(min(d1),min(d2));
+            domainEnd=max(max(d1),max(d2));
             
             idxMax=idx4domain(domainStart, domainIncr, domainEnd);
             domainVector=domainStart:domainIncr:domainEnd;
