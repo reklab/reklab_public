@@ -123,10 +123,37 @@ classdef spect < nldat
           
         end
         
-        function A = powArea(Sin,varargin)
+        function [A, paramSet] = powArea(Sin,varargin)
             % Estimates the power are for determined bands, it can handle
             % multiple bands at the same time as long as the parameters
-            % have the same size
+            % have the same size.
+            % Input: 
+            %       - Sin: input Spect object, it can have mutiple channels
+            %       and realizations
+            % Output: 
+            %       - A: nldat object containing power area of each 
+            %       defined band for each channel and realization. 
+            %       If multiple bands are defined, the areas are stored in 
+            %       the same order in the A object as different samples.
+            %       The channels and realizations of the A object
+            %       correspond to those of the input spect object
+            %       - paramSet: structure of parameters defined in the
+            %       input or as default.
+            % Options:
+            %       - fmin: lower limit of the band for area estimation. It
+            %       can be a single value or a vector for multiple bands
+            %       - fmax: upper limit of the band for area estimation. It
+            %       can be a single value or a vector for multiple bands
+            %       - min_flag: defines if the lower limit is included or
+            %       not in the area estimation. If min_flag is false, 
+            %       fmin<f; if min_flag is true, fmin<=f.
+            %       - max_flag: defines if the upper limit is included or
+            %       not in the area estimation. If max_flag is false, 
+            %       f<fmax; if max_flag is true, f<=fmax.
+            % ---------------------------------------------------------
+            % Note: If multiple bands are analyzed simultaneously, all the
+            % parameters must have the same length
+            % --------------------------------------------------------- 
             optionList= { { 'fmin' [] 'lower limit of the band'}, ...
                 { 'fmax' [] 'upper limit of the band'}...
                 {'min_flag' [] 'include the lower limit in area'},...
@@ -134,59 +161,94 @@ classdef spect < nldat
             arg_parse(optionList, varargin); 
             
             % Check the size of each parameter
-            nLims=[size(fmin(:),1),size(fmax(:),1),size(min_flag(:),1),size(max_flag(:),1)];
+            nLims=[size(fmin(:),1),size(fmax(:),1),...
+                size(min_flag(:),1),size(max_flag(:),1)];
             % Make sure that the parameters have the same size
             U=unique(nLims(nLims>0));
             if length(U)>1
                 error('All the parameters must have the same size')
             end
             
+            % Gets the domain and range of the spect object
             p=Sin.dataSet;
             f=Sin.domainValues;
             % Empty parameters are set to default values
             if isempty(fmin)
+                % Default value for the minimum frequency is 0
                 fmin=zeros(U,1);
             end
             if isempty(fmax)
+                % Default value is the maximum frequency of the spect
+                % object 
                 fmax=max(f)*ones(U,1);
             end
             if isempty(min_flag)
+                % Default is not to include the lower limit
                 min_flag=false(U,1);
             end
             if isempty(max_flag)
+                % Default is not to include the upper limit
                 max_flag=false(U,1);
             end
+            
+            % Generates nldat object to contain the Areas
             A=nldat;
+            % Comment on nldat object will outline the analyzed bands 
             comment=repmat({'power area in the band '},U,1);
+            % Set channel names
             chan=cell(1,size(Sin,2));
             for i=1:size(Sin,2)
                 chan{i}=['A' num2str(i)];
             end
             
-            % Includes or not lower limit in area
+            % Indices that are included in each band for area estimation
             idx_band=false(size(f,1),U);
+            % Allocates matrix to contain the area estimations
             pow=zeros(U,size(p,2),size(p,3));
+            % Defimes the paramSet structure.
+            paramSet.fmin=[];
+            paramSet.fmax=[];
+            paramSet.min_flag=[];
+            paramSet.max_flag=[];
+            % Allocates the size of the paramSet structure.
+            paramSet=repmat(paramSet,U,1);
             
             % For each defined band
             for i=1:U
+                % Define the samples that will be used in the estimation
+                % according to the band limits, and the flags
                 if min_flag(i)
+                    % Includes the minimum frequency
                     idx_band(:,i)=(f>=fmin(i));
                     comment{i}=[comment{i} num2str(fmin(i))  '<=f' ];
                 else
+                    % Does not include the minimum frequency
                     idx_band(:,i)=(f>fmin(i));
                     comment{i}=[comment{i} num2str(fmin(i))  '<f' ];
                 end
-                % Includes or not upper limit in area
+
                 if max_flag(i)
+                    % Includes the maximum frequency
                     idx_band(:,i)=idx_band(:,i)&(f<=fmax(i));
                     comment{i}=[comment{i} '<=' num2str(fmax(i))];
                 else
+                    % Does not include the maximum frequency
                     idx_band(:,i)=idx_band(:,i)&(f<fmax(i));
                     comment{i}=[comment{i} '<' num2str(fmax(i))];
                 end
+                % Estimates the power within the band for all the channels
+                % and realizations simultaneously
                 pow(i,:,:)=trapz(f(idx_band(:,i)),p(idx_band(:,i),:,:));
+                
+                % Stores the parameters in the paramSet structure
+                paramSet(i).fmin=fmin(i);
+                paramSet(i).fmax=fmax(i);
+                paramSet(i).min_flag=min_flag(i);
+                paramSet(i).max_flag=max_flag(i);
             end
             
+            % sets the estimates areas, comment, and channel names to the A
+            % object
             A.dataSet=pow;
             A.comment=comment;
             A.chanNames=chan;
