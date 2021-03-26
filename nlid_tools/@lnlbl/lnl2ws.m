@@ -10,10 +10,10 @@ subsys = get(lnl,'elements');
 
 h = double(subsys{1});
 hlen = length(h);
-Ts = get(subsys{1},'domainincr');
+Ts = get(subsys{1},'domainIncr');
 
 p = subsys{2};
-Q = get(p,'order')+1;
+Q = get(p,'polyOrder')+1;
 kernels = cell(Q,1);
 
 g = double(subsys{3});
@@ -24,7 +24,7 @@ glen = length(g);
 % and generate the kernels of the first two elements.
 hpad = [h;zeros(glen,1)];
 irf1 = subsys{1};
-set(irf1,'data',hpad);
+set(irf1,'dataSet',hpad);
 
 ln = lnbl;
 set(ln,'elements',{irf1, p});
