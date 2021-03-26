@@ -506,26 +506,39 @@ classdef nldat < nltop
             end
         end
         
-        function [ApEn] = ApEn(x)
+        function [apEn] = apEn(x)
             % Approximate Entropy of nldat object, each channel and
             % realization is treated independently.
+            % Input: 
+            %       - x: nldat object with the target signal
+            % Output: 
+            %       - apEn: approximate entropy of each channel and
+            %       realization of the input signal
+            %--------------------------------------------------------
+            
+            % Gets the number of channels and realizations of the input
             [~,nchan,nreal]=size(x);
-            ApEn=nan(1,nchan,nreal);
-            % Initialize variables
+            % Allocates the ApEn matrix, one value per channel and realziation 
+            apEn=nan(1,nchan,nreal);
+            % Gets the range of the input
             x=double(x);
+            
+            % For each realization and channel
             for i=1:nchan
                 for j=1:nreal
                     
-                    % Removes useless samples
+                    % Removes NaN samples 
                     x_temp=x(:,i,j);
                     x_temp(isnan(x_temp))=[];
 
                     % Estimate ApEn
-                    ApEn(1,i,j)=approximateEntropy(x_temp);
+                    apEn(1,i,j)=approximateEntropy(x_temp);
                 end
             end
-            ApEn=nldat(ApEn);
-            set(ApEn,'comment',['Approximate Entropy(' inputname(1)  ')' ]);
+            % Returns the approximate entropy as an nldat object with the
+            % same number of channels and realizations than the inout
+            apEn=nldat(apEn);
+            set(apEn,'comment',['Approximate Entropy(' inputname(1)  ')' ]);
         end
         
         function z = medfilt1 (x, varargin)
@@ -1093,34 +1106,68 @@ classdef nldat < nltop
         
         function S = spectLS(x, varargin)
             % Generates Lomb-Scargle spectrum periodogram for nldat object
+            % Input: 
+            %       - x: nldat object with the target signals, it can have
+            %       multiple channels only if they have the same sampling
+            %       rate and length.
+            % Output: 
+            %       - S: spect object with the spectrum of each channel and
+            %       realization
+            % Options: 
+            %       - 'fmax': the maximum frequency for the estimation of
+            %       the LS periodogram. If it is not specified, it will be
+            %       defined automatically based on the Nyquist frequency
+            % ----------------------------------------------------------
             optionList= { { 'fmax' [] 'maximum frequency in the periodogram'} };
             arg_parse(optionList, varargin);
             
+            % Gets the size of the input
             [nsamp,nchan,nreal]=size(x);
+            % Allocates a matrix P that will contain the output of the
+            % periodogram, the maximum length of the periodogram is double
+            % the length of the signal.
             P=nan(2*nsamp,nchan,nreal);
-
+            
+            % Extracts the range and domain of the signals. The signal can
+            % be nonuniformly sampled but it must contain only one channel
+            % and one relaization
             X=x.dataSet;
             T=domain(x);
             
+            % Channel names
             chan=cell(1,nchan);
             
+            % Iterates for each channel
             for i=1:nchan
+                % Iterates for each realization
                 for j=1:nreal
+                    % Defines the maximum frequency of the periodogram is
+                    % available
                     if isempty(fmax)
                         [p,f]=plomb(X(:,i,j),T);
                     else
                         [p,f]=plomb(X(:,i,j),T,fmax);
                     end
+                    % In the case that the specified maximum frequency is
+                    % smaller than the Nyquist frequency, the periodogram
+                    % will have less samples. Thus, we only overwrite the
+                    % available samples to the P matrix
                     P(1:length(p),i,j)=p;
                 end
+                % Generates the channel names
                 chan{i}=['Gxx' num2str(i)];
             end
-            % remove nan samples
+            % In the case that fmax<fNyquist,we remove the last elements of
+            % the P matrix which will be NaNs
             flag=(sum(sum(isnan(P),3),2)==nreal*nchan);
             P(flag,:,:)=[];
             
+            % Generates the spect object
             S=spect;
+            % With the P matrix that contains the spectrum of each channel
+            % and each realization independently. 
             S.dataSet=P;
+            % And the frequency domain of the spectrum. 
             S.domainValues=f;
             
             S.chanNames=chan;
