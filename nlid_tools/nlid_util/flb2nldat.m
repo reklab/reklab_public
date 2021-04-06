@@ -1,4 +1,4 @@
-function X = flb2nld ( f, N ) 
+function X = flb2nldat ( f, N ) 
 % FLB2NLD - Read a nld object from flb
 % $Revision: 1.5 $
 % Copyright 1999-2003, Robert E Kearney and David T Westwick
@@ -12,5 +12,5 @@ end
 % Read a nldat type from a flb file 
 x= flb2mat(f,'read_Case',N);
 X=nldat;
-set(X,'dataSet', x.Data,'comment',x.comment,'domainIncr', x.domainIncr,'domainName',x.domainName,'chanNames',x.chanName);
+set(X,'dataSet', x.dataSet,'comment',x.comment,'domainIncr', x.domainIncr,'domainName',x.domainName,'chanNames',x.chanName);
 end

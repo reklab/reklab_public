@@ -29,11 +29,8 @@ function D= flb2mat (fname, option, caseNum)
 %  D = flb2mat('test.flb','read_all')
 %
 % Get idex of flbfile
-%
-% idex = flb2mat('test.flb','index');
-%
+% index = flb2mat('test.flb','index');
 % Determine number of cases
-%
 % nCase = flb2mat('test.flb','length');
 
 %
@@ -70,11 +67,28 @@ switch lower(option)
             tempD=flbio(fid,'skip_case');
         end
         D=flbio(fid,'read_case');
+        D=struct2nldat(D);
         
     case 'read_all'
-        D=flbio(fid,'read_all');
+        S=flbio(fid,'read_all');
+        nCase=length(S)
+        D={};
+        for i=1:nCase
+            D{i}=struct2nldat(S(i));
+        end
+            
+      
     otherwise
         error([' mat2flb option not defined:' option]);
 end
 fclose(fid);
 return
+
+end
+
+function N=struct2nldat(S);
+N=nldat(S.Data,'domainIncr',S.domainIncrement, 'domainStart',S.domainStart, ...
+    'comment',S.comment,'chanNames', S.chanName);
+end
+
+
