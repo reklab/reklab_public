@@ -71,9 +71,9 @@ classdef segdat<nldat
             if ~isempty(idxIntersect)
                 catVector(idxIntersect)='3';
             end
-            e=eseq(catVector);
+            e=eseq(catVector, domainStart,domainIncr);
             
-            eDomain=domain(e,domainStart,domainIncr);
+            eDomain=domain(e);
             % Generate concatonated segdat
             segNum=0;
             domainStart=[];
@@ -81,9 +81,9 @@ classdef segdat<nldat
             segInfo={};
             segLen=[];
             dataSet=[];
-     for i=1:length(e),
+            for i=1:length(e),
                 if e(i).type ~='0'
-                    segNum=segNum+1;                    
+                    segNum=segNum+1;
                     domainStart(segNum)=domainVector(e(i).startIdx);
                     iStart=e(i).startIdx;
                     iEnd=e(i).endIdx;
@@ -96,7 +96,7 @@ classdef segdat<nldat
                         onsetPointer(segNum)=onsetPointer(segNum-1)+segLen(segNum-1);
                     end
                     switch e(i).type
-                        case '1'                           
+                        case '1'
                             curSegNum=seg4domain(S1,eventStart);
                             segInfo{segNum}=S1.segInfo{curSegNum};
                         case '2'
@@ -108,7 +108,7 @@ classdef segdat<nldat
                     end
                 end
             end
-
+            
             sCat=S1;
             sCat.domainStart=domainStart;
             sCat.dataSet=dataSet;
@@ -412,18 +412,18 @@ classdef segdat<nldat
                 error('At least segment exceeds the data range')
             end
             %% Suppress checking for overlap since this is now OK
-%             for k = 1: nchan
-%                 for i = 1 : length(onsetpointer)
-%                     for j = 1 : length(onsetpointer)
-%                         if i == j
-%                             break;
-%                         elseif (onsetpointer(j)<=onsetpointer(i))&&(onsetpointer(i)<=endpointer(j))
-%                             % warning(['In channel ',num2str(k),', segment ',num2str(i),' & segment',num2str(j),' overlap.'])
-%                         end
-%                     end
-%                 end
-%                 
-%             end
+            %             for k = 1: nchan
+            %                 for i = 1 : length(onsetpointer)
+            %                     for j = 1 : length(onsetpointer)
+            %                         if i == j
+            %                             break;
+            %                         elseif (onsetpointer(j)<=onsetpointer(i))&&(onsetpointer(i)<=endpointer(j))
+            %                             % warning(['In channel ',num2str(k),', segment ',num2str(i),' & segment',num2str(j),' overlap.'])
+            %                         end
+            %                     end
+            %                 end
+            %
+            %             end
             
         end
         
@@ -433,6 +433,7 @@ end
 
 function S=nl2seg(N, varName)
 % Convert an nldat object to a segdat using nans as segment separators;
+% S is empty is there is no valid data in N
 
 [nSamp,nChan,nReal]=size(N);
 if nChan>1,
@@ -473,9 +474,14 @@ end
 S=segdat;
 i=find(isnan(dataSet));
 dataSet(i,:)=[];
-set(S,'chanNames',N.chanNames, 'chanUnits',N.chanUnits, 'domainIncr',N.domainIncr, ...
-    'domainStart',domainStart,'domainValues',nan, 'dataSet', newDataSet, ...
-    'dataSize', size(dataSet),'comment',N.comment, ...
-    'onsetPointer', onsetPointer,'segLength',segLength, 'segInfo',segInfo);
+
+if length(dataSet)>0
+    set(S,'chanNames',N.chanNames, 'chanUnits',N.chanUnits, 'domainIncr',N.domainIncr, ...
+        'domainStart',domainStart,'domainValues',nan, 'dataSet', newDataSet, ...
+        'dataSize', size(dataSet),'comment',N.comment, ...
+        'onsetPointer', onsetPointer,'segLength',segLength, 'segInfo',segInfo);
+else
+    set(S,'dataSet',dataSet);
+end
 end
 
