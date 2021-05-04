@@ -209,7 +209,7 @@ classdef segdat<nldat
         
         
         
-        function Z = segIntersect (Z1, Z2)
+        function Z = intersect (Z1, Z2)
             % Determine intersection between two segdat objects
             domainIncr=Z1.domainIncr;
             if Z2.domainIncr ~= domainIncr
@@ -221,21 +221,16 @@ classdef segdat<nldat
             d1=domain(n1);
             n2=nldat(Z2);
             d2=domain(n2);
-            d=cat(1,d1,d2);
-            dMin=min(d);
-            dMax=max(d);
-            iMax=idx4domain(dMin, domainIncr, dMax);
-            zd=nan(iMax,1);
-            ptr1=idx4domain(dMin,domainIncr,d1);
-            zd(ptr1,:)=1;
-            ptr2=idx4domain(dMin,domainIncr,d2);
-            zd(ptr2,:)=2;
-            iOverlap=intersect(ptr1,ptr2);
-            comment=['segcat(' name1 ',' name2 ')'];
-            if ~isempty (iOverlap),
-                zd(iOverlap,:)=3;
+            iIntersect=ismember(d1,d2); 
+            if isempty(iIntersect),
+                Z=nldat;
             end
-            Z=nldat (n1,'domainStart',dMin,'dataSet',zd );
+            dCommon=d1(iIntersect);
+            ptr1=idx4domain(n1.domainStart,domainIncr,dCommon);
+            ptr2=idx4domain(n2.domainStart,domainIncr,dCommon);
+            n1New=n1(ptr1);
+            n2New=n2(ptr2);
+            Z=cat(2,n1New,n2New);
         end
         
         
