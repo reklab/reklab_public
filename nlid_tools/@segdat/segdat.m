@@ -428,14 +428,23 @@ end
 
 function S=nl2seg(N, varName)
 % Convert an nldat object to a segdat using nans as segment separators;
-% S is empty is there is no valid data in N
+% S is empty if there is no valid data in N
 
 [nSamp,nChan,nReal]=size(N);
 if nChan>1,
     error('segdat does not yet support mulitple channels');
 end
-dataSet=N.dataSet;
-% Find start and end points of datas
+%% Generate data set for segment analysis
+dN=domain(N);
+dStart=min(dN);
+dEnd=max(dN);
+dIncr=N.domainIncr;
+nSamp=1+(dEnd-dStart)/N.domainIncr;
+dataSet=nan(nSamp,1);
+idx=idx4domain(dStart,N.domainIncr, dN);
+dataSet(idx)=N.dataSet;
+nDomain=[dStart:dIncr:dEnd];
+% Find start and end points of data
 segCnt=0;
 segStart=1;
 nLen=length(dataSet);
@@ -450,7 +459,7 @@ seqCnt=0;
 segIno={};
 onsetPointer=0;
 newDataSet=[];
-nDomain=domain(N);
+%nDomain=domain(N);
 newComment={};
 for ie=1:ne,
     if e(ie).type=='good'
@@ -460,23 +469,21 @@ for ie=1:ne,
         segLength(segCnt)=e(ie).nSamp;
         segInfo{segCnt}=[ varName num2str(segCnt)];
         chanNames=N.chanNames;
-        t=chanNames{1};
-        
+        t=chanNames{1};        
         newDataSet=cat(1,newDataSet, dataSet(e(ie).startIdx:e(ie).endIdx));
     end
 end
 
 S=segdat;
-i=find(isnan(dataSet));
-dataSet(i,:)=[];
 
-if length(dataSet)>0
+
+if length(newDataSet)>0
     set(S,'chanNames',N.chanNames, 'chanUnits',N.chanUnits, 'domainIncr',N.domainIncr, ...
         'domainStart',domainStart,'domainValues',nan, 'dataSet', newDataSet, ...
         'dataSize', size(dataSet),'comment',N.comment, ...
         'onsetPointer', onsetPointer,'segLength',segLength, 'segInfo',segInfo);
 else
-    set(S,'dataSet',dataSet);
+    set(S,'dataSet',[]);
 end
 end
 
