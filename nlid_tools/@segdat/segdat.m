@@ -71,9 +71,9 @@ classdef segdat<nldat
             if ~isempty(idxIntersect)
                 catVector(idxIntersect)='3';
             end
-            e=eseq(catVector);
+            e=eseq(catVector, domainStart,domainIncr);
             
-            eDomain=domain(e,domainStart,domainIncr);
+            eDomain=domain(e);
             % Generate concatonated segdat
             segNum=0;
             domainStart=[];
@@ -81,9 +81,9 @@ classdef segdat<nldat
             segInfo={};
             segLen=[];
             dataSet=[];
-     for i=1:length(e),
+            for i=1:length(e),
                 if e(i).type ~='0'
-                    segNum=segNum+1;                    
+                    segNum=segNum+1;
                     domainStart(segNum)=domainVector(e(i).startIdx);
                     iStart=e(i).startIdx;
                     iEnd=e(i).endIdx;
@@ -96,7 +96,7 @@ classdef segdat<nldat
                         onsetPointer(segNum)=onsetPointer(segNum-1)+segLen(segNum-1);
                     end
                     switch e(i).type
-                        case '1'                           
+                        case '1'
                             curSegNum=seg4domain(S1,eventStart);
                             segInfo{segNum}=S1.segInfo{curSegNum};
                         case '2'
@@ -108,7 +108,7 @@ classdef segdat<nldat
                     end
                 end
             end
-
+            
             sCat=S1;
             sCat.domainStart=domainStart;
             sCat.dataSet=dataSet;
@@ -209,7 +209,7 @@ classdef segdat<nldat
         
         
         
-        function Z = segIntersect (Z1, Z2)
+        function Z = intersect (Z1, Z2)
             % Determine intersection between two segdat objects
             domainIncr=Z1.domainIncr;
             if Z2.domainIncr ~= domainIncr
@@ -221,21 +221,16 @@ classdef segdat<nldat
             d1=domain(n1);
             n2=nldat(Z2);
             d2=domain(n2);
-            d=cat(1,d1,d2);
-            dMin=min(d);
-            dMax=max(d);
-            iMax=idx4domain(dMin, domainIncr, dMax);
-            zd=nan(iMax,1);
-            ptr1=idx4domain(dMin,domainIncr,d1);
-            zd(ptr1,:)=1;
-            ptr2=idx4domain(dMin,domainIncr,d2);
-            zd(ptr2,:)=2;
-            iOverlap=intersect(ptr1,ptr2);
-            comment=['segcat(' name1 ',' name2 ')'];
-            if ~isempty (iOverlap),
-                zd(iOverlap,:)=3;
+            iIntersect=ismember(d1,d2); 
+            if isempty(iIntersect),
+                Z=nldat;
             end
-            Z=nldat (n1,'domainStart',dMin,'dataSet',zd );
+            dCommon=d1(iIntersect);
+            ptr1=idx4domain(n1.domainStart,domainIncr,dCommon);
+            ptr2=idx4domain(n2.domainStart,domainIncr,dCommon);
+            n1New=n1(ptr1);
+            n2New=n2(ptr2);
+            Z=cat(2,n1New,n2New);
         end
         
         
@@ -412,18 +407,18 @@ classdef segdat<nldat
                 error('At least segment exceeds the data range')
             end
             %% Suppress checking for overlap since this is now OK
-%             for k = 1: nchan
-%                 for i = 1 : length(onsetpointer)
-%                     for j = 1 : length(onsetpointer)
-%                         if i == j
-%                             break;
-%                         elseif (onsetpointer(j)<=onsetpointer(i))&&(onsetpointer(i)<=endpointer(j))
-%                             % warning(['In channel ',num2str(k),', segment ',num2str(i),' & segment',num2str(j),' overlap.'])
-%                         end
-%                     end
-%                 end
-%                 
-%             end
+            %             for k = 1: nchan
+            %                 for i = 1 : length(onsetpointer)
+            %                     for j = 1 : length(onsetpointer)
+            %                         if i == j
+            %                             break;
+            %                         elseif (onsetpointer(j)<=onsetpointer(i))&&(onsetpointer(i)<=endpointer(j))
+            %                             % warning(['In channel ',num2str(k),', segment ',num2str(i),' & segment',num2str(j),' overlap.'])
+            %                         end
+            %                     end
+            %                 end
+            %
+            %             end
             
         end
         
@@ -433,13 +428,23 @@ end
 
 function S=nl2seg(N, varName)
 % Convert an nldat object to a segdat using nans as segment separators;
+% S is empty if there is no valid data in N
 
 [nSamp,nChan,nReal]=size(N);
 if nChan>1,
     error('segdat does not yet support mulitple channels');
 end
-dataSet=N.dataSet;
-% Find start and end points of datas
+%% Generate data set for segment analysis
+dN=domain(N);
+dStart=min(dN);
+dEnd=max(dN);
+dIncr=N.domainIncr;
+nSamp=1+(dEnd-dStart)/N.domainIncr;
+dataSet=nan(nSamp,1);
+idx=idx4domain(dStart,N.domainIncr, dN);
+dataSet(idx)=N.dataSet;
+nDomain=[dStart:dIncr:dEnd];
+% Find start and end points of data
 segCnt=0;
 segStart=1;
 nLen=length(dataSet);
@@ -454,7 +459,7 @@ seqCnt=0;
 segIno={};
 onsetPointer=0;
 newDataSet=[];
-nDomain=domain(N);
+%nDomain=domain(N);
 newComment={};
 for ie=1:ne,
     if e(ie).type=='good'
@@ -464,18 +469,21 @@ for ie=1:ne,
         segLength(segCnt)=e(ie).nSamp;
         segInfo{segCnt}=[ varName num2str(segCnt)];
         chanNames=N.chanNames;
-        t=chanNames{1};
-        
+        t=chanNames{1};        
         newDataSet=cat(1,newDataSet, dataSet(e(ie).startIdx:e(ie).endIdx));
     end
 end
 
 S=segdat;
-i=find(isnan(dataSet));
-dataSet(i,:)=[];
-set(S,'chanNames',N.chanNames, 'chanUnits',N.chanUnits, 'domainIncr',N.domainIncr, ...
-    'domainStart',domainStart,'domainValues',nan, 'dataSet', newDataSet, ...
-    'dataSize', size(dataSet),'comment',N.comment, ...
-    'onsetPointer', onsetPointer,'segLength',segLength, 'segInfo',segInfo);
+
+
+if length(newDataSet)>0
+    set(S,'chanNames',N.chanNames, 'chanUnits',N.chanUnits, 'domainIncr',N.domainIncr, ...
+        'domainStart',domainStart,'domainValues',nan, 'dataSet', newDataSet, ...
+        'dataSize', size(dataSet),'comment',N.comment, ...
+        'onsetPointer', onsetPointer,'segLength',segLength, 'segInfo',segInfo);
+else
+    set(S,'dataSet',[]);
+end
 end
 
