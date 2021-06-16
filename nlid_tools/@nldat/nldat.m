@@ -146,7 +146,7 @@ classdef nldat < nltop
             %nOut = convertDomainUnit (nIn, conversionType) - convert domain units
             % conversionType = {sec2min sec2hour }
             %   Detailed explanation goes here
-            nOut=-nIn;
+            nOut=nIn;
             switch lower(conversionType)
                 case 'seconds2minutes'
                     conversionFactor=60;
