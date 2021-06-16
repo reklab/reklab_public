@@ -142,6 +142,44 @@ classdef nldat < nltop
             Z.dataSet=z;
         end
         
+        function nOut = convertDomainUnit (nIn, conversionType)
+            %nOut = convertDomainUnit (nIn, conversionType) - convert domain units
+            % conversionType = {sec2min sec2hour }
+            %   Detailed explanation goes here
+            nOut=-nIn;
+            switch lower(conversionType)
+                case 'seconds2minutes'
+                    conversionFactor=60;
+                    nOut.domainName='minutes';
+                case 'seconds2hours'
+                    conversionFactor=60*60;
+                    nOut.domainName='hours';
+                case 'minutes2seconds'
+                    conversionFactor=1/60;
+                    nOut.domainName='seconds';
+                case 'minutes2hours'
+                    conversionFactor=1/60;
+                    nOut.domainName='hours';
+                case 'hours2seconds'
+                    conversionFactor=1/(60*60);
+                    nOut.domainName='seconds';
+                case 'hours2minutes'
+                    conversionFactor=1/(60);
+                    nOut.domainName='minutes';
+                otherwise
+                    error(['Undefined conversion:' conversionType]);
+                    
+            end
+            
+            nOut.domainIncr=nIn.domainIncr/conversionFactor;
+            nOut.domainStart=nOut.domainStart/conversionFactor;
+            if ~isnan(nOut.domainValues)
+                nOut.domainValues=nOuut.domainValues/conversionFactor;
+            end
+        end
+        
+        
+        
         function [c,p] = corrcoef (x)
             % nldat wrapper for corrcoef function
             [nSamp,nChan,nReal]=size(x);
@@ -509,16 +547,16 @@ classdef nldat < nltop
         function [apEn] = apEn(x)
             % Approximate Entropy of nldat object, each channel and
             % realization is treated independently.
-            % Input: 
+            % Input:
             %       - x: nldat object with the target signal
-            % Output: 
+            % Output:
             %       - apEn: approximate entropy of each channel and
             %       realization of the input signal
             %--------------------------------------------------------
             
             % Gets the number of channels and realizations of the input
             [~,nchan,nreal]=size(x);
-            % Allocates the ApEn matrix, one value per channel and realziation 
+            % Allocates the ApEn matrix, one value per channel and realziation
             apEn=nan(1,nchan,nreal);
             % Gets the range of the input
             x=double(x);
@@ -527,10 +565,10 @@ classdef nldat < nltop
             for i=1:nchan
                 for j=1:nreal
                     
-                    % Removes NaN samples 
+                    % Removes NaN samples
                     x_temp=x(:,i,j);
                     x_temp(isnan(x_temp))=[];
-
+                    
                     % Estimate ApEn
                     apEn(1,i,j)=approximateEntropy(x_temp);
                 end
@@ -1077,43 +1115,43 @@ classdef nldat < nltop
             optionList= { { 'window' [] 'window to divide the signal into sgements'} ...
                 {'noverlap' [] 'number of samples of overlap between sgements'} ...
                 {'nfft' [] 'numberof DFT points'} };
-            flag=arg_parse(optionList, varargin); 
+            flag=arg_parse(optionList, varargin);
             fSamp=1/N.domainIncr;
             [s,f,t,p,Fc,Tc]=spectrogram(N.dataSet,window,noverlap,nfft,fSamp);
-             [nrow,ncol]=size(s);
-             s1=reshape(s,nrow,1,ncol);
-             S=tvdat(s1);
-             S.realDomainValues=t;
-             S.domainValues=f;
-             S.domainName='Frequency (Hz)';
-             S.chanNames={'Fourier transform'}; 
-             if nargout>=1,
-              p1=reshape(p,nrow,1,ncol);
-             P=tvdat(p1);
-             P.realDomainValues=t;
-             P.domainValues=f;
-             P.domainName='Frequency (Hz)';
-             P.chanNames(1)={'Power spectrum'}; 
-             varargout{1}=P;                 
-             end
-             if nargout>=2,
-                 varargout{2}=Fc;
-             end
-             if nargout>=3,
-                 varargout{3}=Tc;  
-             end
+            [nrow,ncol]=size(s);
+            s1=reshape(s,nrow,1,ncol);
+            S=tvdat(s1);
+            S.realDomainValues=t;
+            S.domainValues=f;
+            S.domainName='Frequency (Hz)';
+            S.chanNames={'Fourier transform'};
+            if nargout>=1,
+                p1=reshape(p,nrow,1,ncol);
+                P=tvdat(p1);
+                P.realDomainValues=t;
+                P.domainValues=f;
+                P.domainName='Frequency (Hz)';
+                P.chanNames(1)={'Power spectrum'};
+                varargout{1}=P;
+            end
+            if nargout>=2,
+                varargout{2}=Fc;
+            end
+            if nargout>=3,
+                varargout{3}=Tc;
+            end
         end
         
         function S = spectLS(x, varargin)
             % Generates Lomb-Scargle spectrum periodogram for nldat object
-            % Input: 
+            % Input:
             %       - x: nldat object with the target signals, it can have
             %       multiple channels only if they have the same sampling
             %       rate and length.
-            % Output: 
+            % Output:
             %       - S: spect object with the spectrum of each channel and
             %       realization
-            % Options: 
+            % Options:
             %       - 'fmax': the maximum frequency for the estimation of
             %       the LS periodogram. If it is not specified, it will be
             %       defined automatically based on the Nyquist frequency
@@ -1165,9 +1203,9 @@ classdef nldat < nltop
             % Generates the spect object
             S=spect;
             % With the P matrix that contains the spectrum of each channel
-            % and each realization independently. 
+            % and each realization independently.
             S.dataSet=P;
-            % And the frequency domain of the spectrum. 
+            % And the frequency domain of the spectrum.
             S.domainValues=f;
             
             S.chanNames=chan;
