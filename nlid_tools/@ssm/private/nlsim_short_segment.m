@@ -37,7 +37,7 @@ for i = 1 : length(endpointer)
 end
 out = out - mean(out);
 in = in - mean(in);
-switch_time = [1;switch_time];
+switch_time = [1;switch_time(:)];
 nsamp = length(in);
 p = length(segLength);
 m = size(A,1);
@@ -69,13 +69,18 @@ output_predicted = output_predicted - mean(output_predicted);
 outp = segdat;
 chanName = get(z,'chanNames');
 chanUnit = get(z,'chanUnits');
-set(outp,'dataSet',output_predicted,'chanNames','Predicted output','chanUnits',chanUnit,'chanNames',chanName{2},'domainIncr',ts,'onsetPointer',switch_time(1:end-1),'segLength',segLength);
+set(outp,'dataSet',output_predicted,'chanNames','Predicted output','chanUnits',chanUnit,'chanNames',chanName{2},...
+    'domainIncr',ts,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainStart',z.domainStart);
+
 % figure
 % plot(output_predicted,'r');
 % hold on
 % plot(out)
-% output_predicted = nldat(output_predicted,'domainIncr',ts);
+% output_predicted = nldat(outpuredicted,'domainIncr',ts);
 end
+
+
+
 function Phi = BD_omega_regressor(u,A,C)
 b=zeros(size(u,1),size(A,1)*(size(u,2)));
 e=eye(size(A,1));

@@ -61,6 +61,15 @@ classdef nlm < nltop
         
         function y = nlsim ( sys, x )
             % Simulate response of nlm object to input data set
+            % Handle segdat objects separately to simulate properly. 
+            if isa(x,'segdat')
+                [nSamp,nChan,nReal]=size(x);
+                if nChan ~=2,
+                    error ('nlsim needs ID output data for segdat simulations');
+                end
+                xOutId=x(:,2);
+                
+            end
             subsys = sys.elements;
             [nparallel, nseries]=size(subsys);
             y=x(:,1)*0;
@@ -68,7 +77,11 @@ classdef nlm < nltop
                 xOut=x;
                 for j=1:nseries,
                     ss=subsys{i,j};
-                    xIn=xOut;
+                    if isa(x,'segdat') & isa(ss,'ssm')
+                        xIn=cat(2,xOut,xOutId);
+                    else
+                        xIn=xOut;
+                    end
                     xOut = nlsim(ss,xIn);
                 end
                 y=y+xOut;

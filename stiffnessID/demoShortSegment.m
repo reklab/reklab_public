@@ -19,25 +19,31 @@ maxSegment = 1;%maximum segment length in s
 numSegment = 50;%number of segments
 minSegment = floor(minSegment / samplingTime);
 maxSegment = floor(maxSegment / samplingTime);
-segLength = randi([minSegment,maxSegment],numSegment,1);% vector of segment lengths
-onsetPointer = randi([1,length(position) - maxSegment],numSegment,1);%vector of segment onset
-endPointer = onsetPointer+segLength-1;
-domainStart=(onsetPointer-1)*samplingTime;
-nSeg=length(segLength);
+
 %% Define segdat objects
 %segdat is a child of nldat (data class of NLID toolbox) for segmented data
 z=cat(2,position,torque);
 ZNL=nldat(z,'domainIncr',samplingTime,'comment','Position','chanNames', ...
     {'Joint angular position (rad)' 'Joint torque (Nm)'});
 % Generate segments and segdat object
-Z=segdat(ZNL,'domainStart',domainStart,'onsetPointer',onsetPointer,'segLength',segLength);
-
+Z=segdat.randSeg(ZNL, minSegment, maxSegment, 50); 
+% Z=segdat;
+% for iSeg=1: numSegment
+%     tmpZ=ZNL(onsetPointer(iSeg):endPointer(iSeg),:);
+%     tmpZ.domainStart=domainStart(iSeg);
+%     tmpS=segdat(tmpZ);
+%     if iSeg==1,
+%         Z=tmpS;
+%     else
+%         Z=cat(1,Z,tmpS);
+%     end
+% end
 
     
 %% Let's visualize the data
 disp('Plotting segmented data')
 h = figure;
-segPlot(Z); 
+plot(Z); 
 xAxisPanZoom
 disp('Press any key to continue')
 pause
@@ -86,7 +92,7 @@ minSegment = 0.25;
 maxSegment = 0.5;
 minSegment = floor(minSegment / samplingTime);
 maxSegment = floor(maxSegment / samplingTime);
-
+%% Modify so domainStart and length make senses
 disp(['Randomly selecting : ',num2str(numSegmentValidation),' segments for validation'])
 segLengthValidation = randi([minSegment,maxSegment],numSegmentValidation,1);% vector of segment lengths
 onsetPointerValidation = randi([1,length(position) - maxSegment],numSegmentValidation,1);%vector of segment onset
@@ -97,7 +103,8 @@ torqueValidation = segdat(torque,'onsetPointer',onsetPointerValidation,'segLengt
 %Concatenate input and output
 zValidation = cat(2,positionValidation,torqueValidation);
 zValidation.domainStart=(zValidation.onsetPointer-1)*zValidation.domainIncr; 
-[tqIValidation,tqRValidation,tqTValidation,vafValidation,posMeasured,trqMeasured] = simulate_PC_ShortSegment(intrinsic,reflex,zValidation);
+[tqIValidation,tqRValidation,tqTValidation,vafValidation,posMeasured,trqMeasured] =  ...
+    simulate_PC_ShortSegment(intrinsic,reflex,zValidation);
 disp(['Validation VAF was : ',num2str(vafValidation(1)),' for validation'])
 %Let's visualize
 onsetPointer = tqIValidation.onsetPointer;

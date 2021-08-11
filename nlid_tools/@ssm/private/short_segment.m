@@ -10,16 +10,17 @@ function system_ss = short_segment (z,ps)
 %%
 assign(ps);
 condition = 1;
+% changes to new segdat format where all channels must have same properties
 ts = get(z,'domainIncr');
 in_onsetPointer = get(z,'onsetPointer');
-onsetPointer = in_onsetPointer (:,2);
-in_onsetPointer = in_onsetPointer (:,1);
+onsetPointer = in_onsetPointer ;% (:,2);
+in_onsetPointer = in_onsetPointer; % (:,1);
 in_segLength = get(z,'segLength');
-segLength = in_segLength (:,2);
-in_segLength = in_segLength (:,1);
-if ~( isequal(onsetPointer,in_onsetPointer) &&  isequal(in_segLength,segLength))
-    error('The input and output onset pointer and length must be equal..')
-end
+segLength = in_segLength; %(:,2);
+in_segLength = in_segLength; % (:,1);
+% if ~( isequal(onsetPointer,in_onsetPointer) &&  isequal(in_segLength,segLength))
+%     error('The input and output onset pointer and length must be equal..')
+% end
 data = get(z,'dataSet');
 input = data(:,1);
 output = data(:,2);
@@ -49,7 +50,7 @@ for i = 1 : length(endpointer)
 end
 out = out - mean(out);
 in = in - mean(in);
-switch_time = [1;switch_time];
+switch_time = [1;switch_time(:)];
 nsamp = length(in);
 p = length(segLength);
 %Ensure enough number of samples is available
@@ -102,7 +103,7 @@ if nsamp>2*hankleSize*p-p+5*hankleSize+1
         condition = 0;
     end
 else
-    warning('Not enough number of samples is available for identification')
+    warning('Not enough samples available for identification')
     warning('Attempt to identify the system failed.')
     system_ss = ssm;
     condition = 0;
