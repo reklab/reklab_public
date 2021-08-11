@@ -30,7 +30,7 @@ classdef nldat < nltop
                     warning('Row vector. Transposing');
                 end
                 d.dataSet=z;
-                [nsamp,nchan,nreal]=size(z);
+                [~,nchan,nreal]=size(z);
                 d.dataSize=size(z);
                 for i=1:nchan,
                     d.chanNames{i} = [inputname(1) int2str(i) ];
@@ -752,8 +752,13 @@ classdef nldat < nltop
         
         function z = mtimes(x,y);
             % array multiply function for nldat variables;
-            x=nldat(x);
-            y=nldat(y);
+            if isnumeric(x)
+                x=nldat(x);
+            end
+            if isnumeric(y)
+                y=nldat(y);
+            end
+            
             sx=size(x);
             xchan=sx(2);
             sy= size(y);
@@ -912,6 +917,13 @@ classdef nldat < nltop
         end
         
         function z=times(x,y)
+            if isnumeric(x)
+                x=nldat(x);
+            end
+            if isnumeric(y),
+                y=nldat(y);
+            end
+            
             z=x;
             z.dataSet=x.dataSet.*y.dataSet;
             z.comment='x times y';
@@ -965,6 +977,9 @@ classdef nldat < nltop
             end
             y.comment = [' RESHAPED ' x.comment];
         end
+        
+        
+        
         
         
         
@@ -1049,15 +1064,16 @@ classdef nldat < nltop
         
         function [nsamp,nchan,nreal]= size (d, DIM)
             % overloaded size function for nldatclass.
-            [nsamp,nchan,nreal]=size(d.dataSet);
+            xd=d.dataSet;
+            [nsamp,nchan,nreal]=size(xd);
             if nargout == 0 | nargout==1,
                 if nargin ==1,
                     nsamp=[ nsamp nchan nreal];
                 else
-                    nsamp=size(d.dataSet, DIM);
+                    nsamp=size(xd, DIM);
                 end
             elseif nargout ==2
-                [nsamp,nchan]=size(d.dataSet);
+                [nsamp,nchan]=size(xd);
             elseif nargout ==3
                 return
             end
@@ -1227,6 +1243,10 @@ classdef nldat < nltop
             
             
             if strcmp (S.type, '()')
+                if isa(A,'segdat') | isa(B,'segdat')
+                    error('subsassgn not yet implemented for segdat classs');
+                end
+                
                 B=nldat(B);
                 [nx(1),nx(2),nx(3)]=size(B.dataSet);
                 for i=1:3,
@@ -1264,11 +1284,13 @@ classdef nldat < nltop
         
         
         function out = subsref (N, S)
+            
             nTemp=N;
             for i=1:length(S),
                 if strcmp(S(i).type,'.'),
                     nTemp=get(nTemp,S(i).subs);
                 elseif strcmp(S(i).type,'()')
+                    
                     oDom=domain(nTemp);
                     d=nTemp.dataSet;
                     dTemp=builtin('subsref', d, S(i));
@@ -1291,10 +1313,9 @@ classdef nldat < nltop
                     end
                     %Fix for segdat
                     if isa(nTemp,'segdat')
-                        onsetpointer = get(nTemp,'onsetPointer');
-                        seglength = get(nTemp,'segLength');
-                        set(nTemp,'onsetPointer', onsetpointer (S(i).subs{2}));
-                        set(nTemp,'segLength' , seglength (S(i).subs{2}));
+                        if ~strcmp(S(i).subs(1),':')
+                            error('sample extraction is not imlemented for the segdata class');
+                        end
                     end
                 end
                 
