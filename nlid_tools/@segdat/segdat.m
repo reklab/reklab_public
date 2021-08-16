@@ -39,6 +39,30 @@ classdef segdat<nldat
             N=find((domainVal-dStart)>=delta & (domainVal-dEnd)<=delta);
         end
         
+        function C = cor(S, varargin)
+            % segdatCor - overlaid correlation function for segdat objecs
+            %   Detailed explanation goes here
+            
+            if ~any(strcmp('nLags',varargin))
+                error('nlags must be specified for cor on segdat objects');
+            end
+            
+            
+            nSeg=segCount(S);
+            C={};
+            for iSeg=1:nSeg
+                curSeg=segGet(S,iSeg);
+                cTemp=cor(curSeg, varargin);
+                if iSeg==1,
+                    C=cTemp;
+                else
+                    C=C+cTemp;
+                end
+            end
+            C=C./nSeg;
+            set(C,'comment','Correlation function');
+        end
+        
         
         
         
@@ -537,7 +561,7 @@ classdef segdat<nldat
         end
         
         
-     
+        
     end
 end
 
