@@ -63,6 +63,30 @@ classdef segdat<nldat
             set(C,'comment','Correlation function');
         end
         
+         function I = irf(S, varargin)
+            % segdatCor - overlaid correlation function for segdat objecs
+            %   computes average IRF for segments 
+            
+            if ~any(strcmp('nLags',varargin))
+                error('nlags must be specified for cor on segdat objects');
+            end
+            
+            
+            nSeg=segCount(S);
+            C={};
+            for iSeg=1:nSeg
+                curSeg=segGet(S,iSeg);
+                iTemp=irf(curSeg, varargin);
+                if iSeg==1,
+                    I=iTemp;
+                else
+                    I=I+iTemp;
+                end
+            end
+            I=I./nSeg;
+            set(I,'comment','Average IRF');
+        end
+        
         
         
         

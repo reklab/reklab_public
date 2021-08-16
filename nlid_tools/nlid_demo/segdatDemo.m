@@ -148,6 +148,15 @@ figure (2);
 CXXY=cor(ZS,'nSides',2, 'nLags',16,'kernOrder',2);
 plot(CXXY);
 
+%% IRF
+X=nldat(randn(20000,1));
+Y=smo(X,5);
+Z=cat(2,X,Y);
+ZS=segdat.randSeg(Z,200,500,50);
+I=irf(ZS,'nSides',2,'nLags',16);
+figure(1);
+plot(I);
+
 
 
 
