@@ -306,7 +306,8 @@ classdef polynom < nltop
             if strcmp(class(xin),'segdat')
                 segdat_flag = 1;
                 xIN = xin;
-                xin =nldat(xin(:,1));
+                xtmp =nldat(xin);
+                xin=xtmp(:,1);
                 if nchan == 2
                     nchan = 1;
                 end
@@ -366,15 +367,12 @@ classdef polynom < nltop
                 end
                 
             end
+            y=nldat(Y);
             if segdat_flag
-                dataset = xIN.dataSet;
-                dataset (:,1) = Y;
-                y = xIN;
-                set(y,'dataSet',dataset);
-            else
-                set(y,'dataSet',Y);
+                y = segdat(Y); 
             end
-            set(y,'comment',[ polyType ' series prediction']);
+                set(y,'comment',[ polyType ' series prediction'], 'domainIncr', ...
+            xin.domainIncr,'domainStart',xin.domainStart);
             % polynom/nlsim
         end
         %%

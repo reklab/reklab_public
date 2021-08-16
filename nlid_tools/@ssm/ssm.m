@@ -106,6 +106,8 @@ classdef ssm<nltop
             ztype = class(z);
             switch ztype
                 case 'segdat'
+                    disp('ssm.nlsim requires input and output for accurate simulation of segdat data.');
+                    
                     if nchan == 2
                         out = nlsim_short_segment (S.parameterSet,z);
                     end

@@ -14,7 +14,7 @@ function [R, V, yp] = nlid_resid( M, z, varargin);
 %  If NM==1 & NZ > 1
 %     errors is computed for each realization.
 %  IF NM > 1 7 NZ > 1
-%     error is computer for each model wioth the data
+%     error is computed for each model wioth the data
 % If NM > 1 NZ > 1 and NM=NZ
 %  Run ech model for the associated data set
 % if NM>1 & Nz>1 & NM ~= NZ
@@ -68,8 +68,11 @@ else
     y=z(:,2);
     
 end
-
+if isa(z,'segdat'),
+    yp=nlsim(M,z);
+else
 yp= nlsim(M,x); yp=yp(:,1);
+end
 % Get rid of transients
 y=chop(y,choplen);
 yp=chop(yp,choplen);

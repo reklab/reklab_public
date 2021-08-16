@@ -19,16 +19,17 @@ if nargin==1,
     y=subsref(xTemp,S);
     DIM='total';
 elseif nargin ==2,
-    if strcmp(class(y),'nldat'),
-        DIM='total';
-    elseif isstr(y),
+    
+    if isstr(y),
         DIM=y;
         xTemp=x;
     S.type='()';
     S.subs = { ':',1,':'};
     x=subsref(xTemp,S);
     S.subs = { ':',2,':'};    
-    y=subsref(xTemp,S);        
+    y=subsref(xTemp,S);
+    else
+        DIM='total';
     end
 end
 if nargin <3,

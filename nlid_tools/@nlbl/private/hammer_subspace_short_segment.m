@@ -62,7 +62,7 @@ for i = 1 : length(endpointer)
 end
 out = out - mean(out);
 in = in - mean(in);
-switch_time = [1;switch_time];
+switch_time = [1;switch_time(:)];
 nsamp = length(in);
 p = length(segLength);
 if nsamp>2*hankleSize*p-p+2*maxOrderNLE*hankleSize+3*hankleSize+1

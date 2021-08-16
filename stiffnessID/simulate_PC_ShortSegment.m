@@ -4,9 +4,9 @@ function [trqIntrinsicPredict,trqReflexPredict,trqTotalPredict,idVAF,posMeasured
 decimationRatio = 1;
 zn=nldat(z)
 position = zn(:,1);
-position = position - mean(position);
+position = position - mean(position,'omitnan');
 torque = zn(:,2);
-torque = torque - mean(torque);
+torque = torque - mean(torque,'omitnan');
 torque = get(torque,'dataSet');
 samplingTimeIntrinsic = get(intrinsic,'domainIncr');
 samplingTimeReflex = get(reflex{2},'domainIncr');
