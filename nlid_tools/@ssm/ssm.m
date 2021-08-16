@@ -6,7 +6,7 @@ classdef ssm<nltop
     methods
         function S = ssm (a,varargin)
             %SSM specific parameters
-             S.parameterSet=param('paramName','A','paramDefault',[], ...
+            S.parameterSet=param('paramName','A','paramDefault',[], ...
                 'paramHelp','State-Space matrix A', ...
                 'paramType','number');
             S.parameterSet(2)=param('paramName','B','paramDefault',[], ...
@@ -109,44 +109,44 @@ classdef ssm<nltop
                     disp('ssm.nlsim requires input and output for accurate simulation of segdat data.');
                     
                     if nchan == 2
-                        out = nlsim_short_segment (S.parameterSet,z);
+                        out = nlsim_short_segment (S.parameterSet,z)
                     end
-                case 'nldat'
-                    matrix_a = get(S,'A');
-                    matrix_b = get(S,'B');
-                    matrix_c = get(S,'C');
-                    matrix_d = get(S,'D');
-                    ts = get(S,'domainIncr');
-                    delay = get(S,'nDelayInput');
-                    input = get(z,'dataSet');
-                    inputd = del(input,delay);
-                    out = dlsim(matrix_a,matrix_b,matrix_c,matrix_d,inputd);
-                    out = nldat(out,'domainIncr',ts);
-                otherwise
-                    error('The input type not supported.')
+                        case 'nldat'
+                            matrix_a = get(S,'A');
+                            matrix_b = get(S,'B');
+                            matrix_c = get(S,'C');
+                            matrix_d = get(S,'D');
+                            ts = get(S,'domainIncr');
+                            delay = get(S,'nDelayInput');
+                            input = get(z,'dataSet');
+                            inputd = del(input,delay);
+                            out = dlsim(matrix_a,matrix_b,matrix_c,matrix_d,inputd);
+                            out = nldat(out,'domainIncr',ts);
+                            otherwise
+                                error('The input type not supported.')
+                    end
             end
-        end
-        function S = nlident (S, z,  varargin)
-            %Identify a state-space object from input-output data
-            %
-            if nargin < 2,
-                disp('NLIDtakes three inputs for SSM objects: irf, fresp, nldat' );
-            elseif nargin > 2,
-                set(S,varargin{:});
-            end
-            assign(S.parameterSet)
-            set(S,'domainIncr',get(z,'domainIncr'));
-            ztype = class(z);
-            switch ztype
-                case 'fresp'
-                    warning('This option is not implemented!');
-                    S = ssm;
-                case 'irf'
-                    warning('This option is not implemented!');
-                    S = ssm;
-                case 'segdat'
+            function S = nlident (S, z,  varargin)
+                %Identify a state-space object from input-output data
+                %
+                if nargin < 2,
+                    disp('NLIDtakes three inputs for SSM objects: irf, fresp, nldat' );
+                elseif nargin > 2,
+                    set(S,varargin{:});
+                end
+                assign(S.parameterSet)
+                set(S,'domainIncr',get(z,'domainIncr'));
+                ztype = class(z);
+                switch ztype
+                    case 'fresp'
+                        warning('This option is not implemented!');
+                        S = ssm;
+                    case 'irf'
+                        warning('This option is not implemented!');
+                        S = ssm;
+                    case 'segdat'
                         S = short_segment(z,S.parameterSet);
-                case 'nldat'
+                    case 'nldat'
                         in = z(:,1);
                         out = z(:,2);
                         in = delay(in,nDelayInput);
@@ -178,10 +178,10 @@ classdef ssm<nltop
                             otherwise
                                 error('Identification method must be PI or PO');
                         end
-                otherwise
-                    error (['ssm nlident - does not support data type: ' ztype]);
+                    otherwise
+                        error (['ssm nlident - does not support data type: ' ztype]);
+                end
             end
         end
     end
-end
-
+    
