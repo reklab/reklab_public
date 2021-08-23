@@ -349,6 +349,30 @@ classdef nldat < nltop
             d=d(:);
         end
         
+        function y= changeDomain (x,changeType)
+            % change domain from seconds to hours
+            y=x;
+            switch lower(changeType),
+                case 'seconds2hours'
+                    scaleFactor=1/(60*60);
+                    newName='Time (hours)';
+                    
+                case 'hours2seconds'
+                    scaleFactor=60*60;
+                    newName='Time (s)';
+                otherwise
+                    error (['Bad change type: ' changeType]);
+            end
+            
+            y.domainStart=x.domainStart.*scaleFactor;
+            y.domainIncr=x.domainIncr.*scaleFactor;
+            y.domainName=newName;
+        end
+            
+            
+            
+            
+        
         
         function y=double(x)
             y = double (x.dataSet);
