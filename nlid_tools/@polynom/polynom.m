@@ -114,11 +114,11 @@ classdef polynom < nltop
         
         function p= set.polyCoef (p, value)
             assign(p.parameterSet);
-            if strcmp(polyType,'Bspline'),   
+            if strcmp(polyType,'Bspline'),
                 % There is a mismatch between # of coefficient and spline
-                % definitions. 
+                % definitions.
                 if length(value)~=length(splineCenters)
-                   error ('Number of coefficients does not match spline definition');
+                    error ('Number of coefficients does not match spline definition');
                 end
             end
             
@@ -295,43 +295,34 @@ classdef polynom < nltop
             end
         end
         
-        function y = nlsim ( sys, xin )
+        function y = nlsim ( sys, xIn )
             % polynom/nlsim - simulate response of polynominal series to input data set
-            
-            
+            inputClass=class(xIn);
             nin=sys.nInputs;
             assign(sys.parameterSet);
-            [~,nchan,nreal]=size(xin);
+            [~,nchan,nreal]=size(xIn);
             segdat_flag = 0;
-            if strcmp(class(xin),'segdat')
-                segdat_flag = 1;
-                xIN = xin;
-                xtmp =nldat(xin);
-                xin=xtmp(:,1);
-                if nchan == 2
-                    nchan = 1;
-                end
-                if (nchan ~= nin)
-                    error ('number of input channels does not match polynominal');
-                end
-                %nchan = nchan - 1;
-            elseif (nchan ~= nin)
+            switch inputClass
+                case'segdat'
+                    segdat_flag = 1;
+                    y=xIn;
+                case 'nldat'
+                    y=xIn;
+                case 'double'
+                    xIn=nldat(xIn);
+                    y=xIn;
+            end
+            if (nchan ~= nin)
                 error ('number of input channels does not match polynominal');
             end
-            if strcmp(class(xin),'nldat')
-                y=xin;
-            elseif isa(class(xin),'segdat')
-                y=segdat;
-            else
-                y = nldat;
-            end
-            x=double (xin);
+            x=xIn.dataSet;
             [nr,nc]=size(x);
             if nin > nc,
                 error ('dimension mismatch');
             else
+                xData=xIn.dataSet;
                 for iReal=1:nreal,
-                    x=double(xin(:,:,iReal));
+                    x=xData(:,:,iReal);
                     
                     switch lower(polyType)
                         
@@ -367,12 +358,9 @@ classdef polynom < nltop
                 end
                 
             end
-            y=nldat(Y);
-            if segdat_flag
-                y = segdat(Y); 
-            end
-                set(y,'comment',[ polyType ' series prediction'], 'domainIncr', ...
-            xin.domainIncr,'domainStart',xin.domainStart);
+           
+            set(y,'dataSet',Y,'comment',[ polyType ' series prediction'], 'domainIncr', ...
+                xIn.domainIncr,'domainStart',xIn.domainStart);
             % polynom/nlsim
         end
         %%

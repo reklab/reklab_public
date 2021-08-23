@@ -38,54 +38,57 @@ classdef segdat<nldat
             delta=-S.domainIncr/2;
             N=find((domainVal-dStart)>=delta & (domainVal-dEnd)<=delta);
         end
+        function C=cor(S,varargin)
+            C=corirf(S,'cor',varargin{:}); 
+        end
+         function I=irf(S,varargin)
+            I=corirf(S,'irf',varargin{:}); 
+        end
         
-        function C = cor(S, varargin)
+        
+        
+        function C = corirf(S, fncType,varargin)
             % segdatCor - overlaid correlation function for segdat objecs
             %   Detailed explanation goes here
-            
-            if ~any(strcmp('nLags',varargin))
+            iLag=find(strcmp('nLags',varargin));
+            if isempty(iLag)
                 error('nlags must be specified for cor on segdat objects');
-            end
-            
-            
+            else
+                nLags=varargin{iLag+1};
+            end   
             nSeg=segCount(S);
             C={};
+            iCnt=0;
             for iSeg=1:nSeg
                 curSeg=segGet(S,iSeg);
-                cTemp=cor(curSeg, varargin);
-                if iSeg==1,
+                curLen=length(curSeg); 
+                if curLen>2*nLags+1
+                    switch fncType
+                        case 'cor'
+                            cTemp=cor(curSeg, varargin);
+                        case 'irf'
+                             cTemp=irf(curSeg, varargin);
+                        otherwise
+                            error(['Bad fncType':  fncType])
+                    end
+                            
+                iCnt=iCnt+1;
+                if iCnt==1,
                     C=cTemp;
                 else
                     C=C+cTemp;
                 end
-            end
-            C=C./nSeg;
-            set(C,'comment','Correlation function');
-        end
-        
-         function I = irf(S, varargin)
-            % segdatCor - overlaid correlation function for segdat objecs
-            %   computes average IRF for segments 
-            
-            if ~any(strcmp('nLags',varargin))
-                error('nlags must be specified for cor on segdat objects');
-            end
-            
-            
-            nSeg=segCount(S);
-            C={};
-            for iSeg=1:nSeg
-                curSeg=segGet(S,iSeg);
-                iTemp=irf(curSeg, varargin);
-                if iSeg==1,
-                    I=iTemp;
                 else
-                    I=I+iTemp;
+                    disp(['Segment ' num2str(iSeg) ' to0 short not included']);
                 end
             end
-            I=I./nSeg;
-            set(I,'comment','Average IRF');
+            if iCnt>0
+                C=C./iCnt;
+            set(C,'comment',fncType);
+            else
+            end
         end
+        
         
         
         
@@ -192,9 +195,13 @@ classdef segdat<nldat
             name1=inputname(1);
             name2=inputname(2);
             n1=nldat(Z1);
+            iVALID1=find(~isnan(n1));
             d1=domain(n1);
+            d1=d1(iVALID1);
             n2=nldat(Z2);
+            iVALID2=find(~isnan(n2));
             d2=domain(n2);
+            d2=d2(iVALID2);
             iIntersect=ismember(d1,d2);
             if isempty(iIntersect),
                 Z=nldat;
