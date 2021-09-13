@@ -103,6 +103,7 @@ if plotflag,
     plot (R);
     T= ('Residuals' );
     title(T);
+    streamer (M.comment);
 end
 
 
