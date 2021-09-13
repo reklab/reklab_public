@@ -21,19 +21,23 @@ classdef ssm<nltop
             S.parameterSet(5)=param('paramName','idMethod','paramDefault','PI', ...
                 'paramHelp','Subspace id Method', ...
                 'paramType','string');
-            S.parameterSet(6)=param('paramName','orderSelect','paramDefault','manual', ...
-                'paramType','select', 'paramLimits',{'manual' 'largest-gap'}, ...
+            S.parameterSet(6)=param('paramName','order','paramDefault',2, ...
+                'paramType','number',  ...
+                'paramHelp','System orde');
+
+            S.parameterSet(7)=param('paramName','orderSelect','paramDefault','manual', ...
+                'paramType','select', 'paramLimits',{'manual' 'largest-gap' 'fixed'}, ...
                 'paramHelp','Methods for order seletion');
-            S.parameterSet(7)=param('paramName','hankleSize','paramDefault',20, ...
+            S.parameterSet(8)=param('paramName','hankleSize','paramDefault',20, ...
                 'paramHelp','Size of hankle matrix (> system order)', ...
                 'paramType','number');
-            S.parameterSet(8)=param('paramName','domainIncr','paramDefault',0.001, ...
+            S.parameterSet(9)=param('paramName','domainIncr','paramDefault',0.001, ...
                 'paramHelp','Sampling Time', ...
                 'paramType','number');
-            S.parameterSet(9)=param('paramName','nDelayInput','paramDefault',0, ...
+            S.parameterSet(10)=param('paramName','nDelayInput','paramDefault',0, ...
                 'paramHelp','Input delay in samples', ...
                 'paramType','number');
-            S.parameterSet(10)=param('paramName','displayFlag','paramDefault',0,...
+            S.parameterSet(11)=param('paramName','displayFlag','paramDefault',0,...
                 'paramHelp','display','paramLimits', {0,1});
             set(S,'comment','State-Space Model');
             if nargin==0;
@@ -121,7 +125,7 @@ classdef ssm<nltop
                             input = get(z,'dataSet');
                             inputd = del(input,delay);
                             out = dlsim(matrix_a,matrix_b,matrix_c,matrix_d,inputd);
-                            out = nldat(out,'domainIncr',ts);
+                            out = nldat(out,'domainIncr',ts,'domainStart',z.domainStart);
                             otherwise
                                 error('The input type not supported.')
                     end
@@ -155,10 +159,12 @@ classdef ssm<nltop
                         switch upper(idMethod)
                             case 'PI'
                                 [Sn,R] = dordpi(x,y,hankleSize);
-                                order = orderselect(Sn,orderSelect);
+                                if ~strcmp(orderSelect,'fixed'),
+                                    order = orderselect(Sn,orderSelect);
+                                end
                                 [A,C]  =  destac(R,order);
                                 [B,D] =  destbd(x,y,A,C);
-                                set(S,'A',A,'B',B,'C',C,'D',D);
+                                set(S,'A',A,'B',B,'C',C,'D',D,'order',order);
                                 if get(S,'displayFlag') == 1
                                     predicted_output = nlsim(S,in);
                                     figure;
@@ -166,10 +172,12 @@ classdef ssm<nltop
                                 end
                             case 'PO'
                                 [Sn,R] = dordpo(x,y,hankleSize);
-                                order = orderselect(Sn,orderSelect);
+                                if ~strcmp(orderSelect,'fixed')
+                                  order = orderselect(Sn,orderSelect);
+                                end
                                 [A,C]  =  destac(R,order);
                                 [B,D] =  destbd(x,y,A,C);
-                                set(S,'A',A,'B',B,'C',C,'D',D);
+                                set(S,'A',A,'B',B,'C',C,'D',D,'order',order);
                                 if get(S,'displayFlag') == 1
                                     predicted_output = nlsim(S,in);
                                     figure;
