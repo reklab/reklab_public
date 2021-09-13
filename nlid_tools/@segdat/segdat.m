@@ -282,22 +282,29 @@ classdef segdat<nldat
             %             elseif  any(~(mean(seglength')==seglength(:,1)'))
             %                 error('All data channels must have equal segment lengths')
             %             end
-            onsetpointer_new = zeros(size(onsetpointer));
-            seglength_new = zeros(size(onsetpointer));
+            %onsetpointer_new = zeros(size(onsetpointer));
+            %seglength_new = zeros(size(onsetpointer));
             endpointer = onsetpointer + seglength - 1;
             ts = get(data,'domainIncr');
             out = data;
             set(out,'domainIncr',ts*decimation_ratio);
             dataset = get(data,'dataSet');
-            d = zeros(ceil(sum(seglength(:,1))/decimation_ratio),nchan);
+            %d = zeros(ceil(sum(seglength(:,1))/decimation_ratio),nchan);
             for i = 1: nchan
                 pointer = 1;
-                for j = 1 : size(onsetpointer,1)
-                    d_temp = decimate(dataset(onsetpointer(j):endpointer(j),i),decimation_ratio);
-                    onsetpointer_new(j) = pointer;
-                    seglength_new(j) = length(d_temp);
-                    d(onsetpointer_new(j):onsetpointer_new(j)+seglength_new(j)-1) = d_temp;
-                    pointer = pointer + seglength_new(j);
+                jOut=0;
+                for j = 1 : length(onsetpointer)
+                    curSeg=dataset(onsetpointer(j):endpointer(j),i);
+                    if length(curSeg)<24,
+                        disp(['Segment ' num2str(j)  ' too short. Dropping']);
+                    else
+                      jOut=jOut+1;  
+                    d_temp = decimate(curSeg,decimation_ratio);
+                    onsetpointer_new(jOut) = pointer;
+                    seglength_new(jOut) = length(d_temp);
+                    d(onsetpointer_new(jOut):onsetpointer_new(jOut)+seglength_new(jOut)-1,i) = d_temp;
+                    pointer = pointer + seglength_new(jOut);
+                    end
                 end
             end
             set(out,'dataSet',d,'onsetPointer',onsetpointer_new,'segLength',seglength_new);
@@ -479,7 +486,7 @@ classdef segdat<nldat
             elseif DIM==2
                 sCat=S1;
                 sCat.dataSet=cat(2,S1.dataSet,S2.dataSet);
-                sCat.chanNames= cat(2,S1.chanNames, S2.chanNames)
+                sCat.chanNames= cat(2,S1.chanNames, S2.chanNames);
             else
                 error ('Dimensions >2 not support');
             end
