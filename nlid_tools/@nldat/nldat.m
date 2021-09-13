@@ -217,6 +217,15 @@ classdef nldat < nltop
             z=x;
         end
         
+        function y = circshift (x,n)
+            y=x;
+            xd=double(x);
+            yd=circshift(xd,n);
+            set(y,'dataSet',yd,'comment','shifted value', ...
+               'domainStart',x.domainStart+(n*x.domainIncr) );
+        end
+            
+        
         function z= cumtrapz (x)
             % nlid wrapper for cumtrapz
             % Z= cumtrapz (x)
