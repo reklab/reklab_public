@@ -309,7 +309,7 @@ classdef irf < kern
         
         function y = nlsim ( model, xin )
             % irf/nlsim Simulate response of IRF to input data set
-            % input options not fill defined as yet
+            % input options not fully defined as yet
             filter = model.dataSet;
             if isa(xin,'double'),
                 xin=nldat(xin);
@@ -364,7 +364,7 @@ classdef irf < kern
                 % Simulate a time-invariant response
                 %
             else
-                x=x(:,1,:);
+               % x=x(:,1,:);
                 [nsamp,nchan,nreal]=size(x);
                 [nsampFilter, nchanFilter,nrealFilter]= size(filter);
                 % check that realizations are reasonable
@@ -377,12 +377,11 @@ classdef irf < kern
                     for j=1:nRealMax,
                         jFilter=min(j,nrealFilter);
                         jInput=min(j,nreal);
-                        yout(:,i,j) = filter_ts(filter(:,i,jFilter), x(:,i,jInput), nSides, incr);
+                        yout(:,i,j) = filter_ts(filter(:,jFilter), x(:,i,jInput), nSides, incr);
                     end
                 end
                 y=xin;
                 set(y,'comment','filtered','dataSet',yout);
-                set (y,'chanNames',{'Predicted output'});
                 
             end
             
