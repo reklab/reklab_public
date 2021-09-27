@@ -43,8 +43,25 @@ classdef segdat<nldat
         end
          function I=irf(S,varargin)
             I=corirf(S,'irf',varargin{:}); 
-        end
+         end
         
+        
+         function e= segdat2eseq (S, domainStart)
+            e=eseq;
+            nSeg=segCount(S);
+            for iSeg=1:nSeg
+               curSeg=segGet(S,iSeg);
+               curDomain=domain(curSeg);
+               curIdx=idx4domain(domainStart, S.domainIncr, curDomain);
+               e(iSeg).domainStart=domainStart;
+               e(iSeg).domainIncr=S.domainIncr;
+               e(iSeg).startIdx=min(curIdx);
+               e(iSeg).endIdx=max(curIdx); 
+               e(iSeg).nSamp=length(curSeg);
+               e(iSeg).type='SEGDAT';
+            end
+         end
+            
         
         
         function C = corirf(S, fncType,varargin)
