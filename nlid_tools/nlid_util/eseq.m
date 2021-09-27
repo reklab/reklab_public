@@ -1,8 +1,7 @@
 classdef eseq
-    % UESEQ - event sequence oject
+    % eseq - class for manipulation of event sequences. 
     %
-    % This template includes the minimum set of functions required
-    % to define a System object with discrete state.
+    % 
     
     % Public, tunable properties
     properties
@@ -32,6 +31,7 @@ classdef eseq
             
             if isa(a,'categorical')
                 e=eseq.cseq2eseq(a, domainStart, domainIncr);
+          
             else
                 error ('Invlaid input type');
             end
@@ -62,6 +62,7 @@ classdef eseq
             end
         end
         
+       
         function d=domain(e)
             %  d=domain(eseq) return a cell array of domain values for an event sequence
             d={};
@@ -97,6 +98,8 @@ classdef eseq
                     else
                         if e1Cur.type==e2Cur.type
                             iInter=iInter+1;
+                            eInter(iInter,1).domainStart=e1.domainStart;
+                            eInter(iInter,1).domainIncr=e1.domainIncr;
                             eInter(iInter,1).startIdx=max(e1CurStart, e2CurStart);
                             eInter(iInter,1).endIdx=min(e1CurEnd,e2CurEnd);
                             eInter(iInter,1).type=e1Cur.type;
