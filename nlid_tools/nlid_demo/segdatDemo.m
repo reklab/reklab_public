@@ -110,6 +110,15 @@ ZS=segdat.randSeg(Z,200,500,50);
 NL=nlbl(ZS,'idMethod','subspace');
 [R,V,P]=nlid_resid(NL,ZS);
 
+%% LN BL Models 
+x=randn(5000,1);
+X=nldat(x,'domainIncr',.01);
+Z=nlid_sim('LN3',X);
+ZS=segdat.randSeg(Z,200,500,50);
+
+NL=lnbl(ZS,'idMethod','hk');
+[R,V,P]=nlid_resid(NL,ZS);
+
 
 
 %% Decimate
@@ -122,6 +131,31 @@ XS=segdat(X);
 Y=nldat(ones(1500,1)*2,'domainIncr',.001,'domainStart',2., 'chanNames',{'Y'});
 YS=segdat(Y);
 S=segdat.cat(1, XS,YS);
+
+%% Correlations 
+X=nldat(randn(20000,1));
+Y=smo(X,5);
+Z=cat(2,X,Y);
+ZS=segdat.randSeg(Z,200,500,50);
+CX=cor(ZS(:,1),'nSides',2,'nLags',16);
+CY=cor(ZS(:,2),'nSides',2,'nLags',16);
+CXY=cor(ZS,'nSides',2,'nLags',16);
+figure(1);
+subplot (3,1,1); plot (CX);
+subplot (3,1,2);plot(CY);
+subplot (3,1,3); plot (CXY);
+figure (2);
+CXXY=cor(ZS,'nSides',2, 'nLags',16,'kernOrder',2);
+plot(CXXY);
+
+%% IRF
+X=nldat(randn(20000,1));
+Y=smo(X,5);
+Z=cat(2,X,Y);
+ZS=segdat.randSeg(Z,200,500,50);
+I=irf(ZS,'nSides',2,'nLags',16);
+figure(1);
+plot(I);
 
 
 

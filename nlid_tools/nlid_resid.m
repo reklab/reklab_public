@@ -65,10 +65,9 @@ if isa(M,'polynom');
     y=z(:,nin+1);
 else
     x=z(:,1);
-    y=z(:,2);
-    
+    y=z(:,2);   
 end
-if isa(z,'segdat'),
+if isa(z,'segdat') & ~isa(M,'polynom'),
     yp=nlsim(M,z);
 else
 yp= nlsim(M,x); yp=yp(:,1);
@@ -104,6 +103,7 @@ if plotflag,
     plot (R);
     T= ('Residuals' );
     title(T);
+    streamer (M.comment);
 end
 
 

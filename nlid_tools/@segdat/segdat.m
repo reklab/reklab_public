@@ -38,6 +38,74 @@ classdef segdat<nldat
             delta=-S.domainIncr/2;
             N=find((domainVal-dStart)>=delta & (domainVal-dEnd)<=delta);
         end
+        function C=cor(S,varargin)
+            C=corirf(S,'cor',varargin{:}); 
+        end
+         function I=irf(S,varargin)
+            I=corirf(S,'irf',varargin{:}); 
+         end
+        
+        
+         function e= segdat2eseq (S, domainStart)
+            e=eseq;
+            nSeg=segCount(S);
+            for iSeg=1:nSeg
+               curSeg=segGet(S,iSeg);
+               curDomain=domain(curSeg);
+               curIdx=idx4domain(domainStart, S.domainIncr, curDomain);
+               e(iSeg).domainStart=domainStart;
+               e(iSeg).domainIncr=S.domainIncr;
+               e(iSeg).startIdx=min(curIdx);
+               e(iSeg).endIdx=max(curIdx); 
+               e(iSeg).nSamp=length(curSeg);
+               e(iSeg).type='SEGDAT';
+            end
+         end
+            
+        
+        
+        function C = corirf(S, fncType,varargin)
+            % segdatCor - overlaid correlation function for segdat objecs
+            %   Detailed explanation goes here
+            iLag=find(strcmp('nLags',varargin));
+            if isempty(iLag)
+                error('nlags must be specified for cor on segdat objects');
+            else
+                nLags=varargin{iLag+1};
+            end   
+            nSeg=segCount(S);
+            C={};
+            iCnt=0;
+            for iSeg=1:nSeg
+                curSeg=segGet(S,iSeg);
+                curLen=length(curSeg); 
+                if curLen>2*nLags+1
+                    switch fncType
+                        case 'cor'
+                            cTemp=cor(curSeg, varargin);
+                        case 'irf'
+                             cTemp=irf(curSeg, varargin);
+                        otherwise
+                            error(['Bad fncType':  fncType])
+                    end
+                            
+                iCnt=iCnt+1;
+                if iCnt==1,
+                    C=cTemp;
+                else
+                    C=C+cTemp;
+                end
+                else
+                    disp(['Segment ' num2str(iSeg) ' to0 short not included']);
+                end
+            end
+            if iCnt>0
+                C=C./iCnt;
+            set(C,'comment',fncType);
+            else
+            end
+        end
+        
         
         
         
@@ -144,9 +212,13 @@ classdef segdat<nldat
             name1=inputname(1);
             name2=inputname(2);
             n1=nldat(Z1);
+            iVALID1=find(~isnan(n1));
             d1=domain(n1);
+            d1=d1(iVALID1);
             n2=nldat(Z2);
+            iVALID2=find(~isnan(n2));
             d2=domain(n2);
+            d2=d2(iVALID2);
             iIntersect=ismember(d1,d2);
             if isempty(iIntersect),
                 Z=nldat;
@@ -227,22 +299,29 @@ classdef segdat<nldat
             %             elseif  any(~(mean(seglength')==seglength(:,1)'))
             %                 error('All data channels must have equal segment lengths')
             %             end
-            onsetpointer_new = zeros(size(onsetpointer));
-            seglength_new = zeros(size(onsetpointer));
+            %onsetpointer_new = zeros(size(onsetpointer));
+            %seglength_new = zeros(size(onsetpointer));
             endpointer = onsetpointer + seglength - 1;
             ts = get(data,'domainIncr');
             out = data;
             set(out,'domainIncr',ts*decimation_ratio);
             dataset = get(data,'dataSet');
-            d = zeros(ceil(sum(seglength(:,1))/decimation_ratio),nchan);
+            %d = zeros(ceil(sum(seglength(:,1))/decimation_ratio),nchan);
             for i = 1: nchan
                 pointer = 1;
-                for j = 1 : size(onsetpointer,1)
-                    d_temp = decimate(dataset(onsetpointer(j):endpointer(j),i),decimation_ratio);
-                    onsetpointer_new(j) = pointer;
-                    seglength_new(j) = length(d_temp);
-                    d(onsetpointer_new(j):onsetpointer_new(j)+seglength_new(j)-1) = d_temp;
-                    pointer = pointer + seglength_new(j);
+                jOut=0;
+                for j = 1 : length(onsetpointer)
+                    curSeg=dataset(onsetpointer(j):endpointer(j),i);
+                    if length(curSeg)<24,
+                        disp(['Segment ' num2str(j)  ' too short. Dropping']);
+                    else
+                      jOut=jOut+1;  
+                    d_temp = decimate(curSeg,decimation_ratio);
+                    onsetpointer_new(jOut) = pointer;
+                    seglength_new(jOut) = length(d_temp);
+                    d(onsetpointer_new(jOut):onsetpointer_new(jOut)+seglength_new(jOut)-1,i) = d_temp;
+                    pointer = pointer + seglength_new(jOut);
+                    end
                 end
             end
             set(out,'dataSet',d,'onsetPointer',onsetpointer_new,'segLength',seglength_new);
@@ -424,7 +503,7 @@ classdef segdat<nldat
             elseif DIM==2
                 sCat=S1;
                 sCat.dataSet=cat(2,S1.dataSet,S2.dataSet);
-                sCat.chanNames= cat(2,S1.chanNames, S2.chanNames)
+                sCat.chanNames= cat(2,S1.chanNames, S2.chanNames);
             else
                 error ('Dimensions >2 not support');
             end
@@ -537,7 +616,7 @@ classdef segdat<nldat
         end
         
         
-     
+        
     end
 end
 
