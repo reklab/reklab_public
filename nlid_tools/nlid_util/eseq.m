@@ -5,6 +5,7 @@ classdef eseq
     
     % Public, tunable properties
     properties
+        
         domainStart=0;
         domainIncr=1;
         startIdx=[];
@@ -87,7 +88,7 @@ classdef eseq
             iInter=0;
             for i1=1:n1,
                 e1Cur=e1(i1);
-                e1CurStart=e1Cur.startIdx
+                e1CurStart=e1Cur.startIdx;
                 e1CurEnd=e1Cur.endIdx;
                 for i2=1:n2,
                     e2Cur=e2(i2);
@@ -102,6 +103,7 @@ classdef eseq
                             eInter(iInter,1).domainIncr=e1.domainIncr;
                             eInter(iInter,1).startIdx=max(e1CurStart, e2CurStart);
                             eInter(iInter,1).endIdx=min(e1CurEnd,e2CurEnd);
+                            eInter(iInter,1).nSamp=  eInter(iInter,1).endIdx - eInter(iInter,1).startIdx +1
                             eInter(iInter,1).type=e1Cur.type;
                         end
                     end
