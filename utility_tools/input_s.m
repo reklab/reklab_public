@@ -29,7 +29,7 @@ while (~done),
     ans=temp;
   end
   if (nargin==3),
-    done = table_col_num(options,ans);
+    done = ismember(ans,options);
     if (~done),
       disp('Invalid. Options are:');
       disp(options);
