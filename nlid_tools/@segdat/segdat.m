@@ -205,6 +205,7 @@ classdef segdat<nldat
         
         function Z = intersect (Z1, Z2)
             % Determine intersection between two segdat objects
+            % Returns an empty variable if the intersection is emmptk
             domainIncr=Z1.domainIncr;
             if Z2.domainIncr ~= domainIncr
                 error('DomainIncrements are not the same');
@@ -220,8 +221,9 @@ classdef segdat<nldat
             d2=domain(n2);
             d2=d2(iVALID2);
             iIntersect=ismember(d1,d2);
-            if isempty(iIntersect),
-                Z=nldat;
+            if ~any(iIntersect),
+                Z=[];
+                return;
             end
             dCommon=d1(iIntersect);
             ptr1=idx4domain(n1.domainStart,domainIncr,dCommon);
@@ -254,7 +256,7 @@ classdef segdat<nldat
             N.dataSet=dataSet(sStart:sEnd,:);
             set(N, 'chanNames', S.chanNames,'chanUnits',S.chanNames, 'domainIncr',S.domainIncr, ...
                 'domainName',S.domainName);
-            N.comment=(['sSegment ' num2str(segNum) '  of segdat object']);
+            N.comment=(['Segment ' num2str(segNum) '  of ' S.comment ]);
             N.domainStart=S.domainStart(segNum);
         end
         
