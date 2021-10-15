@@ -196,7 +196,11 @@ classdef polynom < nltop
             coeff = mdot.polyCoef;
             order = length(coeff);
             % differentiate the power series term by term
+            if order==1,
+                coeff=0;
+            else
             coeff = coeff(2:order).*[1:order-1]';
+            end
             set(mdot,'polyCoef',coeff);
             % change back to the original polynomial type.
             mdot = nlident(mdot,'polyType',polyType);

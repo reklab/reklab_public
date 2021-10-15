@@ -86,20 +86,17 @@ Vt=['%VAF = ' num2str(chop(double(V),4))];
 
 if plotflag,
     
-    subplot (4,1,1);
-    plot(y);
-    title('Observed');
-    subplot (4,1,2);
-    plot (yp);
+    subplot (3,1,1);
+    plot(x);
+    title('Input');
+    subplot (3,1,2);
+    plot(y-mean(y));
+    h=line (yp-mean(yp));
+    set(h,'color','r'); 
+    title(['Output ' Vt]);
     
+    subplot (3,1,3);
     
-    title(['Predicted ' Vt]);
-    
-    subplot (4,1,3);
-    plot (y);
-    h=line(yp); set(h,'color','r'); 
-    title('Superimposed');
-    subplot (4,1,4);
     plot (R);
     T= ('Residuals' );
     title(T);
