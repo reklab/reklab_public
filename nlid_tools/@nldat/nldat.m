@@ -555,6 +555,26 @@ classdef nldat < nltop
             end
         end
         
+        function VQ=interp1(Y,newDomain, method)
+            % nlid wrapper for interp1 function
+            % Y - original daa set
+            % new Domain - domain values for interpoated data
+            % method - see matlab help for details of options
+            % VQ - interpolate values
+           if nargin <3
+               method='linear';
+           end
+           newDomain=double(newDomain(:));
+           x=domain(Y);
+           v=double(Y);
+           vq=interp1(x,v,newDomain, method);
+           VQ=Y;
+           VQ.dataSet=vq;
+           VQ.domainValues=newDomain;
+           VQ.comment='Interpolated values';       
+        end
+            
+        
         
         function y = isnan (x);
             y=nldat(x);
