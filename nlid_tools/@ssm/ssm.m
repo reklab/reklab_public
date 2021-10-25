@@ -19,14 +19,14 @@ classdef ssm<nltop
                 'paramHelp','State-Space matrix A', ...
                 'paramType','number');
             S.parameterSet(5)=param('paramName','idMethod','paramDefault','PI', ...
-                'paramHelp','Subspace id Method', ...
-                'paramType','string');
+                'paramHelp','Subspace id Method (PI/PO) ', ...
+                'paramType','select','paramLimits', {'PI' 'PO' } );
             S.parameterSet(6)=param('paramName','order','paramDefault',2, ...
                 'paramType','number',  ...
                 'paramHelp','System orde');
 
             S.parameterSet(7)=param('paramName','orderSelect','paramDefault','manual', ...
-                'paramType','select', 'paramLimits',{'manual' 'largest-gap' 'fixed'}, ...
+                'paramType','select', 'paramLimits',{'manual' 'largest-gap' 'preset'}, ...
                 'paramHelp','Methods for order seletion');
             S.parameterSet(8)=param('paramName','hankleSize','paramDefault',20, ...
                 'paramHelp','Size of hankle matrix (> system order)', ...
@@ -158,12 +158,18 @@ classdef ssm<nltop
                         y = get(out,'dataSet');
                         switch upper(idMethod)
                             case 'PI'
+                                % extract the column space using the i past input moesp algorithm
+                                %which can be used for the output error identification problem. 
                                 [Sn,R] = dordpi(x,y,hankleSize);
-                                if ~strcmp(orderSelect,'fixed'),
+                                if ~strcmp(orderSelect,'preset'),
                                     order = orderselect(Sn,orderSelect);
                                 end
                                 [A,C]  =  destac(R,order);
                                 [B,D] =  destbd(x,y,A,C);
+                                if any(isnan(B)) | any(isnan(D))
+                                set(S,'comment','ID failed', 'order',-1) % Return an empty value if ID failed. 
+                                    return;
+                                end
                                 set(S,'A',A,'B',B,'C',C,'D',D,'order',order);
                                 if get(S,'displayFlag') == 1
                                     predicted_output = nlsim(S,in);
@@ -171,12 +177,20 @@ classdef ssm<nltop
                                     plot(cat(2,out,predicted_output),'plotmode','super');
                                 end
                             case 'PO'
-                                [Sn,R] = dordpo(x,y,hankleSize);
-                                if ~strcmp(orderSelect,'fixed')
+                                % extract the column space usibg the past output moesp algorithm  which can be 
+                                % used for the innovations model identification  problem. 
+                               [Sn,R] = dordpo(x,y,hankleSize);
+                                if ~strcmp(orderSelect,'preset')
                                   order = orderselect(Sn,orderSelect);
                                 end
                                 [A,C]  =  destac(R,order);
                                 [B,D] =  destbd(x,y,A,C);
+                                if isempty (B)
+                                    B=0;
+                                end
+                                if isempty (D)
+                                    D=0;
+                                end
                                 set(S,'A',A,'B',B,'C',C,'D',D,'order',order);
                                 if get(S,'displayFlag') == 1
                                     predicted_output = nlsim(S,in);
