@@ -1,7 +1,7 @@
 classdef eseq
-    % eseq - class for manipulation of event sequences. 
+    % eseq - class for manipulation of event sequences.
     %
-    % 
+    %
     
     % Public, tunable properties
     properties
@@ -19,7 +19,7 @@ classdef eseq
     
     
     methods
-        function e = eseq(a, domainStart,domainIncr)
+        function e = eseq(a, domainStart,domainIncr, eventCat)
             if nargin==0
                 return
             end
@@ -32,7 +32,9 @@ classdef eseq
             
             if isa(a,'categorical')
                 e=eseq.cseq2eseq(a, domainStart, domainIncr);
-          
+            elseif isa(a,'double')
+                e=eseq.idx2eseq(a, domainStart,domainIncr, eventCat);
+                
             else
                 error ('Invlaid input type');
             end
@@ -63,7 +65,7 @@ classdef eseq
             end
         end
         
-       
+        
         function d=domain(e)
             %  d=domain(eseq) return a cell array of domain values for an event sequence
             d={};
@@ -76,6 +78,24 @@ classdef eseq
             end
         end
         
+        function  eOut=events4epoch ( e, epochStart, epochEnd, overlapFlag, minOverlapLen)
+            startIdx=[e.startIdx];
+            endIdx=[e.endIdx];
+            domainStart=[e.domainStart];
+            domainIncr=[e.domainIncr];
+            startTime=domainStart +(startIdx-1).*domainIncr;
+            endTime=domainStart +(endIdx-1).*domainIncr;
+            if ~overlapFlag
+            i= find(startTime>= epochStart & endTime <= epochEnd);
+            else
+                i= (startTime>= epochStart & endTime <= epochEnd) | ...
+                    (startTime<epochStart & (endTime-epochStart)>=minOverlapLen) | ...
+                    (endTime>epochEnd & (epochEnd-startTime)>=minOverlapLen) | ...
+                    (startTime < epochStart & endTime > epochEnd);                
+            end
+            eOut=e(i);
+        end
+
         function eInter = intersect (e1,e2);
             % return events where e1 and e2  are of the same type and intersect
             % assumes that e1 and e2 are in increaeing time and msut have
@@ -195,6 +215,43 @@ classdef eseq
                 event(nEvent+1).nSamp=event(nEvent+1).endIdx-event(nEvent+1).startIdx+1;
                 event=event';
                 
+                
+            end
+        end
+        
+        function event = idx2eseq ( idx, domainStart, domainIncr, eventCat )
+            % idx - nx2 mstric containing start and stop indices for each
+            % event
+            % domainStart
+            % domainIncr
+            % eventCat - category of event.
+            
+            [nRow,nCol]=size(idx);
+            if nCol ~= 2
+                error ('idx must have two columns');
+            end
+            if iscell(eventCat)
+                eventCat=categorical(eventCat);
+            elseif ~iscategorical(eventCat)
+                error('eventCat must be either cstegorical or a cell array');
+            end
+            [nRowCat, nColCat]=size(eventCat)
+            if ~ (nRowCat==1 | nRowCat ==nRow);
+                error ('eventCst must be a singleton or have the same number of rows as idx');
+            end
+            event=eseq;
+            for i=1:nRow,
+                event(i).domainStart=domainStart;
+                event(i).domainIncr=domainIncr;
+                event(i).startIdx=idx(i,1);
+                event(i).endIdx=idx(i,2);
+                if nRowCat==1
+                    currentCat=eventCat;
+                else
+                    currentCat=eventCat(i);
+                end
+                event(i).type=categorical(currentCat);
+                event(i).nSamp=idx(i,2)-idx(i,1)+1;
                 
             end
         end
