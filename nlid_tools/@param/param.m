@@ -88,7 +88,7 @@ classdef param
                 switch lower(ltype)
                     case 'number'
                          disp(['paramValue:' num2str(P(i).paramValue)]); 
-                          disp(['paramDefault:' num2str(P(i).paramDefault)]); 
+                        disp(['paramDefault:' num2str(P(i).paramDefault)]); 
                         llim = num2str(limits(1));
                         ulim = num2str(limits(2));
                         disp(['paramLimits: [ ' llim pad ulim ' ]']);

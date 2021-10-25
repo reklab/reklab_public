@@ -39,7 +39,7 @@ function system= hammer_subspace (z,N)
 ps=N.parameterSet;
 assign(ps);
 p=N.elements{1,1};
-maxOrderNLE=p.polyOrderMax
+maxOrderNLE=p.polyOrderMax;
 it = 1000; % Maximum number of iterations 
 %z = z - mean(z);
 ts = get(z,'domainIncr');
@@ -169,7 +169,7 @@ static_nl = alpha;
 system = nlbl;
 set(system,'comment','NL System identified using subspace method ', ...
     'elements',{static_nl,system_ss},'idMethod','subspace', ...
-    'orderLE', n);
+    'orderLE', n,'orderSelectMethodLE',orderSelectMethodLE);
 end
 end
 function [d_x] = del(x,nDelay)
