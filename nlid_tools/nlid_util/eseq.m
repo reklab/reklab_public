@@ -220,7 +220,7 @@ classdef eseq
         end
         
         function event = idx2eseq ( idx, domainStart, domainIncr, eventCat )
-            % idx - nx2 mstric containing start and stop indices for each
+            % idx - nx2 mstrix containing start and stop indices for each
             % event
             % domainStart
             % domainIncr
@@ -235,7 +235,7 @@ classdef eseq
             elseif ~iscategorical(eventCat)
                 error('eventCat must be either cstegorical or a cell array');
             end
-            [nRowCat, nColCat]=size(eventCat)
+            [nRowCat, nColCat]=size(eventCat);
             if ~ (nRowCat==1 | nRowCat ==nRow);
                 error ('eventCst must be a singleton or have the same number of rows as idx');
             end
