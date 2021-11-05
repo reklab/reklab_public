@@ -130,6 +130,31 @@ classdef eseq
                 end
             end
         end
+        
+        function nOut= nldat4eseq ( E, N)
+           %  N = nldat4eseq ( E, N)
+           % E - event sequence arrau
+           % nldat or segdat object
+           % Returns a cell array of nldat objects one for each event in E.
+           % Each nldat object containts the data from N correspond to the
+           % event.
+           if isa(N,'segdat'),
+               N=nldat(N);
+           end
+           nOut={};
+           eDomain=domain(E); 
+           nEvent=length(E);
+           for iEvent=1:nEvent,
+               curDomain=eDomain{iEvent};
+               idx=idx4domain(N.domainStart, N.domainIncr, curDomain);
+               curOut= N(idx,:);
+               nOut{iEvent}=curOut;              
+           end
+           
+      
+        end
+        
+            
         function h=line(e)
             [c,d]=cseq(e);
             line(d,c);
