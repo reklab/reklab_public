@@ -170,7 +170,7 @@ classdef nlbl < nlm
             hi=cumsum(h)*h.domainIncr;
             gain=double(hi(end));
             if abs(gain)<.01,
-                warning('SS Gain is low - may not be highpass');
+                disp('nlbl.normGainLE: SS Gain is low - system may not be lowpass');
                 gain =0.01*sign(gain);
             end
             m=m.*gain;
