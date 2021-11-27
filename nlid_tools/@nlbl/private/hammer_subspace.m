@@ -8,13 +8,7 @@ function system= hammer_subspace (z,N)
 %       z is an nldat objects containing the input-output data
 %
 %
-% The available options (and their default values) are:
-%          'nLagLE' (16):                  length of linear component IRF in samples
-%          'maxOrderNLE' (12):             maximum order for nonlinearity
-%          'nHankle' (20):                 Size of hankle matrix; must be larger than the linear system order
-%          'threshSSE:  Threshold on SSE for terminitiaon of the iterative search
-%          'orderSelectMethod' ('manual'): Method for order selection; can be manual or auto
-%          'nDelayInput' (0):              Input delay (samples)
+% see nlbl comments for parameters 
 %
 % See
 % [1] Jalaleddini, K., and Kearney, R.E., Subspace Identification of SISO Hammerstein Systems:
@@ -39,12 +33,14 @@ function system= hammer_subspace (z,N)
 ps=N.parameterSet;
 assign(ps);
 p=N.elements{1,1};
+LE=N.elements{1,2};
 maxOrderNLE=p.polyOrderMax;
 it = 1000; % Maximum number of iterations 
 %z = z - mean(z);
 ts = get(z,'domainIncr');
 input = z(:,1);
 input = input.dataSet;
+nDelayInput=LE.nDelayInput;
 input = del(input,nDelayInput);
 output = z(:,2);
 %Normalizing input for Tchebychev expansion
@@ -54,29 +50,31 @@ un = (input - avg)*2/rng;
 %u_r is the Tchebychev expansion of input
 u_r = multi_tcheb(un,maxOrderNLE-1);
 %% Estimate the extended observability matrix for u_r as the input and output
-[S, R] = dordpi(u_r,output.dataSet,hankleSize);
+[S, R] = dordpi(u_r,output.dataSet,LE.hankleSize);
 %Selecting the order of the linear system
-if strcmp('preset',orderSelectMethodLE),
-    n = orderLE;
+if strcmp('preset',LE.orderSelect),
+    n = LE.order;
 else
-n = orderselect(S,orderSelectMethodLE);
+n = orderselect(S,LE.orderSelect);
 end
 %% Estimate the A and C matrix from extended observability matrix
 [AT, CT] = destac(R,n);
 %Return if the system poles are outside of the unit circle
 if ~isempty(find(abs(eig(AT))>1, 1))
-    disp('Identified System is unstable. Function returns void matrices...')
-    static_nl = polynom;
-    system = nlbl;
-    system_ss = ssm;
-    set(system,'elements',{static_nl,system_ss},'idMethod','subspace');
+    disp('Identified System is unstable. Function returns empty model...')
+%     static_nl = polynom;
+%     system = nlbl;
+%     system_ss = ssm;
+%     set(system,'elements',{static_nl,system_ss},'idMethod','subspace');
+system=[];
     return
 elseif n==0
-    disp('Zero-order system. Function returns void matrices...')
-    static_nl = polynom;
-    system = nlbl;
-    system_ss = ssm;
-    set(system,'elements',{static_nl,system_ss},'idMethod','subspace');
+    disp('Zero-order system. Function returns empty model matrices...')
+%     static_nl = polynom;
+%     system = nlbl;
+%     system_ss = ssm;
+%     set(system,'elements',{static_nl,system_ss},'idMethod','subspace');
+system=[];
     return
 else
 %% Estimate Phi using dcalcphi from SMI toolbox
@@ -158,18 +156,19 @@ newMin = min(input);
 newMax = max(input);
 newMean = mean(input);
 newStd = std(input);
-alpha = polynom('polyCoef',alpha,'polyType','tcheb',...
+NLE = polynom('polyCoef',alpha,'polyType','tcheb',...
     'comment','Static Nonlinearity','polyRange',[newMin;newMax],...
-    'polyMean',newMean,'polyStd',newStd);
+    'polyMean',newMean,'polyStd',newStd, ...
+    'polyOrderSelectMode',p.polyOrderSelectMode,'polyOrderMax',p.polyOrderMax);
 %Constrcut ssm object for the linear system
 system_ss = ssm;
-set(system_ss,'A',AT,'B',BT,'C',CT,'D',DT,'domainIncr',ts,'nDelayInput',nDelayInput);
+set(system_ss,'A',AT,'B',BT,'C',CT,'D',DT,'domainIncr',ts,'nDelayInput',nDelayInput,'orderSelect',LE.orderSelect,...
+    'hankleSize',LE.hankleSize, 'idMethod', LE.idMethod);
 %Concatenate the polynom and IRF objects to construct the estimated Hammerstein system
-static_nl = alpha;
+static_nl = NLE;
 system = nlbl;
 set(system,'comment','NL System identified using subspace method ', ...
-    'elements',{static_nl,system_ss},'idMethod','subspace', ...
-    'orderLE', n,'orderSelectMethodLE',orderSelectMethodLE);
+    'elements',{static_nl,system_ss},'idMethod','subspace');
 end
 end
 function [d_x] = del(x,nDelay)
