@@ -1,4 +1,4 @@
-function  nldatDemo( X )
+nfunction  nldatDemo( X )
 % nldatDemo -  demonstrate various methods for nldat. 
 %   Detailed explanation goes here
 figure(1); clf
@@ -47,8 +47,21 @@ plot (X(100:200,1,1))
 plot (Y(:,1,1))
 X1=X;
 X1(100:200)=ones(101,1); plot(X1)
-
+%% var - variance
 var(X);
 Z=cat(2,X,X);
 vaf(X,X);
-end
+
+%% Interpolation
+ x = 0:10; v = sin(x); xq = 0:.25:10;
+ vq = interp1(x,v,xq); 
+ V=nldat(v');
+ set(V,'domainValues',x');
+ VQ=interp1(V,xq);
+ figure(1); clf
+ h=line(V); set(h,'LineStyle','none','Color','r','Marker','o');
+ h=line(VQ);
+ legend ('Original' ,'Interpolated');
+ 
+ 
+ 
