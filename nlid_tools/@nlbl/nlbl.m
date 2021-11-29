@@ -29,27 +29,32 @@ classdef nlbl < nlm
     %   - normCoefLE. See help on these merthods for details. 
     %
     % Paramters are:
-    %   nLagLE - number of lags in the linear element LE, when described by
-    %          an IRF
-    %   maxOrderNLE - maximum order of polynomial nonlienar element 
+    %  
     %   threshNSE - threshold of the normalized squared errror for
     %            convergence
     %   displayFlag - display intermediate results
-    %
+    % Parameters of the nonlinear element are set in the first element
+    %  polyType 
+    % ployOrderSelectMode: auto/full/manual]
+    % polyOrderMax - 
+    % 
     % Additional parameters for 'sls' method controlling search 
     %    nIterMax - Maximum number of iterations
     %   accel :ridge multiplied by accell after successful update
     %   decel  :ridge multipled by decdel devel after unsuccessful update
     %   delta: initial size of ridge added to Hessian
     %
-    % Additional parameters for 'subsapce method' 
-     %  hankleSize: Size of hankle matrix (> linear system order)
-    %   orderSelectMethodLE :Method for selection of order of linear element
-    %       preset - use value of orderLE
+    % Additional parameters for 'subspace method'  These must be set for
+    % the linear element of the model. 
+     %  idMethod : PI  or ?
+     %  order :Order of linear subsystemn
+    %   orderSelect: :Method for selection of order of linear element
+    %       preset - use value of order
     %       manual - interactive manual selection
     %       largest-gap - auotmatic sletion 
-    %   orderLE :Order of linear subsystemn
+    %  hankleSize: Size of hankle matrix (> linear system order)
     %   Delay Input:number of samples of delay between input and output 
+    %
     
     
     
@@ -145,6 +150,7 @@ classdef nlbl < nlm
                                 nl = hammer_subspace_short_segment(z,nl);
                             case 'nldat'
                                 nl = hammer_subspace(z,nl);
+                               
                         end 
                     otherwise
                         disp (['Method ' m ' not defined for nlbl']);
@@ -152,7 +158,9 @@ classdef nlbl < nlm
             else
                 error('conversions to models of class nlbl not yet implemented');
             end
+             if ~isempty(nl)
             nl=normCoefNLE(nl);
+             end
         end
 
         function nlmtst(N)
@@ -170,7 +178,7 @@ classdef nlbl < nlm
             hi=cumsum(h)*h.domainIncr;
             gain=double(hi(end));
             if abs(gain)<.01,
-                warning('SS Gain is low - may not be highpass');
+                disp('nlbl.normGainLE: SS Gain is low - system may not be lowpass');
                 gain =0.01*sign(gain);
             end
             m=m.*gain;
@@ -295,30 +303,32 @@ end
                          'paramLimits', [0 inf], ...
                         'paramHelp','initial size of ridge added to Hessian');
                 case 'subspace'
-                     ps(4)=param('paramName','hankleSize',...
-                        'paramDefault',20, ...
-                         'paramLimits', [1 inf], ...
-                        'paramHelp','Size of hankle matrix (> linear system order)');
-                    ps(5)=param('paramName','orderSelectMethodLE',...
-                        'paramDefault','manual', ...
-                        'paramType','select', ...
-                        'paramLimits',{'manual' 'largest-gap' 'preset'}, ...
-                        'paramHelp','Method for selection of order of linear element');
-                    ps(6)=param('paramName','orderLE',...
-                        'paramDefault',2, ...
-                        'paramType','number', ...
-                        'paramLimits',[ 0 inf ], ...
-                        'paramHelp','Order of linear subsystem');
-                    ps(7)=param('paramName','nDelayInput', ...
-                        'paramDefault',0, ...
-                         'paramLimits', [1 inf], ...
-                        'paramHelp','number of samples of delay ');
-                    ps(8)=param('paramName','maxOrderNLE', ...
-                        'paramDefault',12, ...
-                         'paramLimits', [1 20 ], ...
-                        'paramHelp','Maximum order for nonlinearity');
+                    ps=ps(1:3);
+                    sys.elements{1,2}=ssm;
+%                      ps(4)=param('paramName','hankleSize',...
+%                         'paramDefault',20, ...
+%                          'paramLimits', [1 inf], ...
+%                         'paramHelp','Size of hankle matrix (> linear system order)');
+%                     ps(5)=param('paramName','orderSelectMethodLE',...
+%                         'paramDefault','manual', ...
+%                         'paramType','select', ...
+%                         'paramLimits',{'manual' 'largest-gap' 'preset'}, ...
+%                         'paramHelp','Method for selection of order of linear element');
+%                     ps(6)=param('paramName','orderLE',...
+%                         'paramDefault',2, ...
+%                         'paramType','number', ...
+%                         'paramLimits',[ 0 inf ], ...
+%                         'paramHelp','Order of linear subsystem');
+%                     ps(7)=param('paramName','nDelayInput', ...
+%                         'paramDefault',0, ...
+%                          'paramLimits', [1 inf], ...
+%                         'paramHelp','number of samples of delay ');
+%                     ps(8)=param('paramName','maxOrderNLE', ...
+%                         'paramDefault',12, ...
+%                          'paramLimits', [1 20 ], ...
+%                         'paramHelp','Maximum order for nonlinearity');
                 otherwise
-                    disp(['specified value of parameter idMethod is not defined:' newMethod]);
+s                    disp(['specified value of parameter idMethod is not defined:' newMethod]);
                     disp(['Valid options are:' methodList]);
                     error ('Bad option value');
             end

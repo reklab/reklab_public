@@ -47,6 +47,8 @@ classdef segdat<nldat
         
         
          function e= segdat2eseq (S, domainStart)
+             % e= segdat2eseq (S, domainStart)
+             % domainstart for sequence data (seconds); 
             e=eseq;
             nSeg=segCount(S);
             for iSeg=1:nSeg
