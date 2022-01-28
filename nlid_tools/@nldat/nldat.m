@@ -144,7 +144,7 @@ classdef nldat < nltop
         
         function nOut = convertDomainUnit (nIn, conversionType)
             %nOut = convertDomainUnit (nIn, conversionType) - convert domain units
-            % conversionType = {sec2min sec2hour }
+            % conversionType = {seconds2minutes seconds2houra .... }
             %   Detailed explanation goes here
             nOut=nIn;
             switch lower(conversionType)
@@ -248,15 +248,14 @@ classdef nldat < nltop
         end
         
         function [d_x] = delay(x,nDelay)
-            %  del - delay the signal by n samples setting initial values to zero
+            %  del - delay the signal by doing a circu;lar shif pg  n samples 
             % x is the input signal
             % nDelay - dealy in samples
             d_x=x;
-            [nSamp,nChan] = size(double(x));
-            xStart=nldat(zeros(nDelay,nChan));
-            xTemp=double(cat(1,xStart,x));
-            xTemp=xTemp(1:nSamp,:);
-            set(d_x,'dataSet',double(xTemp));
+            
+            xTemp=x.dataSet;
+            xTemp=circshift(xTemp,nDelay);
+            set(d_x,'dataSet',double(xTemp),'comment', 'Delayed');
         end
         
         
