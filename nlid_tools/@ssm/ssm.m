@@ -69,6 +69,16 @@ classdef ssm<nltop
             i = impulse(sys_ss,time);
             set(I,'dataSet',i,'domainIncr',ts);
         end
+        
+        function SS = step(S)
+            % Compute the step respnse of a ssm model
+            sTemp=ss(S);
+            stepR=step(sTemp);
+            domainIncr=get(S,'domainIncr');
+            SS=nldat(stepR,'domainIncr',domainIncr,'comment','Step response of ssm');
+        end
+        
+            
         function F = fresp(S)
             % Convert an SSM to fresp
             F = fresp;
@@ -104,6 +114,18 @@ classdef ssm<nltop
             set(I,'dataSet',i,'domainIncr',ts,'comment',['IRF Representation of ',get(S,'comment')]);
             plot(I);
             
+        end
+        
+         function SS=ss(S)
+             % convert an ssm oject to a ss object. 
+            matrix_a = get(S,'A');
+            matrix_b = get(S,'B');
+            matrix_c = get(S,'C');
+            matrix_d = get(S,'D');
+            delay = get(S,'nDelayInput');
+            ts = get(S,'domainIncr');
+            SS = ss(matrix_a,matrix_b,matrix_c,matrix_d,ts,'InputDelay',delay);
+           
         end
         function out = nlsim(S,z)
             [~,nchan,~]=size(z);
