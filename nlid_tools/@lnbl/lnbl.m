@@ -66,6 +66,12 @@ classdef lnbl < nlm
             if nargin > 2
                 set (bl,varargin{:});
             end
+            if bl.inputDelay ~=0
+                x=z(:,1);
+                xd=delay(x,bl.inputDelay);
+                z(:,1)=xd;
+            end
+            
             if isa(z,'nldat') | isa(z,'double')
                 if isa(z,'nldat')
                     Ts=z.domainIncr;
