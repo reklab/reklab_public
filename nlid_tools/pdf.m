@@ -5,6 +5,8 @@ classdef pdf  < nldat
         parameterSet=param;
     end
     
+    
+    
     methods
         function sys = pdf  (a,varargin)
             % Add object  specific parameters
@@ -22,7 +24,7 @@ classdef pdf  < nldat
             sys.comment='PDF ';
             if nargin==0;
                 return
-            elseif nargin==1,
+            elpathseif nargin==1,
                 sys=nlmkobj(sys,a);
             elseif isa(a,'pdf')
                 sys=nlmkobj(a,varargin{:});
@@ -42,7 +44,7 @@ classdef pdf  < nldat
             end
             assign (p.parameterSet);
             tempComment=p.comment;
-            % PDF of data 
+            % PDF of data
             if isa(z,'nldat') | isa (z,'double'),
                 if isa(z,'double'),
                     z=nldat(z);
@@ -58,7 +60,7 @@ classdef pdf  < nldat
                     if xRange==0,
                         xRange=1;
                     end
-                        
+                    
                     delX=xRange/(nBins-1);
                     binCenters=(0:delX:xRange)+xMin;
                     p.domainValues=binCenters(:);
@@ -87,8 +89,8 @@ classdef pdf  < nldat
                 set (p,'comment',[ pdfType ' of ' char(z.chanNames)]);
                 set (p,'domainName',[ 'Value of ' char(z.chanNames)]);
                 set (p,'domainStart',min(dom), 'domainIncr',incr);;
-
-                % pdf of randvar objects 
+                
+                % pdf of randvar objects
             elseif isa(z,'randvar'),
                 pList= getParamValCell(z.parameterSet);
                 if isnan(p.domainValues),
@@ -100,11 +102,11 @@ classdef pdf  < nldat
                         xRange=.1;
                     end
                     delX=xRange/(nBins-1);
-                   xTemp=(0:delX:xRange)+xMin;
-                   p.domainValues=xTemp(:);
-     
+                    xTemp=(0:delX:xRange)+xMin;
+                    p.domainValues=xTemp(:);
+                    
                 end
-                     
+                
                 switch lower(pdfType)
                     case 'density'
                         switch lower(z.randvarType)
@@ -112,7 +114,7 @@ classdef pdf  < nldat
                                 Y = unifpdf (p.domainValues, pList{:});
                             case 'chisquare'
                                 Y = chi2pdf(p.domainValues, pList{:});
-                           case 't'
+                            case 't'
                                 Y = tpdf(p.domainValues, pList{:});
                             case 'f'
                                 Y = fpdf(p.domainValues, pList{:});
@@ -121,7 +123,7 @@ classdef pdf  < nldat
                                 Y = unidpdf(p.domainValues, n);
                             otherwise
                                 
-              
+                                
                                 PD = makedist(z.randvarType,pList{:});
                                 
                                 Y = pdf (PD, p.domainValues);
@@ -149,10 +151,12 @@ classdef pdf  < nldat
                 end
                 set(p,'dataSet',Y(:),'domainValues',p.domainValues(:));
             end
-    
+            
         end
         
-        
+        function nlmtst(sys)
+            pdfDemo;
+        end
         function plot ( C,varargin )
             % pdf/plotOverload plot function for PDF objects
             options={ {'help_flag' 0 'display help (0=No/1=yes)'} ...
@@ -201,63 +205,59 @@ classdef pdf  < nldat
             xlabel('Value')
             title(C.comment);
         end
+    end
+end
+    
+    function [dist,dom] = pdfnl(x,binCenters,option)
+    % compute the probabilty distibution of a signal
+    %	THE FUNCTION PDF COMPUTES THE PROBABILITY DISTRIBUTION FUNCTION
+    %	OF A GIVE CHANNEL X.
+    %
+    %	USAGE:	[dist,dom] = pdf(x,numbins,option)
+    %
+    %	x	: input vector
+    %	numbins: number of bins used in order to calculate the
+    %		  discrete PDF or normalized histogram.
+    %	option  - string determined result
+    %                     'freq' - frequency histogram Ni
+    %                     'prob' - probabilty function Ni/Ntotal
+    %                     'dens' - proabilty density Ni/Ntotal*BinWidth
+    %                     'cdf - cumulativeProbabilty'
+    
+    
+    % Copyright 1991-2003, Robert E Kearney and Eric J Perreault
+    % This file is part of the nlid toolbox, and is released under the GNU
+    % General Public License For details, see ../copying.txt and ../gpl.txt
+    
+    if (nargin==2),
+        option='probability';
+    end
+    %% Get rid of NANs
+    iNan=find(~isnan(x));
+    xtemp=x(iNan);
+    x=xtemp;
+    %
+    option=lower(option);
+    scale = length(x);
+    [dist,dom]=hist(x,binCenters);
+    dist=hist(x,dom);
+    if (strcmp(option,'frequency')),
+        dist = dist;
+    elseif(strcmp(option,'cdf')),
+        dist =cumsum( dist / scale);
+    elseif(strcmp(option,'probability')),
+        dist = dist / scale;
+    elseif(strcmp(option,'density')),
+        binwidth=min(unique(chop(diff(dom),5)));
+        if dist(1) ~=0 | dist(end)~=0,
+            % warning('first and last bins must be empty for density estimates');
+        end
+        dist = dist / (binwidth*scale);
+    else
+        error(['pdf - bad option:' option]);
         
-        
+    end
     end
     
     
     
-end
-function [dist,dom] = pdfnl(x,binCenters,option)
-% compute the probabilty distibution of a signal
-%	THE FUNCTION PDF COMPUTES THE PROBABILITY DISTRIBUTION FUNCTION
-%	OF A GIVE CHANNEL X.
-%
-%	USAGE:	[dist,dom] = pdf(x,numbins,option)
-%
-%	x	: input vector
-%	numbins: number of bins used in order to calculate the
-%		  discrete PDF or normalized histogram.
-%	option  - string determined result
-%                     'freq' - frequency histogram Ni
-%                     'prob' - probabilty function Ni/Ntotal
-%                     'dens' - proabilty density Ni/Ntotal*BinWidth
-%                     'cdf - cumulativeProbabilty'
-
-
-% Copyright 1991-2003, Robert E Kearney and Eric J Perreault
-% This file is part of the nlid toolbox, and is released under the GNU
-% General Public License For details, see ../copying.txt and ../gpl.txt
-
-if (nargin==2),
-    option='probability';
-end
-%% Get rid of NANs
-iNan=find(~isnan(x));
-xtemp=x(iNan);
-x=xtemp;
-%
-option=lower(option);
-scale = length(x);
-[dist,dom]=hist(x,binCenters);
-dist=hist(x,dom);
-if (strcmp(option,'frequency')),
-    dist = dist;
-elseif(strcmp(option,'cdf')),
-    dist =cumsum( dist / scale);
-elseif(strcmp(option,'probability')),
-    dist = dist / scale;
-elseif(strcmp(option,'density')),
-    binwidth=min(unique(chop(diff(dom),5)));
-    if dist(1) ~=0 | dist(end)~=0,
-        % warning('first and last bins must be empty for density estimates');
-    end
-    dist = dist / (binwidth*scale);
-else
-    error(['pdf - bad option:' option]);
-    
-end
-end
-
-
-

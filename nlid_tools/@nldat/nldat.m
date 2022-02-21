@@ -30,7 +30,7 @@ classdef nldat < nltop
                     warning('Row vector. Transposing');
                 end
                 d.dataSet=z;
-                [nsamp,nchan,nreal]=size(z);
+                [~,nchan,nreal]=size(z);
                 d.dataSize=size(z);
                 for i=1:nchan,
                     d.chanNames{i} = [inputname(1) int2str(i) ];
@@ -142,6 +142,44 @@ classdef nldat < nltop
             Z.dataSet=z;
         end
         
+        function nOut = convertDomainUnit (nIn, conversionType)
+            %nOut = convertDomainUnit (nIn, conversionType) - convert domain units
+            % conversionType = {sec2min sec2hour }
+            %   Detailed explanation goes here
+            nOut=nIn;
+            switch lower(conversionType)
+                case 'seconds2minutes'
+                    conversionFactor=60;
+                    nOut.domainName='minutes';
+                case 'seconds2hours'
+                    conversionFactor=60*60;
+                    nOut.domainName='hours';
+                case 'minutes2seconds'
+                    conversionFactor=1/60;
+                    nOut.domainName='seconds';
+                case 'minutes2hours'
+                    conversionFactor=1/60;
+                    nOut.domainName='hours';
+                case 'hours2seconds'
+                    conversionFactor=1/(60*60);
+                    nOut.domainName='seconds';
+                case 'hours2minutes'
+                    conversionFactor=1/(60);
+                    nOut.domainName='minutes';
+                otherwise
+                    error(['Undefined conversion:' conversionType]);
+                    
+            end
+            
+            nOut.domainIncr=nIn.domainIncr/conversionFactor;
+            nOut.domainStart=nOut.domainStart/conversionFactor;
+            if ~isnan(nOut.domainValues)
+                nOut.domainValues=nOuut.domainValues/conversionFactor;
+            end
+        end
+        
+        
+        
         function [c,p] = corrcoef (x)
             % nldat wrapper for corrcoef function
             [nSamp,nChan,nReal]=size(x);
@@ -178,6 +216,15 @@ classdef nldat < nltop
             set (x,'comment',[ Comment '; Chop']);
             z=x;
         end
+        
+        function y = circshift (x,n)
+            y=x;
+            xd=double(x);
+            yd=circshift(xd,n);
+            set(y,'dataSet',yd,'comment','shifted value', ...
+               'domainStart',x.domainStart+(n*x.domainIncr) );
+        end
+            
         
         function z= cumtrapz (x)
             % nlid wrapper for cumtrapz
@@ -310,6 +357,30 @@ classdef nldat < nltop
             end
             d=d(:);
         end
+        
+        function y= changeDomain (x,changeType)
+            % change domain from seconds to hours
+            y=x;
+            switch lower(changeType),
+                case 'seconds2hours'
+                    scaleFactor=1/(60*60);
+                    newName='Time (hours)';
+                    
+                case 'hours2seconds'
+                    scaleFactor=60*60;
+                    newName='Time (s)';
+                otherwise
+                    error (['Bad change type: ' changeType]);
+            end
+            
+            y.domainStart=x.domainStart.*scaleFactor;
+            y.domainIncr=x.domainIncr.*scaleFactor;
+            y.domainName=newName;
+        end
+            
+            
+            
+            
         
         
         function y=double(x)
@@ -484,6 +555,26 @@ classdef nldat < nltop
             end
         end
         
+        function VQ=interp1(Y,newDomain, method)
+            % nlid wrapper for interp1 function
+            % Y - original daa set
+            % new Domain - domain values for interpoated data
+            % method - see matlab help for details of options
+            % VQ - interpolate values
+           if nargin <3
+               method='linear';
+           end
+           newDomain=double(newDomain(:));
+           x=domain(Y);
+           v=double(Y);
+           vq=interp1(x,v,newDomain, method);
+           VQ=Y;
+           VQ.dataSet=vq;
+           VQ.domainValues=newDomain;
+           VQ.comment='Interpolated values';       
+        end
+            
+        
         
         function y = isnan (x);
             y=nldat(x);
@@ -509,16 +600,16 @@ classdef nldat < nltop
         function [apEn] = apEn(x)
             % Approximate Entropy of nldat object, each channel and
             % realization is treated independently.
-            % Input: 
+            % Input:
             %       - x: nldat object with the target signal
-            % Output: 
+            % Output:
             %       - apEn: approximate entropy of each channel and
             %       realization of the input signal
             %--------------------------------------------------------
             
             % Gets the number of channels and realizations of the input
             [~,nchan,nreal]=size(x);
-            % Allocates the ApEn matrix, one value per channel and realziation 
+            % Allocates the ApEn matrix, one value per channel and realziation
             apEn=nan(1,nchan,nreal);
             % Gets the range of the input
             x=double(x);
@@ -527,10 +618,10 @@ classdef nldat < nltop
             for i=1:nchan
                 for j=1:nreal
                     
-                    % Removes NaN samples 
+                    % Removes NaN samples
                     x_temp=x(:,i,j);
                     x_temp(isnan(x_temp))=[];
-
+                    
                     % Estimate ApEn
                     apEn(1,i,j)=approximateEntropy(x_temp);
                 end
@@ -714,8 +805,13 @@ classdef nldat < nltop
         
         function z = mtimes(x,y);
             % array multiply function for nldat variables;
-            x=nldat(x);
-            y=nldat(y);
+            if isnumeric(x)
+                x=nldat(x);
+            end
+            if isnumeric(y)
+                y=nldat(y);
+            end
+            
             sx=size(x);
             xchan=sx(2);
             sy= size(y);
@@ -874,6 +970,13 @@ classdef nldat < nltop
         end
         
         function z=times(x,y)
+            if isnumeric(x)
+                x=nldat(x);
+            end
+            if isnumeric(y),
+                y=nldat(y);
+            end
+            
             z=x;
             z.dataSet=x.dataSet.*y.dataSet;
             z.comment='x times y';
@@ -927,6 +1030,9 @@ classdef nldat < nltop
             end
             y.comment = [' RESHAPED ' x.comment];
         end
+        
+        
+        
         
         
         
@@ -1011,15 +1117,16 @@ classdef nldat < nltop
         
         function [nsamp,nchan,nreal]= size (d, DIM)
             % overloaded size function for nldatclass.
-            [nsamp,nchan,nreal]=size(d.dataSet);
+            xd=d.dataSet;
+            [nsamp,nchan,nreal]=size(xd);
             if nargout == 0 | nargout==1,
                 if nargin ==1,
                     nsamp=[ nsamp nchan nreal];
                 else
-                    nsamp=size(d.dataSet, DIM);
+                    nsamp=size(xd, DIM);
                 end
             elseif nargout ==2
-                [nsamp,nchan]=size(d.dataSet);
+                [nsamp,nchan]=size(xd);
             elseif nargout ==3
                 return
             end
@@ -1077,43 +1184,43 @@ classdef nldat < nltop
             optionList= { { 'window' [] 'window to divide the signal into sgements'} ...
                 {'noverlap' [] 'number of samples of overlap between sgements'} ...
                 {'nfft' [] 'numberof DFT points'} };
-            flag=arg_parse(optionList, varargin); 
+            flag=arg_parse(optionList, varargin);
             fSamp=1/N.domainIncr;
             [s,f,t,p,Fc,Tc]=spectrogram(N.dataSet,window,noverlap,nfft,fSamp);
-             [nrow,ncol]=size(s);
-             s1=reshape(s,nrow,1,ncol);
-             S=tvdat(s1);
-             S.realDomainValues=t;
-             S.domainValues=f;
-             S.domainName='Frequency (Hz)';
-             S.chanNames={'Fourier transform'}; 
-             if nargout>=1,
-              p1=reshape(p,nrow,1,ncol);
-             P=tvdat(p1);
-             P.realDomainValues=t;
-             P.domainValues=f;
-             P.domainName='Frequency (Hz)';
-             P.chanNames(1)={'Power spectrum'}; 
-             varargout{1}=P;                 
-             end
-             if nargout>=2,
-                 varargout{2}=Fc;
-             end
-             if nargout>=3,
-                 varargout{3}=Tc;  
-             end
+            [nrow,ncol]=size(s);
+            s1=reshape(s,nrow,1,ncol);
+            S=tvdat(s1);
+            S.realDomainValues=t;
+            S.domainValues=f;
+            S.domainName='Frequency (Hz)';
+            S.chanNames={'Fourier transform'};
+            if nargout>=1,
+                p1=reshape(p,nrow,1,ncol);
+                P=tvdat(p1);
+                P.realDomainValues=t;
+                P.domainValues=f;
+                P.domainName='Frequency (Hz)';
+                P.chanNames(1)={'Power spectrum'};
+                varargout{1}=P;
+            end
+            if nargout>=2,
+                varargout{2}=Fc;
+            end
+            if nargout>=3,
+                varargout{3}=Tc;
+            end
         end
         
         function S = spectLS(x, varargin)
             % Generates Lomb-Scargle spectrum periodogram for nldat object
-            % Input: 
+            % Input:
             %       - x: nldat object with the target signals, it can have
             %       multiple channels only if they have the same sampling
             %       rate and length.
-            % Output: 
+            % Output:
             %       - S: spect object with the spectrum of each channel and
             %       realization
-            % Options: 
+            % Options:
             %       - 'fmax': the maximum frequency for the estimation of
             %       the LS periodogram. If it is not specified, it will be
             %       defined automatically based on the Nyquist frequency
@@ -1165,9 +1272,9 @@ classdef nldat < nltop
             % Generates the spect object
             S=spect;
             % With the P matrix that contains the spectrum of each channel
-            % and each realization independently. 
+            % and each realization independently.
             S.dataSet=P;
-            % And the frequency domain of the spectrum. 
+            % And the frequency domain of the spectrum.
             S.domainValues=f;
             
             S.chanNames=chan;
@@ -1189,6 +1296,10 @@ classdef nldat < nltop
             
             
             if strcmp (S.type, '()')
+                if isa(A,'segdat') | isa(B,'segdat')
+                    error('subsassgn not yet implemented for segdat classs');
+                end
+                
                 B=nldat(B);
                 [nx(1),nx(2),nx(3)]=size(B.dataSet);
                 for i=1:3,
@@ -1226,11 +1337,13 @@ classdef nldat < nltop
         
         
         function out = subsref (N, S)
+            
             nTemp=N;
             for i=1:length(S),
                 if strcmp(S(i).type,'.'),
                     nTemp=get(nTemp,S(i).subs);
                 elseif strcmp(S(i).type,'()')
+                    
                     oDom=domain(nTemp);
                     d=nTemp.dataSet;
                     dTemp=builtin('subsref', d, S(i));
@@ -1253,10 +1366,9 @@ classdef nldat < nltop
                     end
                     %Fix for segdat
                     if isa(nTemp,'segdat')
-                        onsetpointer = get(nTemp,'onsetPointer');
-                        seglength = get(nTemp,'segLength');
-                        set(nTemp,'onsetPointer', onsetpointer (S(i).subs{2}));
-                        set(nTemp,'segLength' , seglength (S(i).subs{2}));
+                        if ~strcmp(S(i).subs(1),':')
+                            error('sample extraction is not imlemented for the segdata class');
+                        end
                     end
                 end
                 

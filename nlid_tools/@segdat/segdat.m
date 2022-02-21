@@ -17,20 +17,14 @@ classdef segdat<nldat
             if nargin==0;
                 return
             elseif isa(a,'double')
-                S.dataSet = a;
-                [nSamp,nChan]=size(a);
-                if nChan>1,
-                    error('segdat: Multiple channels not yet supported');
-                end
-                set(S,'onsetPointer',1);
-                set(S,'segLength',nSamp);
+                S=segdat.nl2seg(nldat(a),inputname(1));
                 if nargin > 1,
                     set (S,varargin{:});
                 end
             elseif isa(a,'segdat')
                 S = nlmkobj(a,varargin{:});
             elseif isa(a,'nldat')
-                S=nl2seg(a,inputname(1));
+                S=segdat.nl2seg(a,inputname(1));
             else
                 set (S,{a varargin{:}});
             end
@@ -41,80 +35,81 @@ classdef segdat<nldat
             % Return segment mumber associated with a domain Value
             dStart=S.domainStart;
             dEnd=domainEnd(S);
-            N=find(domainVal>=dStart & domainVal<=dEnd);
+            delta=-S.domainIncr/2;
+            N=find((domainVal-dStart)>=delta & (domainVal-dEnd)<=delta);
         end
+        function C=cor(S,varargin)
+            C=corirf(S,'cor',varargin{:}); 
+        end
+         function I=irf(S,varargin)
+            I=corirf(S,'irf',varargin{:}); 
+         end
         
         
-        function sCat = cat (S1,S2)
-            % Concatonate two segdat objects
-            domainIncr=S1.domainIncr;
-            d1=domain(S1);
-            s1Data=double(S1);
-            d2=domain(S2);
-            s2Data=double(S2);
-            catVector =categorical;
-            d2=domain(S2);
-            domainStart=min(min(d1),min(d2));
-            domainEnd=max(max(d1),max(d2));
-            
-            idxMax=idx4domain(domainStart, domainIncr, domainEnd);
-            domainVector=domainStart:domainIncr:domainEnd;
-            valueVector(:,1)=domainVector*0;
-            catVector(1:idxMax)='0';
-            idx1=idx4domain(domainStart, domainIncr, d1);
-            valueVector(idx1,1)=s1Data;
-            catVector(idx1)='1';
-            idx2=idx4domain(domainStart, domainIncr, d2);
-            valueVector(idx2,1)=s2Data;
-            catVector(idx2)='2';
-            idxIntersect=intersect(idx1,idx2);
-            if ~isempty(idxIntersect)
-                catVector(idxIntersect)='3';
+         function e= segdat2eseq (S, domainStart)
+             % e= segdat2eseq (S, domainStart)
+             % domainstart for sequence data (seconds); 
+            e=eseq;
+            nSeg=segCount(S);
+            for iSeg=1:nSeg
+               curSeg=segGet(S,iSeg);
+               curDomain=domain(curSeg);
+               curIdx=idx4domain(domainStart, S.domainIncr, curDomain);
+               e(iSeg).domainStart=domainStart;
+               e(iSeg).domainIncr=S.domainIncr;
+               e(iSeg).startIdx=min(curIdx);
+               e(iSeg).endIdx=max(curIdx); 
+               e(iSeg).nSamp=length(curSeg);
+               e(iSeg).type='SEGDAT';
             end
-            e=eseq(catVector);
+         end
             
-            eDomain=domain(e,domainStart,domainIncr);
-            % Generate concatonated segdat
-            segNum=0;
-            domainStart=[];
-            onsetPointer=[];
-            segInfo={};
-            segLen=[];
-            dataSet=[];
-     for i=1:length(e),
-                if e(i).type ~='0'
-                    segNum=segNum+1;                    
-                    domainStart(segNum)=domainVector(e(i).startIdx);
-                    iStart=e(i).startIdx;
-                    iEnd=e(i).endIdx;
-                    dataSet=cat(1, dataSet, valueVector(iStart:iEnd,1));
-                    segLen= [ segLen e(i).nSamp];
-                    eventStart=min(eDomain{i});
-                    if segNum==1
-                        onsetPointer(1)=1;
-                    else
-                        onsetPointer(segNum)=onsetPointer(segNum-1)+segLen(segNum-1);
+        
+        
+        function C = corirf(S, fncType,varargin)
+            % segdatCor - overlaid correlation function for segdat objecs
+            %   Detailed explanation goes here
+            iLag=find(strcmp('nLags',varargin));
+            if isempty(iLag)
+                error('nlags must be specified for cor on segdat objects');
+            else
+                nLags=varargin{iLag+1};
+            end   
+            nSeg=segCount(S);
+            C={};
+            iCnt=0;
+            for iSeg=1:nSeg
+                curSeg=segGet(S,iSeg);
+                curLen=length(curSeg); 
+                if curLen>2*nLags+1
+                    switch fncType
+                        case 'cor'
+                            cTemp=cor(curSeg, varargin);
+                        case 'irf'
+                             cTemp=irf(curSeg, varargin);
+                        otherwise
+                            error(['Bad fncType':  fncType])
                     end
-                    switch e(i).type
-                        case '1'                           
-                            curSegNum=seg4domain(S1,eventStart);
-                            segInfo{segNum}=S1.segInfo{curSegNum};
-                        case '2'
-                            curSegNum=seg4domain(S2,eventStart);
-                            segInfo{segNum}=S2.segInfo{curSegNum};
-                        case '3'
-                            curSegNum=seg4domain(S2,eventStart);
-                            segInfo{segNum}=S2.segInfo{curSegNum};
-                    end
+                            
+                iCnt=iCnt+1;
+                if iCnt==1,
+                    C=cTemp;
+                else
+                    C=C+cTemp;
+                end
+                else
+                    disp(['Segment ' num2str(iSeg) ' to0 short not included']);
                 end
             end
-
-            sCat=S1;
-            sCat.domainStart=domainStart;
-            sCat.dataSet=dataSet;
-            set(sCat,'onsetPointer',onsetPointer,'segInfo',segInfo);
-            set(sCat,'segLength',segLen);
+            if iCnt>0
+                C=C./iCnt;
+            set(C,'comment',fncType);
+            else
+            end
         end
+        
+        
+        
         
         
         function plot(S)
@@ -132,7 +127,8 @@ classdef segdat<nldat
                 end
                 
             else
-                plot(nldat(S))
+                sTmp=nldat(S);
+                plot(sTmp);
             end
         end
         
@@ -209,8 +205,9 @@ classdef segdat<nldat
         
         
         
-        function Z = segIntersect (Z1, Z2)
+        function Z = intersect (Z1, Z2)
             % Determine intersection between two segdat objects
+            % Returns an empty variable if the intersection is emmptk
             domainIncr=Z1.domainIncr;
             if Z2.domainIncr ~= domainIncr
                 error('DomainIncrements are not the same');
@@ -218,24 +215,24 @@ classdef segdat<nldat
             name1=inputname(1);
             name2=inputname(2);
             n1=nldat(Z1);
+            iVALID1=find(~isnan(n1));
             d1=domain(n1);
+            d1=d1(iVALID1);
             n2=nldat(Z2);
+            iVALID2=find(~isnan(n2));
             d2=domain(n2);
-            d=cat(1,d1,d2);
-            dMin=min(d);
-            dMax=max(d);
-            iMax=idx4domain(dMin, domainIncr, dMax);
-            zd=nan(iMax,1);
-            ptr1=idx4domain(dMin,domainIncr,d1);
-            zd(ptr1,:)=1;
-            ptr2=idx4domain(dMin,domainIncr,d2);
-            zd(ptr2,:)=2;
-            iOverlap=intersect(ptr1,ptr2);
-            comment=['segcat(' name1 ',' name2 ')'];
-            if ~isempty (iOverlap),
-                zd(iOverlap,:)=3;
+            d2=d2(iVALID2);
+            iIntersect=ismember(d1,d2);
+            if ~any(iIntersect),
+                Z=[];
+                return;
             end
-            Z=nldat (n1,'domainStart',dMin,'dataSet',zd );
+            dCommon=d1(iIntersect);
+            ptr1=idx4domain(n1.domainStart,domainIncr,dCommon);
+            ptr2=idx4domain(n2.domainStart,domainIncr,dCommon);
+            n1New=n1(ptr1);
+            n2New=n2(ptr2);
+            Z=cat(2,n1New,n2New);
         end
         
         
@@ -253,7 +250,7 @@ classdef segdat<nldat
             if (segNum>nSeg)
                 error('too many segments')
             end
-            dataSet=S.dataSet;
+            dataSet=double(S);
             segLen=get(S,'segLength');
             onsetPointer=get(S,'onsetPointer');
             sStart=onsetPointer(segNum);
@@ -261,7 +258,7 @@ classdef segdat<nldat
             N.dataSet=dataSet(sStart:sEnd,:);
             set(N, 'chanNames', S.chanNames,'chanUnits',S.chanNames, 'domainIncr',S.domainIncr, ...
                 'domainName',S.domainName);
-            N.comment=(['sSegment ' num2str(segNum) '  of segdat object']);
+            N.comment=(['Segment ' num2str(segNum) '  of ' S.comment ]);
             N.domainStart=S.domainStart(segNum);
         end
         
@@ -302,26 +299,33 @@ classdef segdat<nldat
             [~,nchan,~] =size(data);
             onsetpointer = get(data,'onsetPointer');
             seglength = get(data,'segLength');
-            if size(seglength,2)==1
-            elseif  any(~(mean(seglength')==seglength(:,1)'))
-                error('All data channels must have equal segment lengths')
-            end
-            onsetpointer_new = zeros(size(onsetpointer));
-            seglength_new = zeros(size(onsetpointer));
+            %             if size(seglength,2)==1
+            %             elseif  any(~(mean(seglength')==seglength(:,1)'))
+            %                 error('All data channels must have equal segment lengths')
+            %             end
+            %onsetpointer_new = zeros(size(onsetpointer));
+            %seglength_new = zeros(size(onsetpointer));
             endpointer = onsetpointer + seglength - 1;
             ts = get(data,'domainIncr');
             out = data;
             set(out,'domainIncr',ts*decimation_ratio);
             dataset = get(data,'dataSet');
-            d = zeros(ceil(sum(seglength(:,1))/decimation_ratio),nchan);
+            %d = zeros(ceil(sum(seglength(:,1))/decimation_ratio),nchan);
             for i = 1: nchan
                 pointer = 1;
-                for j = 1 : size(onsetpointer,1)
-                    d_temp = decimate(dataset(onsetpointer(j):endpointer(j),i),decimation_ratio);
-                    onsetpointer_new(j) = pointer;
-                    seglength_new(j) = length(d_temp);
-                    d(onsetpointer_new(j):onsetpointer_new(j)+seglength_new(j)-1) = d_temp;
-                    pointer = pointer + seglength_new(j);
+                jOut=0;
+                for j = 1 : length(onsetpointer)
+                    curSeg=dataset(onsetpointer(j):endpointer(j),i);
+                    if length(curSeg)<24,
+                        disp(['Segment ' num2str(j)  ' too short. Dropping']);
+                    else
+                      jOut=jOut+1;  
+                    d_temp = decimate(curSeg,decimation_ratio);
+                    onsetpointer_new(jOut) = pointer;
+                    seglength_new(jOut) = length(d_temp);
+                    d(onsetpointer_new(jOut):onsetpointer_new(jOut)+seglength_new(jOut)-1,i) = d_temp;
+                    pointer = pointer + seglength_new(jOut);
+                    end
                 end
             end
             set(out,'dataSet',d,'onsetPointer',onsetpointer_new,'segLength',seglength_new);
@@ -390,9 +394,9 @@ classdef segdat<nldat
             if (nchan1>1) || (nchan2>1)
                 error('VAF not supported for multiple channel data...')
             end
-            data1 = nldat(data1);
-            data2 = nldat(data2);
-            v = vaf(data1,data2);
+            d1 = nldat(data1.dataSet);
+            d2 = nldat(data2.dataSet);
+            v = vaf(d1,d2);
         end
         
         
@@ -412,70 +416,213 @@ classdef segdat<nldat
                 error('At least segment exceeds the data range')
             end
             %% Suppress checking for overlap since this is now OK
-%             for k = 1: nchan
-%                 for i = 1 : length(onsetpointer)
-%                     for j = 1 : length(onsetpointer)
-%                         if i == j
-%                             break;
-%                         elseif (onsetpointer(j)<=onsetpointer(i))&&(onsetpointer(i)<=endpointer(j))
-%                             % warning(['In channel ',num2str(k),', segment ',num2str(i),' & segment',num2str(j),' overlap.'])
-%                         end
-%                     end
-%                 end
-%                 
-%             end
+            %             for k = 1: nchan
+            %                 for i = 1 : length(onsetpointer)
+            %                     for j = 1 : length(onsetpointer)
+            %                         if i == j
+            %                             break;
+            %                         elseif (onsetpointer(j)<=onsetpointer(i))&&(onsetpointer(i)<=endpointer(j))
+            %                             % warning(['In channel ',num2str(k),', segment ',num2str(i),' & segment',num2str(j),' overlap.'])
+            %                         end
+            %                     end
+            %                 end
+            %
+            %             end
             
         end
         
+        
+        function sCat = cat (DIM,S1,S2)
+            
+            
+            if DIM==1,
+                % Concatonate two segdat objects
+                [nSamp,nChan,nReal]=size(S1);
+                domainIncr=S1.domainIncr;
+                d1=domain(S1);
+                s1Data=double(S1);
+                d2=domain(S2);
+                s2Data=double(S2);
+                catVector =categorical;
+                d2=domain(S2);
+                domainStart=min(min(d1),min(d2));
+                domainEnd=max(max(d1),max(d2));
+                % Handle overlapping segments
+                idxMax=idx4domain(domainStart, domainIncr, domainEnd);
+                domainVector=domainStart:domainIncr:domainEnd;
+                valueVector=zeros(length(domainVector),nChan);
+                catVector(1:idxMax)='0';  % Initialize to nothing
+                idx1=idx4domain(domainStart, domainIncr, d1); % s1 Values
+                valueVector(idx1,:)=s1Data;
+                catVector(idx1)='1';
+                idx2=idx4domain(domainStart, domainIncr, d2);  % S2 values
+                valueVector(idx2,:)=s2Data;
+                catVector(idx2)='2';
+                idxIntersect=intersect(idx1,idx2);
+                if ~isempty(idxIntersect)  % Interesction
+                    catVector(idxIntersect)='3';
+                end
+                e=eseq(catVector, domainStart,domainIncr); % Event sequences indicating what to output.
+                eDomain=domain(e);
+                % Generate concatonated segdat
+                segNum=0;
+                domainStart=[];
+                onsetPointer=[];
+                segInfo={};
+                segLen=[];
+                dataSet=[];
+                for i=1:length(e),
+                    if e(i).type ~='0'
+                        segNum=segNum+1;
+                        domainStart(segNum)=domainVector(e(i).startIdx);
+                        iStart=e(i).startIdx;
+                        iEnd=e(i).endIdx;
+                        dataSet=cat(1, dataSet, valueVector(iStart:iEnd,:));
+                        segLen= [ segLen e(i).nSamp];
+                        eventStart=min(eDomain{i});
+                        if segNum==1
+                            onsetPointer(1)=1;
+                        else
+                            onsetPointer(segNum)=onsetPointer(segNum-1)+segLen(segNum-1);
+                        end
+                        switch e(i).type
+                            case '1'
+                                curSegNum=seg4domain(S1,eventStart);
+                                segInfo{segNum}=S1.segInfo{curSegNum};
+                            case '2'
+                                curSegNum=seg4domain(S2,eventStart);
+                                segInfo{segNum}=S2.segInfo{curSegNum};
+                            case '3'
+                                curSegNum=seg4domain(S2,eventStart);
+                                segInfo{segNum}=S2.segInfo{curSegNum};
+                        end
+                    end
+                end
+                
+                sCat=S1;
+                sCat.domainStart=domainStart;
+                sCat.dataSet=dataSet;
+                set(sCat,'onsetPointer',onsetPointer,'segInfo',segInfo);
+                set(sCat,'segLength',segLen);
+            elseif DIM==2
+                sCat=S1;
+                sCat.dataSet=cat(2,S1.dataSet,S2.dataSet);
+                sCat.chanNames= cat(2,S1.chanNames, S2.chanNames);
+            else
+                error ('Dimensions >2 not support');
+            end
+        end
     end
     
-end
-
-function S=nl2seg(N, varName)
-% Convert an nldat object to a segdat using nans as segment separators;
-
-[nSamp,nChan,nReal]=size(N);
-if nChan>1,
-    error('segdat does not yet support mulitple channels');
-end
-dataSet=N.dataSet;
-% Find start and end points of datas
-segCnt=0;
-segStart=1;
-nLen=length(dataSet);
-% Find start and end of segments
-c=categorical;
-c(1:nLen)='good';
-iNan=find(isnan(dataSet));
-c(iNan)='nan';
-e=eseq(c);
-ne=length(e);
-seqCnt=0;
-segIno={};
-onsetPointer=0;
-newDataSet=[];
-nDomain=domain(N);
-newComment={};
-for ie=1:ne,
-    if e(ie).type=='good'
-        segCnt=segCnt+1;
-        domainStart(segCnt)=nDomain(e(ie).startIdx);
-        onsetPointer(segCnt)=length(newDataSet)+1;
-        segLength(segCnt)=e(ie).nSamp;
-        segInfo{segCnt}=[ varName num2str(segCnt)];
-        chanNames=N.chanNames;
-        t=chanNames{1};
+    
+    methods (Static)
         
-        newDataSet=cat(1,newDataSet, dataSet(e(ie).startIdx:e(ie).endIdx));
+        
+        function S=nl2seg(N, varName)
+            % Convert an nldat object to a segdat using nans as segment separators;
+            % S is empty if there is no valid data in N
+            
+            [nSamp,nChan,nReal]=size(N);
+            if nChan>1,
+                d=N.dataSet;
+                iNAN=find(isnan(d(:,1)));
+                for iChan=2:nChan
+                    jNAN=find(isnan(d(:,iChan)));
+                    if iNAN~=jNAN
+                        warning('Channels have different segmentation ');
+                    end
+                end
+            end
+            %% Generate data set for segment analysis
+            dN=domain(N);
+            dStart=min(dN);
+            dEnd=max(dN);
+            dIncr=N.domainIncr;
+            nSamp=1+round((dEnd-dStart)/N.domainIncr);
+            dataSet=nan(nSamp,nChan);
+            idx=idx4domain(dStart,N.domainIncr, dN);
+            dataSet(idx,:)=N.dataSet;
+            nDomain=[dStart:dIncr:dEnd];
+            % Find start and end points of data
+            segCnt=0;
+            segStart=1;
+            nLen=length(dataSet);
+            % Find start and end of segments
+            c=categorical;
+            c(1:nLen)='good';
+            iNan=find(isnan(dataSet(:,1)));
+            c(iNan)='nan';
+            e=eseq(c);
+            ne=length(e);
+            seqCnt=0;
+            segIno={};
+            onsetPointer=0;
+            newDataSet=[];
+            %nDomain=domain(N);
+            newComment={};
+            for ie=1:ne,
+                if e(ie).type=='good'
+                    segCnt=segCnt+1;
+                    domainStart(segCnt)=nDomain(e(ie).startIdx);
+                    onsetPointer(segCnt)=length(newDataSet)+1;
+                    segLength(segCnt)=e(ie).nSamp;
+                    segInfo{segCnt}=[ varName num2str(segCnt)];
+                    chanNames=N.chanNames;
+                    t=chanNames{1};
+                    newDataSet=cat(1,newDataSet, dataSet(e(ie).startIdx:e(ie).endIdx,:));
+                end
+            end
+            
+            S=segdat;
+            
+            
+            if length(newDataSet)>0
+                set(S,'chanNames',N.chanNames, 'chanUnits',N.chanUnits, 'domainIncr',N.domainIncr, ...
+                    'domainStart',domainStart,'domainValues',nan, 'dataSet', newDataSet, ...
+                    'dataSize', size(dataSet),'comment',N.comment, ...
+                    'onsetPointer', onsetPointer,'segLength',segLength, 'segInfo',segInfo);
+            else
+                set(S,'dataSet',[]);
+            end
+        end
+        
+        function S = randSeg(Z, minSegLen, maxSegLen, maxSegSpace)
+            % randSeg - generate a random segdat from a nldat object
+            % S = randSeg(Z, minSegLen, maxSegLen, maxSegSpace)
+            % Z - nldat object
+            % minSegLen - minimum segment length
+            % maxSegLen - maximum sewgment length
+            % maxSegSpace - maximum spacing between segments
+            % S - segdat object sampled randomly from Z
+            nMax=length(Z);
+            iEnd=0;
+            continueFlag=true;
+            S=segdat;
+            i=1;
+            while continueFlag
+                segLen=randi([minSegLen maxSegLen]);
+                segOffSet=randi([1 maxSegSpace]);
+                iStart=iEnd + segOffSet;
+                iEnd=iStart+segLen-1;
+                if iEnd>nMax,
+                    iEnd=nMax;
+                    continueFlag=false;
+                end
+                sTemp=segdat(Z(iStart:iEnd,:));
+                if i==1
+                    S=sTemp;
+                else
+                    S=cat(1,S,sTemp);
+                end
+                i=i+1;
+                
+            end
+        end
+        
+        
+        
     end
 end
 
-S=segdat;
-i=find(isnan(dataSet));
-dataSet(i,:)=[];
-set(S,'chanNames',N.chanNames, 'chanUnits',N.chanUnits, 'domainIncr',N.domainIncr, ...
-    'domainStart',domainStart,'domainValues',nan, 'dataSet', newDataSet, ...
-    'dataSize', size(dataSet),'comment',N.comment, ...
-    'onsetPointer', onsetPointer,'segLength',segLength, 'segInfo',segInfo);
-end
+
 

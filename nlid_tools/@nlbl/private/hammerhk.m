@@ -28,7 +28,7 @@ i=nl.elements{1,2};
 nLagLE=i.nLags;
 nSides=i.nSides; 
 p=nl.elements{1,1};
-maxOrderNLE=p.polyOrderMax
+maxOrderNLE=p.polyOrderMax;
 set(invi,'nSides',2,'nLags',nLagLE,'irfPseudoInvMode','auto');
 
 set(i,'nSides',nSides','nLags',nLagLE,'irfPseudoInvMode','auto');

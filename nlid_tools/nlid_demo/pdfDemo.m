@@ -1,4 +1,4 @@
-function nlmtst(P)
+function pdfDemo
 % nltest function for pdf operater
 disp('nlmtst for pdf');
 figure(1)

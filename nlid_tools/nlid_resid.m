@@ -14,7 +14,7 @@ function [R, V, yp] = nlid_resid( M, z, varargin);
 %  If NM==1 & NZ > 1
 %     errors is computed for each realization.
 %  IF NM > 1 7 NZ > 1
-%     error is computer for each model wioth the data
+%     error is computed for each model wioth the data
 % If NM > 1 NZ > 1 and NM=NZ
 %  Run ech model for the associated data set
 % if NM>1 & Nz>1 & NM ~= NZ
@@ -65,11 +65,13 @@ if isa(M,'polynom');
     y=z(:,nin+1);
 else
     x=z(:,1);
-    y=z(:,2);
-    
+    y=z(:,2);   
 end
-
+if isa(z,'segdat') & ~isa(M,'polynom'),
+    yp=nlsim(M,z);
+else
 yp= nlsim(M,x); yp=yp(:,1);
+end
 % Get rid of transients
 y=chop(y,choplen);
 yp=chop(yp,choplen);
@@ -84,23 +86,21 @@ Vt=['%VAF = ' num2str(chop(double(V),4))];
 
 if plotflag,
     
-    subplot (4,1,1);
-    plot(y);
-    title('Observed');
-    subplot (4,1,2);
-    plot (yp);
+    subplot (3,1,1);
+    plot(x);
+    title('Input');
+    subplot (3,1,2);
+    plot(y-mean(y));
+    h=line (yp-mean(yp));
+    set(h,'color','r'); 
+    title(['Output ' Vt]);
     
+    subplot (3,1,3);
     
-    title(['Predicted ' Vt]);
-    
-    subplot (4,1,3);
-    plot (y);
-    h=line(yp); set(h,'color','r'); 
-    title('Superimposed');
-    subplot (4,1,4);
     plot (R);
     T= ('Residuals' );
     title(T);
+    streamer (M.comment);
 end
 
 

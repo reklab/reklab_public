@@ -9,13 +9,13 @@ X=nldat(ones(1000,1),'domainIncr',.001,'chanNames',{'X'});
 XS=segdat(X);
 Y=nldat(ones(500,1)*2,'domainIncr',.001,'domainStart',2, 'chanNames',{'Y'});
 YS=segdat(Y);
-S=cat(XS,YS);
+S=cat(1, XS,YS);
 plotHelper (X,Y,S);
-%% reverse order segmens
+%% reverse order of segments
 
 Y=nldat(ones(500,1)*2,'domainIncr',.001,'domainStart',.5, 'chanNames',{'Y'});
 YS=segdat(Y);
-S=cat(XS,YS);
+S=cat(1,XS,YS);
 plotHelper (X,Y,S);%% domain
 %%
 S=segdat;
@@ -23,15 +23,19 @@ X=nldat(ones(2000,1),'domainIncr',.001,'chanNames',{'X'},'domainStart',0);
 XS=segdat(X);
 Y=nldat(ones(500,1)*2,'domainIncr',.001,'domainStart',.5, 'chanNames',{'Y'});
 YS=segdat(Y);
-S=cat(XS,YS);
+S=cat(1, XS,YS);
 plotHelper (X,Y,S);
 
-%% 
+%%  Basic operations
+S2=S+1;
+S3=S-2;
+S=2*S;
+
 
 
 %% Retrieve segments from segdat as nldat objects
 disp(S)
-disp (['Number of segments =' num2str(segCount(S2))]); 
+disp (['Number of segments =' num2str(segCount(S))]); 
 clf
 X1=segGet(S,1); subplot (2,1,1); plot(X); title('Segment 1: X'); 
 X2=segGet(S,2);subplot (2,1,2); plot(Y); title ('Segment 2: Y'); 
@@ -48,22 +52,24 @@ disp(S)
 disp('nldat(S)');
 SN=nldat(S);
 disp(SN)
-plot(SN);title ('nldat(S2)');
-set(gca,'xlim',xLim,'ylim',[0 2.1]);
+plot(SN);title ('nldat(S)');
+set(gca,'ylim',[0 2.1]);
 
 %% convert nldat with nans into segdat
 
 S2=segdat(SN);X
 disp(S2);
+plot(S2)
 set(gca,'xlim',[0 2],'ylim',[0 2.1]);
 
-%% Generate a segdat oeject by concatonating two nldat objects with overlap 
+%% Generate a segdat object by concatonating two nldat objects with overlap 
 S=segdat;
 X=nldat(ones(1000,1),'domainIncr',.001,'chanNames',{'X'});
 XS=segdat(X);
 Y=nldat(ones(1500,1)*2,'domainIncr',.001,'domainStart',.5, 'chanNames',{'Y'});
+xLim=[0 3];
 YS=segdat(Y);
-S=segCat(XS,YS);
+S=segdat.cat(1, XS,YS);
 clf;
 subplot (3,1,1);
 plot (X);
@@ -77,16 +83,84 @@ subplot (3,1,3);
 plot(S); 
 title ('segdat of X and Y ');
 set(gca,'xlim',xLim,'ylim',[0 2.1]);
+%% Polynomial operations
+X=nldat(rand(5000,1),'domainIncr',.001,'chanNames',{'X'});
+Y=X.^2;
+Z=cat(2,X,Y);
+S=segdat.randSeg(Z, 100, 200, 50);
 
-%% Mulitple channel support 
-NOT YET IMPLEMENTED
+P=polynom(Z,'polyType','power');
+[R,V,ZP]=nlid_resid(P,S);
+
+%% SSM models
+x=rand(5000,1);
+X=nldat(X,'domainIncr',.01);
+Z=nlid_sim('L2',X);
+ZS=segdat.randSeg(Z,200, 400, 50);
+SS=ssm(ZS);
+[R,V,ZP]=nlid_resid(SS,ZS);
 
 
+%% NL BL Models 
+x=randn(5000,1);
+X=nldat(x,'domainIncr',.01);
+Z=nlid_sim('N2L',X);
+ZS=segdat.randSeg(Z,200,500,50);
+
+NL=nlbl(ZS,'idMethod','subspace');
+[R,V,P]=nlid_resid(NL,ZS);
+
+%% LN BL Models 
+x=randn(5000,1);
+X=nldat(x,'domainIncr',.01);
+Z=nlid_sim('LN3',X);
+ZS=segdat.randSeg(Z,200,500,50);
+
+NL=lnbl(ZS,'idMethod','hk');
+[R,V,P]=nlid_resid(NL,ZS);
 
 
 
 %% Decimate
-xd=decimate(S2,2);clf; plot(xd);
+xd=decimate(S,2);clf; plot(xd);
+
+%% Mulitple channel support 
+S=segdat;
+X=nldat(ones(1000,1),'domainIncr',.001,'chanNames',{'X'});
+XS=segdat(X);
+Y=nldat(ones(1500,1)*2,'domainIncr',.001,'domainStart',2., 'chanNames',{'Y'});
+YS=segdat(Y);
+S=segdat.cat(1, XS,YS);
+
+%% Correlations 
+X=nldat(randn(20000,1));
+Y=smo(X,5);
+Z=cat(2,X,Y);
+ZS=segdat.randSeg(Z,200,500,50);
+CX=cor(ZS(:,1),'nSides',2,'nLags',16);
+CY=cor(ZS(:,2),'nSides',2,'nLags',16);
+CXY=cor(ZS,'nSides',2,'nLags',16);
+figure(1);
+subplot (3,1,1); plot (CX);
+subplot (3,1,2);plot(CY);
+subplot (3,1,3); plot (CXY);
+figure (2);
+CXXY=cor(ZS,'nSides',2, 'nLags',16,'kernOrder',2);
+plot(CXXY);
+
+%% IRF
+X=nldat(randn(20000,1));
+Y=smo(X,5);
+Z=cat(2,X,Y);
+ZS=segdat.randSeg(Z,200,500,50);
+I=irf(ZS,'nSides',2,'nLags',16);
+figure(1);
+plot(I);
+
+
+
+
+
 
 end
 function plotHelper (X,Y,S);

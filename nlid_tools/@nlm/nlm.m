@@ -61,6 +61,15 @@ classdef nlm < nltop
         
         function y = nlsim ( sys, x )
             % Simulate response of nlm object to input data set
+            % Handle segdat objects separately to simulate properly. 
+            if isa(x,'segdat')
+                [nSamp,nChan,nReal]=size(x);
+                if nChan ~=2,
+                    error ('nlsim needs ID output data for segdat simulations');
+                end
+                xOutId=x(:,2);
+                
+            end
             subsys = sys.elements;
             [nparallel, nseries]=size(subsys);
             y=x(:,1)*0;
@@ -68,7 +77,11 @@ classdef nlm < nltop
                 xOut=x;
                 for j=1:nseries,
                     ss=subsys{i,j};
-                    xIn=xOut;
+                    if isa(x,'segdat') & isa(ss,'ssm')
+                        xIn=cat(2,xOut,xOutId);
+                    else
+                        xIn=xOut;
+                    end
                     xOut = nlsim(ss,xIn);
                 end
                 y=y+xOut;
@@ -76,29 +89,43 @@ classdef nlm < nltop
             set(y,'comment','NLM simulation');
         end
         
-        function plot (n)
-            % Plot a nlm model
-            e=n.elements;
+        function plot (n, nV, nH,nSub)
+            %  plot an nlm moodel: plot (n, nv, nh, nSub)
+            % n - nm model
+            % optional parameters (must specify all or nonee
+            % nv - number of vertical panels in plot
+            % nh - number of horiontal pannels in plot 
+            % nSub - subplot por elements in n
+              e=n.elements;
             [nout,nin]=size(e);
+            nElement=nout+nin-1;
+            switch nargin
+                case 1
+                    nV=nout;
+                    nH=nin;
+                    nSub=1:nElement;
+                case 4
+                    if length(nSub) ~=nElement
+                        error ('nSub muust equal the number of elements in the model');
+                    end
+                otherwise
+                   error ('nlm.plot requires either 1 ot 4 inputs');
+            end
+          
+            
             % SISO Series element
             [np,ns]=size(e);
             ifig=gcf;
             for i=1:np,
                 for j=1:ns
-                    subplot (np,ns,(i-1)*ns+j);
+                    subplot (nV,nH,nSub((i-1)*ns+j));
                     p=e{i,j};
+                    p.comment= [p.comment ' of ' n.comment];
                     plot (p);
-                    %                     title(n.comment);
-                    %                     h=get(gca,'title');
-                    %                     u=get(h,'units');
-                    %                     set(h,'units','pixels');
-                    %                     p=get(h,'position');
-                    %                     set(h,'position',p+[0 -30 0]);
-                    %                     set(h,'units',u);
-                    
+                   
                 end
             end
-            streamer ((n.comment));
+            
         end
         
         
