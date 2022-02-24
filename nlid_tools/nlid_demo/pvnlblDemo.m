@@ -2,49 +2,53 @@
 clearvars
 close all
 
-%% Add path to the NLID toolbox
+%% Add path to the NLID toolbox on your local system, where you have cloned or downloaded the NLID toolbox
 run 'S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\Source Code\NPNPVH Latest NLID\initPath'
 
 %% Load the identified model from Ehsan's implementation of the NPN-Hammerstein code
-load('S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\Data Files\ehsanNPVHammCodeResults.mat','udotD','schedVar','tq','Ts','decimation',...
+load('.\sim_data\example_PVHSimData_IEEEAccess2022.mat','udotD','schedVar','tq','Ts','decimation',...
                                                                                        'irf_len_r','nside_r','alfa',...
                                                                                        'q','m','n','p',...
                                                                                        'max_iter','threshold');
                                                                                    
-%% Measurement Noise
-SNR = 15; %10; %15; %200; 
-noiseType = 'tv-colored'; %'experimental'; %'tv-white'; 'tv-colored'; 'tiv'; 
-wLength = 0.5;   %-- in seconds
-
-noiseSource = 'saved'; %'saved'; %'new';
-
-switch noiseSource 
-    case 'new'
-        switch noiseType 
-            case 'tiv'
-                noise = snr_gen(TQ.Data,SNR);
-            case 'tv-white'
-                noise = snr_tv_gen(TQ.Data,SNR,wLength/Ts,'white',Fs);
-            case 'tv-colored'
-                noise = snr_tv_gen(TQ.Data,SNR,wLength/Ts,'colored',Fs);
-            case 'experimental'
-                wLength = 1;
-                noise = snr_tv_gen(TQ.Data,SNR,wLength/Ts,'experimental',Fs); 
-        end
-        noise = nldat(noise,'domainIncr',Ts);
-    case 'saved'
-        pathToData = 'S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\Source Code\NPNPVH Latest NLID\Data\';
-        load([pathToData,'tvNoise_sv1p4Hz_V02_BEST.mat'])
-end
-
-
 %% First, create nldat data objects
 velD = nldat(udotD,'domainIncr',Ts);
 TQ = nldat(tq,'domainIncr',Ts); 
 rho = nldat(schedVar,'domainIncr',Ts);
 
-%++ Input/SV/Output (I/SV/O) Data structure 
-z = cat(3,velD,rho,TQ);
+Fs = 1/Ts;
+
+%% Measurement Noise
+SNR = 15; %10; %15; %40 %100 
+noiseType = 'tv-colored'; %'experimental'; %'tv-white'; 'tv-colored'; 'tiv'; 
+wLength = 0.5;   %-- in seconds
+
+noiseSource = 'new';
+
+switch noiseSource 
+    case 'new'
+        switch noiseType 
+            case 'tiv'
+                noise = snr_gen(TQ.dataSet,SNR);
+            case 'tv-white'
+                noise = snr_tv_gen(TQ.dataSet,SNR,wLength/Ts,'white',Fs);
+            case 'tv-colored'
+                noise = snr_tv_gen(TQ.dataSet,SNR,wLength/Ts,'colored',Fs);
+            case 'experimental'
+                wLength = 1;
+                noise = snr_tv_gen(TQ.dataSet,SNR,wLength/Ts,'experimental',Fs); 
+        end
+        noise = nldat(noise,'domainIncr',Ts);
+    otherwise
+        disp('There is no other noise source implemented')
+end
+
+%% Add noise to the output
+TQ_n = TQ + noise;
+
+%% Input/SV/Output (I/SV/O) Data structure 
+% z = cat(3,velD,rho,TQ);
+z = cat(3,velD,rho,TQ_n);
 set(z,'chanNames',{'perturbation velocity','SV, position','reflex torque'},...
       'chanUnits',{'(rad/s)','(rad)','Nm'});
 
@@ -56,11 +60,11 @@ set(pvhSys,'inputName',chanNames{1,1},'schedVarName',chanNames{1,2},'outputName'
 %% Set identification method and its parameters
 set(pvhSys,'idMethod','nppv-h');
 %++ Set parameters
-pvhSys.n = 7; %-- Default is 9
-pvhSys.p = 3; %-- Default is 7
+pvhSys.n = 9; %-- Default is 9
+pvhSys.p = 5; %-- Default is 7
 
-pvhSys.q = 6; %-- Default is 8
-pvhSys.m = 0; %-- Default is 8
+pvhSys.q = 8; %-- Default is 8
+pvhSys.m = 6; %-- Default is 8
 
 %% Identify the system using I/SV/O data structure
 pvhSys = nlident(pvhSys,z,'idMethod',pvhSys.idMethod,'decimation',decimation);

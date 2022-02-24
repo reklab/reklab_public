@@ -309,8 +309,10 @@ classdef pvnlbl < pvm
         
         %% Simulation method for the PV Hammerstein systems
         function sys = nlsim(sys, z, varargin)
-            %-- The simulation function 
-            yp = pvHammLaguerreSim(model,u,rho);
+            %-- The simulation function
+            u = z{1,1};
+            rho = z{1,2};
+            sys.yp = pvHammLaguerreSim(model,u,rho);
         end
         
     end %--> End of methods
