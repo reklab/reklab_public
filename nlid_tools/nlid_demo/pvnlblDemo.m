@@ -60,11 +60,11 @@ set(pvhSys,'inputName',chanNames{1,1},'schedVarName',chanNames{1,2},'outputName'
 %% Set identification method and its parameters
 set(pvhSys,'idMethod','nppv-h');
 %++ Set parameters
-pvhSys.n = 9; %-- Default is 9
-pvhSys.p = 5; %-- Default is 7
+pvhSys.n = 7; %-- Default is 9
+pvhSys.p = 3; %-- Default is 7
 
 pvhSys.q = 8; %-- Default is 8
-pvhSys.m = 6; %-- Default is 8
+pvhSys.m = 3; %-- Default is 8
 
 %% Identify the system using I/SV/O data structure
 pvhSys = nlident(pvhSys,z,'idMethod',pvhSys.idMethod,'decimation',decimation);
