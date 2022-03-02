@@ -32,6 +32,7 @@ aa = set(aa,'coeffs',sv_polynoms,...
             'svExpOrder',model.static_nl.svExpOrder,...
             'inputExpOrder',model.static_nl.inputExpOrder);
            
+figure;
 plot(aa,'n_bins_input',50,'n_bins_sv',50)
 
 
@@ -58,6 +59,7 @@ bb = set(bb,'coeffs',sv_polynoms,...
             'inputExpOrder',model.h_r.LaguerreExpOrder,...
             'alfa',model.h_r.LaguerreAlfa);
 
+figure;
 plot(bb,'n_bins_input',80,'n_bins_sv',50)
 
 
