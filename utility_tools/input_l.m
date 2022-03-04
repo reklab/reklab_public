@@ -22,8 +22,8 @@ else
 	val=temp;
 end
 if ( val(1) == 'y') | (val(1)=='Y'),
-	ans = 1;
+	ans = true;
 else
-	ans = 0;
+	ans = false;
 end
 
