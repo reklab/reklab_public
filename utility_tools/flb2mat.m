@@ -71,7 +71,7 @@ switch lower(option)
         
     case 'read_all'
         S=flbio(fid,'read_all');
-        nCase=length(S)
+        nCase=length(S);
         D={};
         for i=1:nCase
             D{i}=struct2nldat(S(i));
@@ -87,7 +87,7 @@ return
 end
 
 function N=struct2nldat(S);
-N=nldat(S.Data,'domainIncr',S.domainIncrement, 'domainStart',S.domainStart, ...
+N=nldat(S.Data,'domainIncr',S.domainIncr, 'domainStart',S.domainStart, ...
     'comment',S.comment,'chanNames', S.chanName);
 end
 
