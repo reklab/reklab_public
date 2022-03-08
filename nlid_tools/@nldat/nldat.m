@@ -337,6 +337,7 @@ classdef nldat < nltop
         end
         
         function Zout=detrend(ZIn,varargin)
+            % nlid wrapper for detrend
             Zout=ZIn;
             [nsamp,nchan,nreal]=size(ZIn);
             for i=1:nchan,
