@@ -47,6 +47,8 @@ classdef segdat<nldat
         
         
          function e= segdat2eseq (S, domainStart)
+             % e= segdat2eseq (S, domainStart)
+             % domainstart for sequence data (seconds); 
             e=eseq;
             nSeg=segCount(S);
             for iSeg=1:nSeg
@@ -106,6 +108,23 @@ classdef segdat<nldat
             end
         end
         
+        function sDelay = delay (S, nDelay)
+            % delay all segemnts of S by nDelay samples
+            sDelay=S;
+            nSeg=segCount(S);
+            for iSeg=1:nSeg,
+                curSeg=segGet(S,iSeg);
+                curSegD=delay(curSeg,nDelay);
+                curData=double(curSegD);
+                if iSeg==1,
+                    dataSet=curData;
+                else
+                    dataSet=cat(1,dataSet,curData);
+                
+            end
+            end
+            set(sDelay,'dataSet', dataSet);
+        end
         
         
         
