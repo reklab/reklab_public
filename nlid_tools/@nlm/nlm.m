@@ -13,6 +13,7 @@ classdef nlm < nltop
         elements = { };
         inputName = { 'Input' };
         outputName = { 'Output' };
+        inputDelay =0;
         parameterSet=param;
         notes = 'Notes'
         
@@ -62,6 +63,15 @@ classdef nlm < nltop
         function y = nlsim ( sys, x )
             % Simulate response of nlm object to input data set
             % Handle segdat objects separately to simulate properly. 
+            if sys.inputDelay ~=0
+                if isa(x,'segdat')
+                    error('Input delay not supported for segdat');
+                end
+                xIn=x(:,1);
+                xInD=delay(xIn,sys.inputDelay);
+                x(:,1)=xInD;
+            end
+            
             if isa(x,'segdat')
                 [nSamp,nChan,nReal]=size(x);
                 if nChan ~=2,
@@ -120,7 +130,7 @@ classdef nlm < nltop
                 for j=1:ns
                     subplot (nV,nH,nSub((i-1)*ns+j));
                     p=e{i,j};
-                    p.comment= [p.comment ' of ' n.comment];
+                    p.comment= [p.comment ];
                     plot (p);
                    
                 end

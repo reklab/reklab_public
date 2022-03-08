@@ -4,7 +4,7 @@ function system= hammer_subspace (z,N)
 % 
 % syntax:  system= hammer_subspace (z)
 % where:
-%       hammer is a nlbl object containing a hammerstein cascade.
+%       N is a nlbl object containing a hammerstein cascade.
 %       z is an nldat objects containing the input-output data
 %
 %
@@ -46,6 +46,12 @@ output = z(:,2);
 %Normalizing input for Tchebychev expansion
 avg = (max(input)+min(input))/2;
 rng = max(input) - min(input);
+if rng==0,
+    disp(' Input is constant cannot estimate system');
+    system=[];
+    return;   
+end
+
 un = (input - avg)*2/rng;
 %u_r is the Tchebychev expansion of input
 u_r = multi_tcheb(un,maxOrderNLE-1);
@@ -61,7 +67,9 @@ end
 [AT, CT] = destac(R,n);
 %Return if the system poles are outside of the unit circle
 if ~isempty(find(abs(eig(AT))>1, 1))
+    if displayFlag
     disp('Identified System is unstable. Function returns empty model...')
+    end
 %     static_nl = polynom;
 %     system = nlbl;
 %     system_ss = ssm;
@@ -168,7 +176,7 @@ set(system_ss,'A',AT,'B',BT,'C',CT,'D',DT,'domainIncr',ts,'nDelayInput',nDelayIn
 static_nl = NLE;
 system = nlbl;
 set(system,'comment','NL System identified using subspace method ', ...
-    'elements',{static_nl,system_ss},'idMethod','subspace');
+    'elements',{static_nl,system_ss},'idMethod','subspace','inputDelay',N.inputDelay);
 end
 end
 function [d_x] = del(x,nDelay)

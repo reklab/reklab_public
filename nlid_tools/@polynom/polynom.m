@@ -113,15 +113,17 @@ classdef polynom < nltop
         end
         
         function p= set.polyCoef (p, value)
-            assign(p.parameterSet);
-            if strcmp(polyType,'Bspline'),
-                % There is a mismatch between # of coefficient and spline
-                % definitions.
-                if length(value)~=length(splineCenters)
-                    error ('Number of coefficients does not match spline definition');
+            try
+                assign(p.parameterSet);
+                if strcmp(polyType,'Bspline'),
+                    % There is a mismatch between # of coefficient and spline
+                    % definitions.
+                    if length(value)~=length(splineCenters)
+                        error ('Number of coefficients does not match spline definition');
+                    end
                 end
+            catch
             end
-            
             if ndims(value)>2 | ~isreal(value) ,
                 error('coefficients must be a real numbers.')
             end
