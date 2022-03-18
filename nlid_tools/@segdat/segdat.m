@@ -362,6 +362,56 @@ classdef segdat<nldat
             end
         end
         
+        function sOut =filter (sIn, varargin)
+            % length(epochIn)+1) - Filter a segdat object
+            % Filters each segmenet separately. 
+            % sIn - segdat object
+            % vrargin - 
+            %     I - impulse repsonse of filter
+            %     B,A - filter characteristics
+            arg1=varargin{1};
+            nSeg=segCount(sIn);
+            for iSeg=1:nSeg,
+                curSeg=segGet(sIn,iSeg);
+                if isa(arg1,'irf')
+                    curFilt=nlsim(arg1,curSeg);
+                else
+                    curFilt=filter(curSeg,varargin);
+                end
+                if iSeg==1,
+                    sOut=segdat(curFilt);
+                else
+                    sOut=segCat(sOut,curFilt);
+                end
+            end
+        end
+        
+        function [ fullEpochs, shortEpochs]= getEpochs ( S, epochLen)
+            % [ fullEpochs, partialEpochs]= getEpochs ( S, epochLength fullEpochs=segdat; set(fullEpochs,'domainIncr',S.domainIncr);)
+            % Break a segdat object into contiguous epochs of length =epochLen 
+            % fullEpochs - segdat object containing epochs of length= epochLen
+            % shortEpochs - segdat object containing epochs of length< epochLen
+            % length=epochLen
+            fullEpochs=[];
+            shortEpochs=[];
+            
+            
+            nSeg=segCount(S);
+            for iSeg=1:nSeg
+                curSeg=segGet(S,iSeg);
+                curSegLen=length(curSeg);
+                for iStart=1:epochLen:curSegLen
+                    iEnd= iStart+epochLen-1;
+                    if iEnd>curSegLen
+                        shortEpochs=segdat.helperCat(shortEpochs, curSeg(iStart:curSegLen));
+                    else
+                        fullEpochs=segdat.helperCat(fullEpochs, curSeg(iStart:iEnd));
+                    end
+                end
+                
+            end
+        end
+        
         function sOut = medfilt1 (sIn, varargin)
             nSeg=segCount(sIn);
             for iSeg=1:nSeg,
@@ -532,7 +582,25 @@ classdef segdat<nldat
     end
     
     
-    methods (Static)
+    methods (Static)   
+        
+        function  epochOut = helperCat (epochIn, seg)
+                if isempty (epochIn)
+                    epochOut=segdat(seg);
+                else
+                    epochOut=epochIn;
+                    epochOut.domainStart=cat(2,epochIn.domainStart, seg.domainStart);
+                    epochOut.dataSet=cat(1,epochIn.dataSet, seg.dataSet);
+                    onsetPointer=get(epochIn,'onsetPointer');
+                    set(epochOut,'onsetPointer',cat(2,onsetPointer,length(epochIn)+1));
+                    segLength=get(epochOut,'segLength'); 
+                     set(epochOut,'segLength',cat(2,segLength,length(seg)));
+                end
+                
+        end
+        
+        
+        
         
         
         function S=nl2seg(N, varName)
