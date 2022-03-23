@@ -6,7 +6,7 @@ close all
 run 'S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\Source Code\NPNPVH Latest NLID\initPath'
 
 %% Load data from a {PT,UT} trial pair of the pilot experimental data used for IEEE TBME publication
-load('.\sim_data\IEEETBME2022_PilotData_AV_PT1_UT2.mat');  %% This contains input/output data in z (nldat object) and scheduling variable in rho (nldat object)
+load('.\sim_data\IEEETBME2022_PilotData_AV_PT1_UT2.mat','io','sv');  %% This contains input/output data in z (nldat object) and scheduling variable in rho (nldat object)
 
 Ts = io.domainIncr;
 Fs = 1/Ts;
@@ -15,14 +15,18 @@ input = io(:,1);
 output = io(:,2);
 
 %% Input/SV/Output (I/SV/O) Data structure 
-z = cat(3,input,sv,output);
-set(z,'chanNames',{'position perturbation','SV, ankle position','torque in response to perturbation'},...
-      'chanUnits',{'(rad)','(rad)','Nm'});
+z = io;  
+set(z,'chanNames',{'position perturbation','torque in response to perturbation'},...
+      'chanUnits',{'(rad)','Nm'});
+
+set(sv,'chanNames',{'SV, ankle position'},...
+      'chanUnits',{'(rad)'});
 
 %% Instantiate a PV-PC object from the pvpc class
 pvpcStiffness = pvpc;
-chanNames = z.chanNames;
-set(pvpcStiffness,'inputName',chanNames{1,1},'schedVarName',chanNames{1,2},'outputName',chanNames{1,3});
+ioNames = z.chanNames;
+svNames = sv.chanNames;
+set(pvpcStiffness,'inputName',ioNames{1,1},'schedVarName',svNames{1,1},'outputName',ioNames{1,2});
 
 %% Set identification method and its parameters
 set(pvpcStiffness,'idMethod','nppv-pc');
@@ -49,28 +53,47 @@ pvpcStiffness.threshold = 10^-10;                  %-- Threshold on SSE for term
 
 %% Identify the system using I/SV/O data structure
 decimation = 10;
-pvpcStiffness = nlident(pvpcStiffness,z,'idMethod',pvpcStiffness.idMethod,'decimation',decimation,'rDelay',rDelay);
+pvpcStiffness = nlident(pvpcStiffness,z,sv,'idMethod',pvpcStiffness.idMethod,'decimation',decimation,'rDelay',rDelay);
 
-%% Plot output prediction against output
-TQ_d = decimate_kian(output,decimation);
+%% Simulate the identified PV-Hammerstein model
+u = z(:,1);
+u_d = decimate_kian(u,decimation);
+sv_d = decimate_kian(sv,decimation);
+[tqT_d_hat, tqI_d, tqR_d] = nlsim(pvpcStiffness,u_d,sv_d,'rDelay',rDelay);
+
+%% Plot predicted output against measured output, as well as the intrinsic and reflex torques
+tqT_d = decimate_kian(output,decimation);
+time = (0:length(tqT_d.dataSet)-1)*Ts*decimation;
+
 figure;
-time = (0:length(TQ_d.dataSet)-1)*Ts*decimation;
-subplot(4,1,1)
-plot(time,TQ_d.dataSet); hold on; plot(time,pvpcStiffness.identTQt.dataSet,'r'); legend('Measured','Predicted')
-title(sprintf('Identification VAF = %0.1f%%',pvpcStiffness.identVAF))
-ylabel('Total torque (Nm)')
-subplot(3,1,2)
-plot(time,pvpcStiffness.identTQi.dataSet,'m')
-ylabel('Intrinsic torque (Nm)')
-subplot(3,1,3)
-plot(time,pvpcStiffness.identTQr.dataSet,'k')
-ylabel('Reflex torque (Nm)')
-xlabel('Time (s)'); 
+subplot(5,1,1)
+plot(u_d)
+ylabel('input (rad)')
+title('Position perturbation')
 
-%% Plot the identified PV IRF model of intrinsic pathway ==> Still non-functional - TBD
-% figure;
-% PVIRF_i = pvpcStiffness.elements{1,1};
-% plot(PVIRF_i,'n_bins_input',80,'n_bins_sv',50)
+subplot(5,1,2)
+plot(sv_d)
+ylabel('SV (rad)')
+title('Ankle position')
+
+subplot(5,1,3)
+plot(time,tqT_d.dataSet - mean(tqT_d.dataSet)); hold on; plot(time,tqT_d_hat.dataSet - mean(tqT_d_hat.dataSet),'r'); legend('Measured','Predicted')
+ylabel('torque (Nm)')
+v = vaf(tqT_d,tqT_d_hat);
+title(sprintf('Total Torque Simulation VAF = %0.1f%%',v.dataSet))
+
+subplot(5,1,4)
+plot(tqI_d)
+ylabel('torque (Nm)')
+v = vaf(tqT_d,tqI_d);
+title(sprintf('Intrinsic torque contribution to total torque, VAF = %0.1f%%',v.dataSet))
+
+subplot(5,1,5)
+plot(tqR_d)
+ylabel('torque (Nm)')
+v = vaf(tqT_d,tqR_d);
+title(sprintf('Reflex torque contribution to total torque, VAF = %0.1f%%',v.dataSet))
+xlabel('time (s)');
 
 %% Plot the identified PV Hammerstein system of reflex pathway
 figure;
