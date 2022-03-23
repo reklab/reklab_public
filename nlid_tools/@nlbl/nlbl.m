@@ -107,6 +107,11 @@ classdef nlbl < nlm
        
         function nl  = nlident (nl, z, varargin)
             % Identify an NL BLock system
+            if nl.inputDelay ~=0
+                x=z(:,1);
+                xd=delay(x,nl.inputDelay);
+                z(:,1)=xd;
+            end
             
             if (nargin > 2),
                set (nl,varargin{:});

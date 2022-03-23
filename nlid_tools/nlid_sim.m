@@ -15,8 +15,8 @@ function [Z,M,  zFull] = nlid_sim (option,U,varargin)
 %       H2 - Bessel high pass
 %       L2 - second-order low pass
 %       LNRECT - Wiener system - second order low-opass followed by full wave rectifier
-%       LN2 - Wiender system with quadratic nonlinearity
-%       LN3 - Wiener systems with cubiv nonlinerity
+%       LN2 - Wiener system with quadratic nonlinearity
+%       LN3 - Wiener systems with cubic nonlinerity
 %       N2L - Hammerstein system with quadratic nonlinearity
 %       N3L - Hammerstien system with cubic nonlinearity.
 %       N3HP - Hammerstein system:  cubic nonlinearity + HP filter
@@ -36,7 +36,7 @@ function [Z,M,  zFull] = nlid_sim (option,U,varargin)
 % This file is part of the nlid toolbox, and is released under the GNU
 % General Public License For details, see copying.txt and gpl.txt
 
-paramList={{'plotFlg' 'false' 'plot [true/false]'} ...
+paramList={{'plotFlag' 'false' 'plot [true/false]'} ...
     {'nsmo' '0' ' tnumber of times to smooth [0-N]'} ...
     {'delay_time' 0 'Output delay (sec))'} ...
     {'domain_incr' .01 'Sampling increment (sec))'} ...
@@ -67,7 +67,7 @@ z=.5;
 w=5*2*pi;
 t=0:domain_incr:.5;
 a1=[ k z w];
-a2=[ 1 .75 25*2*pi];
+a2=[ 1 .75 5*2*pi];
 [irf1]=fkzw(t,a1);
 I1=irf;
 set(I1,'dataSet',irf1,'domainIncr',domain_incr);
@@ -124,9 +124,6 @@ switch option
     case 'L2'
         Y = nlsim(I2,U);
         M=I2;
-        subplot (1,1,1);
-        plot(I2);
-        title('L2');
         comment='Linear data set 2';
         % LN
         
