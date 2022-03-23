@@ -10,6 +10,7 @@ classdef pvnlbl < pvm
     %        IEEE Access, vol. 10, pp. 6348-6362, 11 Jan. 2022, DOI: 10.1109/ACCESS.2022.3141704
     
     properties
+        % TBD: Remove these properties from the model object
         identData = NaN;     %-- I/SV/O data used for identification must be kept within object. 
         identOutput = NaN;   %-- remove this as related to data set used for ID. --> The identified output from model identification/training must be kept within object. 
         identVAF = NaN;      %-- remove this as related to data set used for ID. --> The performance indicator of model identification/training must be kept within object.
@@ -94,7 +95,8 @@ classdef pvnlbl < pvm
                         'paramHelp','Constant parameter of the Laguerre expansion',...
                         'paramType','number',...
                         'paramLimits',[0.01 1]); %-- The theoretical lower limit is any number bigger than 0
-                    
+                    % TBD: Rename parameters to something more easy to
+                    % understand
                     %-- The theoretical feasible range for Laguerre exapansion order is [1, inf].
                     %-- But any expansion order < 5 is pratically useless.
                     %-- Any expansion order > 16 is computationally too complex and not needed.
@@ -161,6 +163,7 @@ classdef pvnlbl < pvm
         
         %% Implementation of various PV Hammerstein identification methods 
         % For example, based on a comment from meeting with Rob, we need something like: nlident(aa,z,'method','npv_hamm')
+        % TBD: Make io as z, and sv as a separate input.
         function sys = nlident(sys, z, varargin)
             sys.identData = z;
             
@@ -320,11 +323,10 @@ end     %--> End of classdef
 
 %% Required functions/subroutines for identification
 %- 1. NPNPV-H Identification Method
-%- 2. Laguerre polynomials or basis functions calculator
-%- 3. Half wave rectifier fit for initialization of static nonlinearity
-%- 4. Data matrix (Gamma_alpha) constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
-%- 5. Data matrix (Gamma_c)     constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
-%- 6. NPNPV-H simulator function
+%- 2. Half wave rectifier fit for initialization of static nonlinearity
+%- 3. Data matrix (Gamma_alpha) constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
+%- 4. Data matrix (Gamma_c)     constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
+%- 5. NPNPV-H simulator function
 
 %% 1. NPNPV-H Identification Method
 function [static_nl,h_r,yp,fIter]= hammerstein_lpv_laguerre_v02(z,rho,wNL,wIRF,varargin)
@@ -686,40 +688,7 @@ yp = nldat(yp,'domainIncr',decimated_ts);
 
 end
 
-
-%% 2. Laguerre polynomials or basis functions calculator
-%++ This function generates Laguerre orthonormal basis functions
-%++ Author: Ehsan Sobhani (10 April 2014)
-%++ This is based on Maremaleris book OR formula (11) of his paper titled:
-%++ "Identification of Nonlinear Biological Systems Using Laguerre Expansions of Kernels", Annals of Biomed. Eng., vol. 21, pp. 573-589, 1993.
-function b = laguerre(irf_len,max_order,alfa)
-%++ The inputs are:
-    % 1) irf_len (integer number of samples)
-    % 2) max_order (integer). The maximum order of Laguerre expansion.
-    % 3) alfa (0<alfa<1). Laguerre parameter. 
-
-%++ The outputs are:
-    % 1) b (real with size [irf_len,max_order+1])
-
-%=== Initialization
-b = zeros(irf_len,max_order+1);
-    
-for t = 1:irf_len
-    for j = 0:max_order
-        gain = alfa^((t-j)/2) * (1-alfa)^(0.5);
-        summation = 0;
-        for k = 0:j
-            argument = (-1)^k * combination(t,k) * combination(j,k) * alfa^(j-k) * (1-alfa)^k;
-            summation = summation + argument;
-        end
-        b(t,j+1) = gain * summation;
-    end
-end
-
-end
-
-
-%% 3. Half wave rectifier fit for initialization of static nonlinearity
+%% 2. Half wave rectifier fit for initialization of static nonlinearity
 function [alpha,yhat,u,Gu_n,y] = hwr_fit(uMin,uMax,slope,threshold,order,polynomType,plotFlag)
 
 u = (uMin:0.0001:uMax)';
@@ -747,7 +716,7 @@ end
 
 end
 
-%% 4. Data matrix constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
+%% 3. Data matrix constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
 function Gamma_alpha = Gamma_alpha_construct_laguerre(alpha,q,m,n,p)
 Gamma_alpha = zeros(q*m*n*p,q*m);
 
@@ -765,7 +734,7 @@ end
 
 end
 
-%% 5. Data matrix constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
+%% 4. Data matrix constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
 function Gamma_c = Gamma_c_construct_laguerre(c,q,m,n,p)
 Gamma_c = zeros(q*m*n*p,n*p);
 
@@ -782,7 +751,7 @@ end
 
 end
 
-%% 6. NPNPV-H simulator function
+%% 5. NPNPV-H simulator function
 function yp = pvHammLaguerreSim(model,u,rho)
 %% Ehsan Sobhnai, May 12, 2021, just renamed the function created Feb. 26, 2021 from lpvHammLaguerreSim to pvHammLaguerreSim 
 %++ This function simulates the output of a LPV Hammerstein Laguerre model in response to the input u and scheduling variable rho
