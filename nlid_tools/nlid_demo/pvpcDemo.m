@@ -35,6 +35,9 @@ pvpcStiffness.p_i = 2;           %0; 2; 3;
 %== REFLEX Pathway
 % pvpcStiffness.nside_r = 1;       %-- Number of sides of reflex IRF - Setting this gives an error! To be investigated. For now, default is 1.
 rDelay = 0.05;         %-- in seconds
+pvpcStiffness.irf_len_r = 0.8 - rDelay;
+pvpcStiffness.alfa = 0.5;
+
 pvpcStiffness.n = 7;   %-- Order of expansion of reflex NL w.r.t. delayed velocity. Default is 7.
 pvpcStiffness.p = 2+1; %-- Order of expansion of reflex NL w.r.t. SV.               Default is 9.
 
@@ -52,7 +55,7 @@ pvpcStiffness = nlident(pvpcStiffness,z,'idMethod',pvpcStiffness.idMethod,'decim
 TQ_d = decimate_kian(output,decimation);
 figure;
 time = (0:length(TQ_d.dataSet)-1)*Ts*decimation;
-subplot(3,1,1)
+subplot(4,1,1)
 plot(time,TQ_d.dataSet); hold on; plot(time,pvpcStiffness.identTQt.dataSet,'r'); legend('Measured','Predicted')
 title(sprintf('Identification VAF = %0.1f%%',pvpcStiffness.identVAF))
 ylabel('Total torque (Nm)')
