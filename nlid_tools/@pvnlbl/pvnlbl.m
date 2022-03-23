@@ -10,10 +10,7 @@ classdef pvnlbl < pvm
     %        IEEE Access, vol. 10, pp. 6348-6362, 11 Jan. 2022, DOI: 10.1109/ACCESS.2022.3141704
     
     properties
-        % TBD: Remove these properties from the model object
-        identData = NaN;     %-- I/SV/O data used for identification must be kept within object. 
-        identOutput = NaN;   %-- remove this as related to data set used for ID. --> The identified output from model identification/training must be kept within object. 
-        identVAF = NaN;      %-- remove this as related to data set used for ID. --> The performance indicator of model identification/training must be kept within object.
+
     end
     
     methods
@@ -164,9 +161,7 @@ classdef pvnlbl < pvm
         %% Implementation of various PV Hammerstein identification methods 
         % For example, based on a comment from meeting with Rob, we need something like: nlident(aa,z,'method','npv_hamm')
         % TBD: Make io as z, and sv as a separate input.
-        function sys = nlident(sys, z, varargin)
-            sys.identData = z;
-            
+        function sys = nlident(sys, z, sv, varargin)
             iMethod = find(strcmp(varargin,'idMethod'));
             newMethod = varargin(iMethod+1);
             %++ ToDo: The above line must be replaced reading the limits from sys object
@@ -186,8 +181,8 @@ classdef pvnlbl < pvm
                        
             switch newMethod{1,1}             
                 case 'nppv-h'
-                    io = z(:,[1,3]); %-- Input is the 1st and Output is the last data
-                    rho = z(:,2);    %-- schedVar is the 2nd data
+                    io = z;      %-- z contains the io data
+                    rho = sv;    %-- sv contains the scheduling variable
                     %++ ToDo: The above lines must be removed by updating
                     %         the identification function to accept 
                     %         triplet [input,sv,output] instead of rho as a
@@ -221,14 +216,7 @@ classdef pvnlbl < pvm
                     
                     [static_nl,h_r,y_hat] = hammerstein_lpv_laguerre_v02(io,rho,wNL,wIRF,'irf_len_r',irf_len_r,'n',n,'p',p-1,'m',m,'q',q,'alfa',alfa,'max_iter',max_iter,...
                                                                  'static_nl_param_init',static_nl_param_init,'use_vel_zeroth_exp',use_vel_zeroth_exp,'decimation_ratio',decimation,'static_nl_init',static_nl_init);
-                    
-                    %% Set output predictions and VAF(%) for the identified model and 
-                    sys.identOutput = y_hat;
-                    %++ Calculate VAF
-                    o_d = decimate_kian(z(:,3),decimation);
-                    v = vaf(o_d,y_hat);
-                    sys.identVAF = v.dataSet;
-                    
+                                       
                     %% Setup the objects based on the identification results
                     %++ Extracting SV Tchebychev polynomials from static_nl and setup PVNL 
                     sv_polynoms_pvnl = cell(static_nl.inputExpOrder+1,1);
@@ -251,7 +239,8 @@ classdef pvnlbl < pvm
                                 'svExpType','tcheb',...
                                 'inputExpType','tcheb',...
                                 'svExpOrder',static_nl.svExpOrder,...
-                                'inputExpOrder',static_nl.inputExpOrder);
+                                'inputExpOrder',static_nl.inputExpOrder,...
+                                'coeffsStruct',static_nl);
                     
                     PVNL = pvnl;
                     PVNL.elements = PVNL_BASIS;
@@ -273,7 +262,8 @@ classdef pvnlbl < pvm
                                       'inputExpType','laguerre',...
                                       'svExpOrder',h_r.svExpOrder,...
                                       'inputExpOrder',h_r.LaguerreExpOrder,...
-                                      'alfa',h_r.LaguerreAlfa);
+                                      'alfa',h_r.LaguerreAlfa,...
+                                      'coeffsStruct',h_r);
                     
                     PVIRF = pvirf;
                     PVIRF.elements = PVIRF_BASIS;
@@ -311,11 +301,13 @@ classdef pvnlbl < pvm
         end
         
         %% Simulation method for the PV Hammerstein systems
-        function sys = nlsim(sys, z, varargin)
-            %-- The simulation function
-            u = z{1,1};
-            rho = z{1,2};
-            sys.yp = pvHammLaguerreSim(model,u,rho);
+        function yp = nlsim(sys, u, sv, varargin)           
+            PVNL = sys.elements{1,1};
+            PVIRF = sys.elements{1,2};
+                       
+            model.static_nl = PVNL.elements.coeffsStruct;
+            model.h_r = PVIRF.elements.coeffsStruct;
+            yp = pvHammLaguerreSim(model,u,sv);
         end
         
     end %--> End of methods
