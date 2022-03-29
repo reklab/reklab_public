@@ -20,7 +20,8 @@ classdef mimobasis < nltop
         svExpType = '';        %-- Supported options are: {'tcheb'}
         svExpOrder = NaN;
         inputExpType = '';     %-- Supported options are: {'tcheb','laguerre'}
-        inputExpOrder = NaN;     
+        inputExpOrder = NaN;
+        coeffsStruct = NaN;
         parameterSet = param;
         notes = '2-D (input, SV) basis function expansion of two kind: IRF, Static NL';
     end

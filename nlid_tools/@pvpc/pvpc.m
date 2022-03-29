@@ -12,11 +12,7 @@ classdef pvpc < pvm
     %        submitted to IEEE TBME, 11 Feb. 2022
     
     properties
-        identData = NaN;     %-- I/SV/O data used for identification must be kept within object. 
-        identTQt = NaN;      %-- remove this as related to data set used for ID. --> The identified output from model identification/training must be kept within object. 
-        identVAF = NaN;      %-- remove this as related to data set used for ID. --> The performance indicator of model identification/training must be kept within object.
-        identTQi = NaN;
-        identTQr = NaN;
+
     end
     
     methods
@@ -183,9 +179,7 @@ classdef pvpc < pvm
         
         %% Implementation of various PV-PC identification methods 
         % For example, based on a comment from meeting with Rob, we need something like: nlident(sys,z,'method','npv_hamm')
-        function sys = nlident(sys, z, varargin)
-            sys.identData = z;
-            
+        function sys = nlident(sys, z, sv, varargin)          
             iMethod = find(strcmp(varargin,'idMethod'));
             newMethod = varargin(iMethod+1);
             %++ ToDo: The above line must be replaced reading the limits from sys object
@@ -209,8 +203,8 @@ classdef pvpc < pvm
                        
             switch newMethod{1,1}             
                 case 'nppv-pc'
-                    io = z(:,[1,3]); %-- Input is the 1st and Output is the last data
-                    rho = z(:,2);    %-- schedVar is the 2nd data
+                    io = z;      %-- z contains the io data
+                    rho = sv;    %-- sv contains the scheduling variable
                     %++ ToDo: The above lines must be removed by updating
                     %         the identification function to accept 
                     %         triplet [input,sv,output] instead of rho as a
@@ -243,24 +237,14 @@ classdef pvpc < pvm
                     wNL = ones((n+1)*p,1);
                     
                     %== This we need to add to ident parameters as an initialization value for the NACS iteration of NPNPV-H 
-                    static_nl_param_init = 'hwrFitEST';
+                    static_nl_param_init = 'unityGain';
                     %== The following two parameters are actually not used.
                     %   Delete them later from "hammerstein_lpv_laguerre_v02" inputs
                     use_vel_zeroth_exp = 'yes';
                     % static_nl_init = []; 
                     
-                    [h_i,h_r,static_nl,TQIhat,TQRhat,TQRProj] = pcasc_lpv_laguerre(io,rho,wNL,wIRF,'irf_len_r',irf_len_r,'irf_len_i',irf_len_i,'n',n,'p',p-1,'p_i',p_i,'m',m,'q',q,'alfa',alfa,'delay',rDelay,...
-                                                                             'static_nl_param_init',static_nl_param_init,'use_vel_zeroth_exp',use_vel_zeroth_exp,'nside_i',nside_i,'max_iter',max_iter);
-                    
-                    %% Set output predictions and VAF(%) for the identified model and 
-                    sys.identTQi = TQIhat;
-                    sys.identTQr = TQRhat;
-                    sys.identTQt = TQIhat + TQRhat;
-                    %++ Calculate VAF
-                    o_d = decimate_kian(z(:,3),decimation);
-                    v = vaf(o_d,sys.identTQt);
-                    sys.identVAF = v.dataSet;
-                    
+                    [h_i,h_r,static_nl,TQIhat,TQRhat,TQRproj] = pcasc_lpv_laguerre(io,rho,wNL,wIRF,'irf_len_r',irf_len_r,'irf_len_i',irf_len_i,'n',n,'p',p-1,'p_i',p_i,'m',m,'q',q,'alfa',alfa,'delay',rDelay,...
+                                                                             'static_nl_param_init',static_nl_param_init,'use_vel_zeroth_exp',use_vel_zeroth_exp,'nside_i',nside_i,'max_iter',max_iter);                  
                     %% Setup the objects based on the identification results
                     rho_d = decimate_kian(rho,decimation);
                     min_sv = min(rho_d.dataSet); max_sv = max(rho_d.dataSet);
@@ -284,7 +268,8 @@ classdef pvpc < pvm
                                       'svExpType','tcheb',...
                                       'inputExpType','none',...
                                       'svExpOrder',h_i.svExpOrder,...
-                                      'inputExpOrder',NaN);
+                                      'inputExpOrder',NaN,...
+                                      'coeffsStruct',h_i);
                                   
                     PVIRF_i = pvirf;
                     PVIRF_i.nSides = nside_i;
@@ -309,7 +294,8 @@ classdef pvpc < pvm
                                 'svExpType','tcheb',...
                                 'inputExpType','tcheb',...
                                 'svExpOrder',static_nl.svExpOrder,...
-                                'inputExpOrder',static_nl.inputExpOrder);
+                                'inputExpOrder',static_nl.inputExpOrder,...
+                                'coeffsStruct',static_nl);
                     
                     PVNL = pvnl;
                     PVNL.elements = PVNL_BASIS;
@@ -331,17 +317,14 @@ classdef pvpc < pvm
                                       'inputExpType','laguerre',...
                                       'svExpOrder',h_r.svExpOrder,...
                                       'inputExpOrder',h_r.LaguerreExpOrder,...
-                                      'alfa',h_r.LaguerreAlfa);
+                                      'alfa',h_r.LaguerreAlfa,...
+                                      'coeffsStruct',h_r);
                     
                     PVIRF = pvirf;
                     PVIRF.elements = PVIRF_BASIS;
                     
                     PVH_r = pvnlbl;
                     set(PVH_r,'elements',{PVNL,PVIRF});
-                    PVH_r.identData = TQRProj;
-                    PVH_r.identOutput = sys.identTQr;
-                    v = vaf(TQRProj,sys.identTQr);
-                    PVH_r.identVAF = v.dataSet;
                     
                     %++ Set the estimated intrinsic model (PVIRF_i) and the estimated reflex model (PVH_r) as the elements of the identified PV-PC stiffness model
                     set(sys,'elements',{PVIRF_i; PVH_r});                    
@@ -375,12 +358,23 @@ classdef pvpc < pvm
             
         end
         
-        %% Simulation method for the PV Hammerstein systems
-        function sys = nlsim(sys, z, varargin)
-            %-- The simulation function
-            u = z{1,1};
-            rho = z{1,2};
-            sys.yp = pvHammLaguerreSim(model,u,rho);
+        %% Simulation method for the PV-PC stiffness model
+        function [tqT,tqI,tqR] = nlsim(sys, u, sv, varargin)  
+            %== Reflex delay (rDelay) should naturaly become an attribute of the model or a (hyper)parameter of the identification method - TBD  
+            iDelay = find(strcmp(varargin,'rDelay'));
+            rDelay = varargin(iDelay+1); rDelay = rDelay{1,1};
+            
+            PV_I = sys.elements{1,1}; %-- PV Intrinsic stiffness
+            
+            PV_R = sys.elements{2,1}; %-- PV Reflex stiffness
+            PV_R_NL = PV_R.elements{1,1};
+            PV_R_IRF = PV_R.elements{1,2};
+            
+            model.h_i = PV_I.elements.coeffsStruct;
+            model.static_nl = PV_R_NL.elements.coeffsStruct;
+            model.h_r = PV_R_IRF.elements.coeffsStruct;
+            model.rDelay = rDelay;
+            [tqT,tqI,tqR] = pvpcStiffnessSim(model,u,sv);
         end
         
     end %--> End of methods
@@ -389,13 +383,13 @@ end     %--> End of classdef
 %% Required functions/subroutines for identification
 %- 1. NPPV-PC Identification Method pcasc_lpv_laguerre 
 %- 2. NPPV-H Identification Method (hammerstein_lpv_laguerre_v02)
-%- 3. Laguerre polynomials or basis functions calculator
-%- 4. Half wave rectifier fit for initialization of static nonlinearity
-%- 5. Data matrix (Gamma_alpha) constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
-%- 6. Data matrix (Gamma_c)     constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
+%- 3. Half wave rectifier fit for initialization of static nonlinearity
+%- 4. Data matrix (Gamma_alpha) constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
+%- 5. Data matrix (Gamma_c)     constructor of the Normalized Iterative Convex Search (NICS) algorithm of NPNPV-H identification method
+%- 6. PV-PC simulation function
 %- 7. NPNPV-H simulator function
 
-%% NPPV-PC identification method
+%% 1. NPPV-PC identification method
 function [h_i,h_r,static_nl,TQ_I,TQ_R,TQ_R_Proj,stopIter]= pcasc_lpv_laguerre(z,rho,wNL,wIRF,varargin)
 % This function estimates an LPV Parallel-Cascade Model of Total Joint Stiffness.
 % The model structure identified is an LPV Hammerstein (LPV Static NL + LPV Laguerre Expansion of IRF) for Reflex Pathway and an LPV IRF for Intrinsic Pathway.
@@ -866,7 +860,7 @@ if isempty(static_nl_init)
         case 'unityGain'  %-- See my notes for reasons and details
             % alpha0 = zeros(nF*(p+1),1);
             % alpha0(1) = 1;
-            alpha0 = zeros(nF,1); alpha0(2) = 1;
+            alpha0 = zeros(nF,1); alpha0(2) = 1; % alpha0(1) = 0.5;
             alpha0 = repmat(alpha0,(p+1),1);
         otherwise 
             disp('This case is not supported!')
@@ -1008,39 +1002,6 @@ yp = nldat(yp,'domainIncr',decimated_ts);
 
 end
 
-
-%% 2. Laguerre polynomials or basis functions calculator
-%++ This function generates Laguerre orthonormal basis functions
-%++ Author: Ehsan Sobhani (10 April 2014)
-%++ This is based on Maremaleris book OR formula (11) of his paper titled:
-%++ "Identification of Nonlinear Biological Systems Using Laguerre Expansions of Kernels", Annals of Biomed. Eng., vol. 21, pp. 573-589, 1993.
-function b = laguerre(irf_len,max_order,alfa)
-%++ The inputs are:
-    % 1) irf_len (integer number of samples)
-    % 2) max_order (integer). The maximum order of Laguerre expansion.
-    % 3) alfa (0<alfa<1). Laguerre parameter. 
-
-%++ The outputs are:
-    % 1) b (real with size [irf_len,max_order+1])
-
-%=== Initialization
-b = zeros(irf_len,max_order+1);
-    
-for t = 1:irf_len
-    for j = 0:max_order
-        gain = alfa^((t-j)/2) * (1-alfa)^(0.5);
-        summation = 0;
-        for k = 0:j
-            argument = (-1)^k * combination(t,k) * combination(j,k) * alfa^(j-k) * (1-alfa)^k;
-            summation = summation + argument;
-        end
-        b(t,j+1) = gain * summation;
-    end
-end
-
-end
-
-
 %% 3. Half wave rectifier fit for initialization of static nonlinearity
 function [alpha,yhat,u,Gu_n,y] = hwr_fit(uMin,uMax,slope,threshold,order,polynomType,plotFlag)
 
@@ -1104,7 +1065,103 @@ end
 
 end
 
-%% 6. NPNPV-H simulator function
+%% 6. PV-PC simulation function
+function [tqT,tqI,tqR] = pvpcStiffnessSim(model,pos,rho)
+%% Ehsan Sobhnai, Aug. 4, 2016
+%++ This function simulates the output of a Non-Parametric LPV PC model of joint stiffness in response to the input u and scheduling variable rho
+
+%-- Inputs: 
+%       (1) model: The object/structure containing the NPLPV-PC model of joint stiffness: LPV IRF intrinsic in parallel with LPV Chebychev Static NL + LPV Laguerre for reflex  
+%       (2) pos: input of stiffness model e.g., position (perturbation)
+%       (3) rho: scheduling variable 
+
+%-- Output:
+%       (1) tqT: predicted total stiffness torque in response to input position and SV (rho)
+%       (2) tqI: predicted intrinsic torque
+%       (3) tqR: predicted reflex torque
+
+%-- Reading the structural blocks of the LPV PC system (LPV IRF || LPV NL + LPV IRF)
+h_i = model.h_i;
+static_nl = model.static_nl;
+h_r = model.h_r;
+rDelay = model.rDelay;
+
+nSamples = length(pos.dataSet);
+
+%% Few sanity checks on the model
+if static_nl.svNormalization ~= h_r.svNormalization
+    disp('The SV Normalization Factors for Static NL and IRF-Laguerre are not the same!')
+    tqT = [];
+    return;
+else
+    avg_rho = static_nl.svNormalization(1);
+    rng_rho = static_nl.svNormalization(2);
+end
+
+ts = h_r.Ts;
+fs = 1/ts;
+if ts ~= pos.domainIncr
+    disp('The sampling time of the input does not match that of the IRF dynamics of the Hammerstein cascade!')
+    tqT = [];
+    return;
+end
+
+%=== Normalizing the SV
+rho_n = (rho.dataSet - avg_rho)*2/rng_rho;
+
+%% Reading the LPV IRF parameters of intrinsic stiffness and simulating intrinsic torque 
+intrinsic = h_i.data;
+nside_i = h_i.nSides;
+nLags_i = h_i.nLags;
+p_i = h_i.svExpOrder;
+
+%=== Computing the lagged positions for the Intrinsic IRF 
+Li = (nLags_i - 1) / nside_i;
+
+if nside_i == 1
+    lags_i = ts * (0:Li);
+else
+    lags_i = ts * (-Li:1:Li);
+end
+
+pos_lags = zeros(nSamples,length(nLags_i));
+for d = 1:nLags_i
+    pos_lags(:,d) = del(pos.dataSet,fs,lags_i(d));
+end
+
+%== Computing the Tchebychev expansions of scheduling for intrinsic pathway
+Gpi =  multi_tcheb(rho_n,p_i);
+
+%== The Regressor of the Intrinsic Pathway
+Phi_intrinsic_expand = zeros(nSamples,(p_i+1)*(nLags_i));
+
+col = 0;
+for d = 1:nLags_i
+    for pic = 1:p_i+1
+        col = col + 1;
+        Phi_intrinsic_expand(:,col) = pos_lags(:,d).*Gpi(:,pic);        
+    end
+end
+
+%== Intrinsic Torque
+tqI = Phi_intrinsic_expand*intrinsic;
+tqI = nldat(tqI,'domainIncr',ts);
+
+%% Reading the LPV Static NL parameters and simulating it output, z
+%=== Generating the reflex path input, delayed velocity
+vel = ddt(pos);
+velD = del(vel.dataSet,fs,rDelay);
+velD = nldat(velD,'domainIncr',ts);
+reflexModel.static_nl = static_nl;
+reflexModel.h_r = h_r;
+tqR = pvHammLaguerreSim(reflexModel,velD,rho);
+
+%% Total torque
+tqT = tqI + tqR;
+
+end
+
+%% 7. NPNPV-H simulator function
 function yp = pvHammLaguerreSim(model,u,rho)
 %% Ehsan Sobhnai, May 12, 2021, just renamed the function created Feb. 26, 2021 from lpvHammLaguerreSim to pvHammLaguerreSim 
 %++ This function simulates the output of a LPV Hammerstein Laguerre model in response to the input u and scheduling variable rho

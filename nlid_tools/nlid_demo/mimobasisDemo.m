@@ -4,14 +4,11 @@ close all
 clear classes
 clc
 
-%% Add path to the NLID toolbox
-addpath 'S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\reklab_public\nlid_tools'
-addpath 'S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\reklab_public\utility_tools'
-addpath 'S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\reklab_public\stiffnessID'
-addpath 'S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\reklab_public\smi-2.0-devel'
+%% Add path to the NLID toolbox on your local system, where you have cloned or downloaded the NLID toolbox
+run 'S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\Source Code\NPNPVH Latest NLID\initPath'
 
-%% Load the identified model from Ehsan's implementation of the NPN-Hammerstein code
-load('S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\Data Files\ehsanNPVHammCodeResults.mat','model','min_sv','max_sv','min_u','max_u');
+%% Load data from a {PT,UT} trial pair of the pilot experimental data used for IEEE TBME publication
+load('.\sim_data\example_PVHModel_IEEEAccess2022.mat','model','min_u','max_u','min_sv','max_sv');  %% This contains input/output data in z (nldat object) and scheduling variable in rho (nldat object)
 
 %% First, test a static NL mimo basis
 %++ Extracting SV Tchebychev polynomials from model.static_nl
@@ -61,9 +58,3 @@ bb = set(bb,'coeffs',sv_polynoms,...
 
 figure;
 plot(bb,'n_bins_input',80,'n_bins_sv',50)
-
-
-
-
-
-

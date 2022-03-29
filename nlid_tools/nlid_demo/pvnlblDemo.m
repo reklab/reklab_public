@@ -47,15 +47,18 @@ end
 TQ_n = TQ + noise;
 
 %% Input/SV/Output (I/SV/O) Data structure 
-% z = cat(3,velD,rho,TQ);
-z = cat(3,velD,rho,TQ_n);
-set(z,'chanNames',{'perturbation velocity','SV, position','reflex torque'},...
-      'chanUnits',{'(rad/s)','(rad)','Nm'});
+z = cat(2,velD,TQ_n);  
+set(z,'chanNames',{'perturbation velocity','reflex torque'},...
+      'chanUnits',{'(rad/s)','Nm'});
 
+sv = rho;
+set(sv,'chanNames',{'SV, position'},...
+      'chanUnits',{'(rad)'});
 %% Instantiate a PV Hammerstein object from the pvnlbl class
 pvhSys = pvnlbl;
-chanNames = z.chanNames;
-set(pvhSys,'inputName',chanNames{1,1},'schedVarName',chanNames{1,2},'outputName',chanNames{1,3});
+ioNames = z.chanNames;
+svNames = sv.chanNames;
+set(pvhSys,'inputName',ioNames{1,1},'schedVarName',svNames{1,1},'outputName',ioNames{1,2});
 
 %% Set identification method and its parameters
 set(pvhSys,'idMethod','nppv-h');
@@ -67,15 +70,22 @@ pvhSys.q = 8; %-- Default is 8
 pvhSys.m = 3; %-- Default is 8
 
 %% Identify the system using I/SV/O data structure
-pvhSys = nlident(pvhSys,z,'idMethod',pvhSys.idMethod,'decimation',decimation);
+pvhSys = nlident(pvhSys,z,sv,'idMethod',pvhSys.idMethod,'decimation',decimation);
 
-%% Plot output prediction against output
+%% Simulate the identified PV-Hammerstein model
+u = z(:,1);
+u_d = decimate_kian(u,decimation);
+sv_d = decimate_kian(sv,decimation);
+TQ_d_hat = nlsim(pvhSys,u_d,sv_d);
+
+%% Plot predicted output against measured output
 TQ_d = decimate_kian(TQ,decimation);
 figure;
 time = (0:length(TQ_d.dataSet)-1)*Ts*decimation;
-plot(time,TQ_d.dataSet); hold on; plot(time,pvhSys.identOutput.dataSet,'r'); legend('Measured','Predicted')
+plot(time,TQ_d.dataSet); hold on; plot(time,TQ_d_hat.dataSet,'r'); legend('Measured','Predicted')
 xlabel('time (s)'); ylabel('torque (Nm)')
-title(sprintf('Identification VAF = %0.1f%%',pvhSys.identVAF))
+v = vaf(TQ_d,TQ_d_hat);
+title(sprintf('Identification VAF = %0.1f%%',v.dataSet))
 
 %% Plot the identified PV Hammerstein system
 figure;
