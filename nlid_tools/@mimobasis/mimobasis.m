@@ -267,6 +267,140 @@ classdef mimobasis < nltop
             
         end
         
+        %% Function to get the snapshots of the MIMO Basis Function
+        function mimoSnapshots = snapshot(basis,sv_values)
+            n_bins_sv = 200;
+            n_bins_input = 200;
+            %++ Normalizing SV and generating SV grid
+            if ~isempty(basis.svRange)
+                %++ Calculate SV normalization parameters: Average and Range 
+                maxSV = basis.svRange(2);
+                minSV = basis.svRange(1);
+                avg_sv = (maxSV + minSV) / 2;  %-- Note that this is not the statistical average
+                rng_sv = maxSV - minSV;
+                %++ Generate SV grid or operating points (OP)
+                res_sv = rng_sv / n_bins_sv;
+                sv_op = (minSV:res_sv:maxSV)';
+                sv_op_n = (sv_op - avg_sv)*2 / rng_sv;
+            else
+                disp('The SV range is not specified in the object. Please set it and retry.')
+                return
+            end
+            
+            %++ Normalizing input and generating input grid
+            if ~isempty(basis.inputRange)
+                maxInput = basis.inputRange(2);
+                minInput = basis.inputRange(1);
+                rng_input = maxInput - minInput;
+                res_input = rng_input / n_bins_input;
+                input_op = (minInput:res_input:maxInput)';
+                %++ Depending on the input expansion type, we may or may not need normalization
+                switch basis.inputExpType
+                    case 'tcheb'       %-- This case requires normalization
+                        %++ Calculate input normalization parameter: Average  
+                        avg_input = (maxInput + minInput) / 2;  %-- Note that this is not the statistical average
+                        %++ Generate input grid or operating points (OP)
+                        input_op_n = (input_op - avg_input)*2 / rng_input;
+                    
+                    case 'laguerre'    %-- This case does not require normalization
+                        input_op_n = input_op;
+                    
+                    case 'none'
+                        nSides = get(basis,'nSides');
+                        if nSides == 1
+                            input_op_n = input_op;
+                        elseif nSides == 2
+                            nLags = length(input_op);
+                            maxNegLag = - fix(nLags / nSides);
+                            maxPosLag = + fix(nLags / nSides);
+                            input_op_n = (maxNegLag:maxPosLag)';
+                        else
+                            error('The number of sides must be either 1 or 2.')
+                        end
+                    otherwise
+                        disp('This input expansion type is not supported. Supported types are: laguerre and tcheb.')
+                        return  
+                end
+            else
+                disp('The input range is not specified in the object. Please set it and retry.')
+                return
+            end
+            
+            %++ Initialize mimo_surface and generate INPUT and SV grids
+            nSV_op = length(sv_op_n);
+            nInput_op = length(input_op_n);
+            % mimo_surface = zeros(nSV_op,nInput_op);
+            [INPUT,SV] = meshgrid(input_op_n,sv_op_n);
+            
+            %++ Converting the polynomial elements of the coeffs cell into a coefficient matrix named coeff_matrix
+            q = basis.inputExpOrder;
+            nRows = length(basis.coeffs);
+            if nRows ~= q+1
+                disp('The number of polynomials in the coeffs cell does not match the input expansion order!')
+                return
+            end
+            
+            %++ Future Extension: We assume all polynomials of SV have the same order, but ... 
+            %++ in the future, that must change allowing different expansion orders w.r.t. SV
+            sv_polynoms = basis.coeffs;                 %-- Reads all SV polynomial expansions
+            m = sv_polynoms{1,1}.polyOrder;             %-- Read the order of the 1st SV polynomial {1,1}
+            if m ~= basis.svExpOrder                    %-- In the Future Extension, we shall simply put a for-loop here for checking the order
+                disp('The order of SV polynomials in the coeffs cell does not match the SV expansion order!')
+                return
+            end
+            
+            svPolyType = sv_polynoms{1,1}.polyType; 
+            if ~strcmp(svPolyType,basis.svExpType)
+                disp('The type of SV polynomials in the coeffs cell does not match the SV expansion type!')
+                return
+            end
+                     
+            %++ Generating the 2D basis function and ploting it as a 2D surface (or 3D plot)
+            G_sv = multi_tcheb(sv_op_n,m);
+            %++ Initialize and extract the coeff_matrix based on the verified orders 
+            coeff_matrix = zeros(m+1,q+1);
+            %++ This also depends on the input expnasion type
+            switch basis.inputExpType
+                case 'tcheb'
+                    %++ Initialize and extract 
+                    G_input = multi_tcheb(input_op_n,q);
+                    for cnt_q = 1:q+1
+                        coeff_matrix(:,cnt_q) = sv_polynoms{cnt_q,1}.polyCoef;
+                    end
+                
+                case 'laguerre'
+                    alfa = get(basis,'alfa');
+                    G_input = laguerre(nInput_op,q,alfa);
+                    for cnt_q = 1:q+1
+                        coeff_matrix(:,cnt_q) = sv_polynoms{cnt_q,1}.polyCoef;
+                    end
+                
+                case 'none'
+                    %-- To be developed
+                
+                otherwise
+                    disp('This input expansion type is not supported. Supported types are: laguerre and tcheb.')
+                    return
+            end
+            
+            mimo_surface = G_sv * coeff_matrix * G_input';
+            
+            sv_values_n = (sv_values - avg_sv)*2 / rng_sv;
+
+            sv_values_indx = zeros(size(sv_values_n));
+
+            for i = 1:length(sv_values_indx)
+                delta = SV(:,1) - sv_values_n(i);
+                [~,minIndx] = min(abs(delta));
+                sv_values_indx(i) = minIndx;
+            end
+            
+            mimoSnapshots.svValues = sv_values;
+            mimoSnapshots.domainValues = INPUT(1,:)';
+            mimoSnapshots.dataSet = mimo_surface(sv_values_indx,:)';
+           
+        end
+        
     end  %-- end of methods
 end      %-- end of class definition
 

@@ -116,6 +116,21 @@ classdef pvirf < pvm
             end
         end
         
+        %% Function to get the snapshots of the PVIRF model
+        function snapshotModels = snapshot(sys,sv_values)
+            mimoSnapshots = snapshot(sys.elements,sv_values);
+            snapshotModels.svValues = sv_values;
+            nModels = length(sv_values);
+            snapshotModels.elements = cell(1,nModels);
+            for j = 1:nModels
+                element = irf('domainIncr',sys.domainIncr,...
+                              'domainValues',mimoSnapshots.domainValues,...
+                              'dataSet',mimoSnapshots.dataSet(:,j));
+                snapshotModels.elements{1,j} = element;
+            end
+            
+        end
+        
     end %--> End of methods
 end     %--> End of classdef
 

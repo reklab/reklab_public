@@ -80,6 +80,23 @@ classdef pvnl < pvm  % pvnl is a subclass of pvm
             yp = pvnlSim(model,u,sv);
         end
         
+        %% Function to get the snapshots of the PVNL model
+        function snapshotModels = snapshot(sys,sv_values)
+            mimoSnapshots = snapshot(sys.elements,sv_values);
+            snapshotModels.svValues = sv_values;
+            nModels = length(sv_values);
+            snapshotModels.elements = cell(1,nModels);
+            for j = 1:nModels
+                x = nldat(mimoSnapshots.domainValues);
+                y = nldat(mimoSnapshots.dataSet(:,j));
+                z = cat(2,x,y);
+                element = polynom('polyType','tcheb','polyOrder',sys.elements.inputExpOrder);
+                element = nlident(element,z);
+                snapshotModels.elements{1,j} = element;
+            end
+            
+        end
+        
         %% Function to identify a static PVNL model from data (To be developed)
         function sys = nlident(sys, z, varargin)
              disp('No identification method has yet been developed for PVNL objects');

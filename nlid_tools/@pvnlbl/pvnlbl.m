@@ -310,6 +310,25 @@ classdef pvnlbl < pvm
             end
         end
         
+        %% Function to get the snapshots of the PV Hammerstein (pnnlbl) model
+        function snapshotModels = snapshot(sys,sv_values)
+            %++ Extract elements of the cascade: PVNL and PVIRF
+            PVNL = sys.elements{1,1};
+            PVIRF = sys.elements{1,2};
+            
+            snapshotsPVNL = snapshot(PVNL,sv_values);
+            snapshotsPVIRF = snapshot(PVIRF,sv_values);
+            
+            snapshotModels.svValues = sv_values;
+            nModels = length(sv_values);
+            snapshotModels.elements = cell(1,nModels);
+            for j = 1:nModels
+                element = nlbl;
+                element.elements = {snapshotsPVNL.elements{1,j}, snapshotsPVIRF.elements{1,j}};
+                snapshotModels.elements{1,j} = element;
+            end
+        end
+        
     end %--> End of methods
 end     %--> End of classdef
 

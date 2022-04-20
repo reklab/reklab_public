@@ -110,3 +110,21 @@ plot(PVH_r,'n_bins_input',50,'n_bins_sv',40)
 sv_values = min(sv_d.dataSet):0.1:max(sv_d.dataSet);
 figure;
 plot(PVH_r,'n_bins_input',50,'n_bins_sv',40,'sv_values',sv_values)
+
+%% Getting snapshots of the PV Hammerstein system of reflex pathway at specific SV values
+sv_values = min(sv_d.dataSet):0.1:max(sv_d.dataSet);
+PVH_r_snapshots = snapshot(PVH_r,sv_values);
+disp('==============================================')
+disp('The snapshots of the PVH model of reflex are:')
+disp(PVH_r_snapshots)
+
+%% Getting snapshots of the inidicual elements the reflex: PVNL, PVIRF at specific SV values
+PVNL_r_snapshots = snapshot(PVH_r.elements{1,1},sv_values);
+disp('==============================================')
+disp('The snapshots of the PV model of reflex nonlinearity are:')
+disp(PVNL_r_snapshots)
+
+PVIRF_r_snapshots = snapshot(PVH_r.elements{1,2},sv_values);
+disp('==============================================')
+disp('The snapshots of the PV model of reflex dynamics are:')
+disp(PVIRF_r_snapshots)

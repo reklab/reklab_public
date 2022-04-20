@@ -624,7 +624,7 @@ decimationR = 1;             %-- The data is already decimated at this stage whe
 [static_nl,h_r,TQ_R,fIter] = hammerstein_lpv_laguerre_v02(zR,rho,wNL,wIRF,'irf_len_r',irf_len_r,'n',n,'p',p,'m',m,'q',q,'alfa',alfa,'max_iter',max_iter,...
                                                                  'static_nl_param_init',static_nl_param_init,'use_vel_zeroth_exp',use_vel_zeroth_exp,'decimation_ratio',decimationR,'static_nl_init',static_nl_init);
  
-disp(['Terminated at iteration ',num2str(fIter)]);
+disp(['Identification terminated at iteration ',num2str(fIter)]);
 stopIter = fIter;                                                             
 
 end
