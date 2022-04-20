@@ -38,8 +38,9 @@ classdef mimobasis < nltop
             else
                 basis = nlmkobj(basis,a,varargin{:});
             end
-            %++ Type specific parameter: Decay parameter if input is expanded by Laguerre polynomials 
+            %++ Type specific parameter: 
             switch basis.inputExpType
+                % Decay parameter if input is expanded by Laguerre polynomials 
                 case 'laguerre'
                     basis.parameterSet(1) = ...
                         param('paramName','alfa',...
@@ -47,6 +48,14 @@ classdef mimobasis < nltop
                               'paramHelp','Constant decay parameter of the Laguerre expansion',...
                               'paramType','number',...
                               'paramLimits',[0.01 1]); %-- The theoretical lower limit is any number bigger than 0
+                % nSides if input is expanded by Laguerre polynomials 
+                case 'none'
+                    basis.parameterSet(1) = ...
+                        param('paramName','nSides',...
+                               'paramDefault',1,...
+                               'paramHelp','Determines whether it is a 1-sided or 2-sided IRF',...
+                               'paramType','number',...
+                               'paramLimits',[1 2]); %-- The actual values it can take are either 1 or 2
                 otherwise 
                     return
             end           
@@ -85,6 +94,13 @@ classdef mimobasis < nltop
                                            'paramHelp','Constant decay parameter of the Laguerre expansion',...
                                            'paramType','number',...
                                            'paramLimits',[0.01 1]); %-- The theoretical lower limit is any number bigger than 0
+                            case 'none'
+                                % IRF needs number of sides to define it
+                                outPs(1) = param('paramName','nSides',...
+                                           'paramDefault',1,...
+                                           'paramHelp','Determines whether it is a 1-sided or 2-sided IRF',...
+                                           'paramType','number',...
+                                           'paramLimits',[1 2]); %-- The actual values it can take are either 1 or 2
                             otherwise
                                 outPs = param;    %-- only laguerre and tcheb are supported for inputExpType
                         end
@@ -107,6 +123,7 @@ classdef mimobasis < nltop
         function plot(basis,varargin)
             options={{'n_bins_input' 40 'number of bins for a grid on input'} ...
                      {'n_bins_sv' 40 'number of bins for a grid on SV'} ...
+                     {'sv_values' nan 'SV values for which to observe the identified system'} ...
             };
             if arg_parse(options,varargin)
                 return
@@ -137,13 +154,27 @@ classdef mimobasis < nltop
                 input_op = (minInput:res_input:maxInput)';
                 %++ Depending on the input expansion type, we may or may not need normalization
                 switch basis.inputExpType
-                    case 'laguerre'    %-- This case does not require normalization
-                        input_op_n = input_op;
                     case 'tcheb'       %-- This case requires normalization
                         %++ Calculate input normalization parameter: Average  
                         avg_input = (maxInput + minInput) / 2;  %-- Note that this is not the statistical average
                         %++ Generate input grid or operating points (OP)
                         input_op_n = (input_op - avg_input)*2 / rng_input;
+                    
+                    case 'laguerre'    %-- This case does not require normalization
+                        input_op_n = input_op;
+                    
+                    case 'none'
+                        nSides = get(basis,'nSides');
+                        if nSides == 1
+                            input_op_n = input_op;
+                        elseif nSides == 2
+                            nLags = length(input_op);
+                            maxNegLag = - fix(nLags / nSides);
+                            maxPosLag = + fix(nLags / nSides);
+                            input_op_n = (maxNegLag:maxPosLag)';
+                        else
+                            error('The number of sides must be either 1 or 2.')
+                        end
                     otherwise
                         disp('This input expansion type is not supported. Supported types are: laguerre and tcheb.')
                         return  
@@ -188,6 +219,13 @@ classdef mimobasis < nltop
             coeff_matrix = zeros(m+1,q+1);
             %++ This also depends on the input expnasion type
             switch basis.inputExpType
+                case 'tcheb'
+                    %++ Initialize and extract 
+                    G_input = multi_tcheb(input_op_n,q);
+                    for cnt_q = 1:q+1
+                        coeff_matrix(:,cnt_q) = sv_polynoms{cnt_q,1}.polyCoef;
+                    end
+                
                 case 'laguerre'
                     alfa = get(basis,'alfa');
                     G_input = laguerre(nInput_op,q,alfa);
@@ -195,12 +233,8 @@ classdef mimobasis < nltop
                         coeff_matrix(:,cnt_q) = sv_polynoms{cnt_q,1}.polyCoef;
                     end
                 
-                case 'tcheb'
-                    %++ Initialize and extract 
-                    G_input = multi_tcheb(input_op_n,q);
-                    for cnt_q = 1:q+1
-                        coeff_matrix(:,cnt_q) = sv_polynoms{cnt_q,1}.polyCoef;
-                    end
+                case 'none'
+                    %-- To be developed
                 
                 otherwise
                     disp('This input expansion type is not supported. Supported types are: laguerre and tcheb.')
@@ -210,11 +244,27 @@ classdef mimobasis < nltop
             mimo_surface = G_sv * coeff_matrix * G_input';
             
             %++ Plotting the computed MIMO surface
-            surf(INPUT,SV,mimo_surface,'LineStyle','none'); 
-            xlabel('Input');  
-            ylabel('SV'); 
-            zlabel('Basis Amplitude');
-            title('2D Basis Function');
+            if isnan(sv_values)
+                surf(INPUT,SV,mimo_surface,'LineStyle','none'); 
+                xlabel('Input');  
+                ylabel('SV'); 
+                zlabel('Basis Amplitude');
+                title('2D Basis Function');
+            else
+                sv_values_n = (sv_values - avg_sv)*2 / rng_sv;
+
+                sv_values_indx = zeros(size(sv_values_n));
+
+                for i = 1:length(sv_values_indx)
+                    delta = SV(:,1) - sv_values_n(i);
+                    [~,minIndx] = min(abs(delta));
+                    sv_values_indx(i) = minIndx;
+                end
+                
+                plot(INPUT(1,:),mimo_surface(sv_values_indx,:))
+                
+            end
+            
         end
         
     end  %-- end of methods

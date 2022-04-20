@@ -12,7 +12,7 @@ classdef pvpc < pvm
     %        submitted to IEEE TBME, 11 Feb. 2022
     
     properties
-
+        reflexDelay = 0.05;  %-- Reflex delay in seconds. Default value is 0.05.
     end
     
     methods
@@ -197,9 +197,8 @@ classdef pvpc < pvm
             iDecimation = find(strcmp(varargin,'decimation'));
             decimation = varargin(iDecimation+1); decimation = decimation{1,1};
             
-            %== Reflex delay (rDelay) should naturaly become an attribute of the model or a (hyper)parameter of the identification method - TBD  
-            iDelay = find(strcmp(varargin,'rDelay'));
-            rDelay = varargin(iDelay+1); rDelay = rDelay{1,1};
+            %== Reflex delay (rDelay), a (hyper)parameter of the identification method, which is now saved as an attribute of the pvpc model instead of being an input argument.  
+            rDelay = sys.reflexDelay;           
                        
             switch newMethod{1,1}             
                 case 'nppv-pc'
@@ -243,7 +242,7 @@ classdef pvpc < pvm
                     use_vel_zeroth_exp = 'yes';
                     % static_nl_init = []; 
                     
-                    [h_i,h_r,static_nl,TQIhat,TQRhat,TQRproj] = pcasc_lpv_laguerre(io,rho,wNL,wIRF,'irf_len_r',irf_len_r,'irf_len_i',irf_len_i,'n',n,'p',p-1,'p_i',p_i,'m',m,'q',q,'alfa',alfa,'delay',rDelay,...
+                    [h_i,h_r,static_nl] = pcasc_lpv_laguerre(io,rho,wNL,wIRF,'irf_len_r',irf_len_r,'irf_len_i',irf_len_i,'n',n,'p',p-1,'p_i',p_i,'m',m,'q',q,'alfa',alfa,'delay',rDelay,...
                                                                              'static_nl_param_init',static_nl_param_init,'use_vel_zeroth_exp',use_vel_zeroth_exp,'nside_i',nside_i,'max_iter',max_iter);                  
                     %% Setup the objects based on the identification results
                     rho_d = decimate_kian(rho,decimation);
@@ -269,11 +268,14 @@ classdef pvpc < pvm
                                       'inputExpType','none',...
                                       'svExpOrder',h_i.svExpOrder,...
                                       'inputExpOrder',NaN,...
-                                      'coeffsStruct',h_i);
+                                      'coeffsStruct',h_i,...
+                                      'nSides',nside_i);
                                   
-                    PVIRF_i = pvirf;
+                    PVIRF_i = pvirf('irfExpansion','none');
+                                        
                     PVIRF_i.nSides = nside_i;
                     PVIRF_i.elements = PVIRF_i_BASIS;
+                    PVIRF_i.domainIncr = decimation * io.domainIncr;
                     
                     %++ REFLEX Pathway: Extracting SV Tchebychev polynomials from static_nl and setup PVNL 
                     sv_polynoms_pvnl = cell(static_nl.inputExpOrder+1,1);
@@ -320,12 +322,17 @@ classdef pvpc < pvm
                                       'alfa',h_r.LaguerreAlfa,...
                                       'coeffsStruct',h_r);
                     
-                    PVIRF = pvirf;
+                    PVIRF = pvirf('irfExpansion','laguerre');
+                                        
                     PVIRF.elements = PVIRF_BASIS;
+                    PVIRF.domainIncr = h_r.Ts;
                     
+                    % Reflex stiffness is a cascade of time derivative, reflex delay and PV Hammerstein model
+                    DDT_r = nlmddt;
+                    DELAY_r = nlmdelay('inputDelay',rDelay);                    
                     PVH_r = pvnlbl;
-                    set(PVH_r,'elements',{PVNL,PVIRF});
-                    
+                    set(PVH_r,'elements',{DDT_r, DELAY_r, PVNL, PVIRF});
+                                                         
                     %++ Set the estimated intrinsic model (PVIRF_i) and the estimated reflex model (PVH_r) as the elements of the identified PV-PC stiffness model
                     set(sys,'elements',{PVIRF_i; PVH_r});                    
                     
@@ -356,25 +363,6 @@ classdef pvpc < pvm
             subplot(1,2,2)
             plot(PVIRF,'n_bins_input',n_bins_input,'n_bins_sv',n_bins_sv)
             
-        end
-        
-        %% Simulation method for the PV-PC stiffness model
-        function [tqT,tqI,tqR] = nlsim(sys, u, sv, varargin)  
-            %== Reflex delay (rDelay) should naturaly become an attribute of the model or a (hyper)parameter of the identification method - TBD  
-            iDelay = find(strcmp(varargin,'rDelay'));
-            rDelay = varargin(iDelay+1); rDelay = rDelay{1,1};
-            
-            PV_I = sys.elements{1,1}; %-- PV Intrinsic stiffness
-            
-            PV_R = sys.elements{2,1}; %-- PV Reflex stiffness
-            PV_R_NL = PV_R.elements{1,1};
-            PV_R_IRF = PV_R.elements{1,2};
-            
-            model.h_i = PV_I.elements.coeffsStruct;
-            model.static_nl = PV_R_NL.elements.coeffsStruct;
-            model.h_r = PV_R_IRF.elements.coeffsStruct;
-            model.rDelay = rDelay;
-            [tqT,tqI,tqR] = pvpcStiffnessSim(model,u,sv);
         end
         
     end %--> End of methods
@@ -470,8 +458,7 @@ vel = ddt(pos);
 % acc = ddt(vel);
 
 % Finding delayed velocity (because of the reflex delay)
-dvel = del(vel.dataSet,fs,delay);
-dvel = nldat(dvel,'domainIncr',ts);
+dvel = del(vel,delay);
 
 %% Data Decimation for Identification
 pos = decimate_kian(pos,decimation_ratio,decimate_option);
@@ -710,15 +697,11 @@ nsamp = size(rho.dataSet,1);
 %% Normalizing the input of the static NL of the Hammerstein system 
 avg_i = (max(input.dataSet)+min(input.dataSet))/2;
 rng_i = max(input.dataSet) - min(input.dataSet);
-% avg_i = 0;
-% rng_i = 5;
 input_n = (input.dataSet - avg_i)*2/rng_i;
 
 %% Normalizing scheduling variable
 avg_rho = (max(rho.dataSet)+min(rho.dataSet))/2;
 rng_rho = max(rho.dataSet) - min(rho.dataSet);
-% avg_rho = -0.125;
-% rng_rho = +0.75;
 rho_n = (rho.dataSet - avg_rho)*2/rng_rho;
 
 %% Computing the lagged, normalized SV and expanded input for the LPV Hammerstein system
@@ -1062,244 +1045,5 @@ for i = 1:n
         Gamma_c(ind1:ind2,cnt) = c;
     end
 end
-
-end
-
-%% 6. PV-PC simulation function
-function [tqT,tqI,tqR] = pvpcStiffnessSim(model,pos,rho)
-%% Ehsan Sobhnai, Aug. 4, 2016
-%++ This function simulates the output of a Non-Parametric LPV PC model of joint stiffness in response to the input u and scheduling variable rho
-
-%-- Inputs: 
-%       (1) model: The object/structure containing the NPLPV-PC model of joint stiffness: LPV IRF intrinsic in parallel with LPV Chebychev Static NL + LPV Laguerre for reflex  
-%       (2) pos: input of stiffness model e.g., position (perturbation)
-%       (3) rho: scheduling variable 
-
-%-- Output:
-%       (1) tqT: predicted total stiffness torque in response to input position and SV (rho)
-%       (2) tqI: predicted intrinsic torque
-%       (3) tqR: predicted reflex torque
-
-%-- Reading the structural blocks of the LPV PC system (LPV IRF || LPV NL + LPV IRF)
-h_i = model.h_i;
-static_nl = model.static_nl;
-h_r = model.h_r;
-rDelay = model.rDelay;
-
-nSamples = length(pos.dataSet);
-
-%% Few sanity checks on the model
-if static_nl.svNormalization ~= h_r.svNormalization
-    disp('The SV Normalization Factors for Static NL and IRF-Laguerre are not the same!')
-    tqT = [];
-    return;
-else
-    avg_rho = static_nl.svNormalization(1);
-    rng_rho = static_nl.svNormalization(2);
-end
-
-ts = h_r.Ts;
-fs = 1/ts;
-if ts ~= pos.domainIncr
-    disp('The sampling time of the input does not match that of the IRF dynamics of the Hammerstein cascade!')
-    tqT = [];
-    return;
-end
-
-%=== Normalizing the SV
-rho_n = (rho.dataSet - avg_rho)*2/rng_rho;
-
-%% Reading the LPV IRF parameters of intrinsic stiffness and simulating intrinsic torque 
-intrinsic = h_i.data;
-nside_i = h_i.nSides;
-nLags_i = h_i.nLags;
-p_i = h_i.svExpOrder;
-
-%=== Computing the lagged positions for the Intrinsic IRF 
-Li = (nLags_i - 1) / nside_i;
-
-if nside_i == 1
-    lags_i = ts * (0:Li);
-else
-    lags_i = ts * (-Li:1:Li);
-end
-
-pos_lags = zeros(nSamples,length(nLags_i));
-for d = 1:nLags_i
-    pos_lags(:,d) = del(pos.dataSet,fs,lags_i(d));
-end
-
-%== Computing the Tchebychev expansions of scheduling for intrinsic pathway
-Gpi =  multi_tcheb(rho_n,p_i);
-
-%== The Regressor of the Intrinsic Pathway
-Phi_intrinsic_expand = zeros(nSamples,(p_i+1)*(nLags_i));
-
-col = 0;
-for d = 1:nLags_i
-    for pic = 1:p_i+1
-        col = col + 1;
-        Phi_intrinsic_expand(:,col) = pos_lags(:,d).*Gpi(:,pic);        
-    end
-end
-
-%== Intrinsic Torque
-tqI = Phi_intrinsic_expand*intrinsic;
-tqI = nldat(tqI,'domainIncr',ts);
-
-%% Reading the LPV Static NL parameters and simulating it output, z
-%=== Generating the reflex path input, delayed velocity
-vel = ddt(pos);
-velD = del(vel.dataSet,fs,rDelay);
-velD = nldat(velD,'domainIncr',ts);
-reflexModel.static_nl = static_nl;
-reflexModel.h_r = h_r;
-tqR = pvHammLaguerreSim(reflexModel,velD,rho);
-
-%% Total torque
-tqT = tqI + tqR;
-
-end
-
-%% 7. NPNPV-H simulator function
-function yp = pvHammLaguerreSim(model,u,rho)
-%% Ehsan Sobhnai, May 12, 2021, just renamed the function created Feb. 26, 2021 from lpvHammLaguerreSim to pvHammLaguerreSim 
-%++ This function simulates the output of a LPV Hammerstein Laguerre model in response to the input u and scheduling variable rho
-
-%-- Inputs: 
-%       (1) model: The object/structure containing the model
-%       (2) u: input signal (e.g., perturbation velocity
-%       (3) rho: scheduling variable 
-
-%-- Output:
-%       (1) yp: predicted response of the model to input u and SV of rho
-
-%% Modifications:
-%-- May  05, 2021: I applied changes to the naming of properties and function arguments to make them consistent with the latest version of the NLID toolbox
-%                  For example, nldatObj.data to nldatObj.dataSet
-
-%% Body of the code
-%-- Reading the structural blocks of the LPV Hammerstein system (LPV NL + LPV IRF)
-static_nl = model.static_nl;
-h_r = model.h_r;
-
-nSamples = length(u.dataSet);
-
-%+++ Few sanity checks on the model
-if static_nl.svNormalization ~= h_r.svNormalization
-    disp('The SV Normalization Factors for Static NL and IRF-Laguerre are not the same!')
-    yp = [];
-    return;
-else
-    avg_rho = static_nl.svNormalization(1);
-    rng_rho = static_nl.svNormalization(2);
-end
-
-ts = h_r.Ts;
-fs = 1/ts;
-if ts ~= u.domainIncr
-    disp('The sampling time of the input does not match that of the IRF dynamics of the Hammerstein cascade!')
-    yp = [];
-    return;
-end
-
-%% Reading the LPV Static NL parameters and simulating it output, z
-avg_i = static_nl.inputNormalization(1);
-rng_i = static_nl.inputNormalization(2);
-alpha = static_nl.coeffs;
-n = static_nl.inputExpOrder;
-p = static_nl.svExpOrder;
-
-%-- The parameters of LPV static NL in matrix alpha must be ordered as [inputExpOrder,svExpOrder]
-[inputExpOrder,svExpOrder] = size(alpha);
-if svExpOrder ~=p+1
-    disp('The expansion order of SV does not match the number of columns in alpha!')
-    yp = [];
-end
-
-switch static_nl.useZerothInpExp
-    case 'no'
-        if inputExpOrder ~= n
-            disp('The expansion order of input does not match the number of rows in alpha!')
-            yp = [];
-            return;
-        end
-    case 'yes'
-        if inputExpOrder ~= n+1
-            disp('The expansion order of input does not match the number of rows in alpha!')
-            yp = [];
-            return;
-        end
-end
-
-%++ Normalizing the input and scheduling variable
-u_n = (u.dataSet - avg_i)*2/rng_i;
-rho_n = (rho.dataSet - avg_rho)*2/rng_rho;
-
-%++ Chebychev Basis Exapnsions of normalized Input and SV
-Gn = multi_tcheb(u_n,n); 
-if strcmp(static_nl.useZerothInpExp,'no')
-    Gn = Gn(:,2:end);
-end
-
-Gp = multi_tcheb(rho_n,p);
-
-%++ Generating the output of the LPV static NL, z
-z = zeros(nSamples,1);
-for k = 1:nSamples
-    sumZ = 0;
-    for i = 1:size(Gn,2)
-        for j = 1:size(Gp,2)
-            sumZ = sumZ + alpha(i,j)*Gn(k,i)*Gp(k,j); 
-        end
-    end
-    z(k,1) = sumZ;
-end
-
-%% Reading the LPV Laguerre Dynamics parameters and simulating it output, i.e. system output yp, using z as its input.
-c = h_r.coeffs;
-alfa = h_r.LaguerreAlfa;
-q = h_r.LaguerreExpOrder;
-m = h_r.svExpOrder;
-nLags = h_r.nLags;
-  
-%-- Generating the Laguerre Basis Functions up to order q
-f = laguerre(nLags,q,alfa);
-
-%-- Generating Chebychev Basis Expansions of SV
-Gm = multi_tcheb(rho_n,m);
-
-%-- Computing the lagged inputs of the LPV Hammerstein dynamics, which are the lagged outputs of the LPV static NL.  
-lags = h_r.Ts * (0:nLags);
-z_lags = zeros(nSamples,length(nLags));
-
-for d = 1:nLags
-    z_lags(:,d) = del(z,fs,lags(d));
-end
-
-%-- Computing the Zl[nsamp,(q+1)] vector of covolution sum of Laguerre bases and lagged outputs of the LPV static NL. 
-ZL = zeros(nSamples,q+1);  %-- I named it with Capital ZL (output of static NL convolved with Laguerre)
-
-for k = 1:nSamples
-    for cnt_q = 1:q+1
-        ZL(k,cnt_q) = f(:,cnt_q)'*z_lags(k,:)';
-    end
-end
-
-%% Computing the output of the LPV Hammerstein system
-yp = zeros(nSamples,1);
-for k = 1:nSamples
-    sumY = 0;
-    for cnt_m = 1:m+1
-        for cnt_q = 1:q+1
-            sumY = sumY + c(cnt_m,cnt_q)*Gm(k,cnt_m)*ZL(k,cnt_q);
-        end
-    end
-    yp(k,1) = sumY;
-end
-
-% yp = h_r.Ts * yp;
-
-yp = nldat(yp,'domainIncr',ts);
 
 end

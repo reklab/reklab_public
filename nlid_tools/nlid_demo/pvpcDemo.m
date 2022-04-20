@@ -39,6 +39,7 @@ pvpcStiffness.p_i = 2;           %0; 2; 3;
 %== REFLEX Pathway
 % pvpcStiffness.nside_r = 1;       %-- Number of sides of reflex IRF - Setting this gives an error! To be investigated. For now, default is 1.
 rDelay = 0.05;         %-- in seconds
+pvpcStiffness.reflexDelay = rDelay;
 pvpcStiffness.irf_len_r = 0.8 - rDelay;
 pvpcStiffness.alfa = 0.5;
 
@@ -46,20 +47,23 @@ pvpcStiffness.n = 7;   %-- Order of expansion of reflex NL w.r.t. delayed veloci
 pvpcStiffness.p = 2+1; %-- Order of expansion of reflex NL w.r.t. SV.               Default is 9.
 
 pvpcStiffness.q = 8;   %-- Laguerre expansion order for reflex dynamics.    Default is 8.
-pvpcStiffness.m = 0;   %-- Order of expansion of reflex dynamics w.r.t. SV. Default is 8.
+pvpcStiffness.m = 0;   %-- Order of expansion of reflex dynamics w.r.t. SV. Default is 8. In the IEEE TBME paper, it was 0.
 
 pvpcStiffness.max_iter = 500; 
 pvpcStiffness.threshold = 10^-10;                  %-- Threshold on SSE for terminitiaon of the iterative search'
+
 
 %% Identify the system using I/SV/O data structure
 decimation = 10;
 pvpcStiffness = nlident(pvpcStiffness,z,sv,'idMethod',pvpcStiffness.idMethod,'decimation',decimation,'rDelay',rDelay);
 
-%% Simulate the identified PV-Hammerstein model
+%% Simulate the identified PVPC stiffness model and its individual elements: intrinsic and reflex stiffness
 u = z(:,1);
 u_d = decimate_kian(u,decimation);
 sv_d = decimate_kian(sv,decimation);
-[tqT_d_hat, tqI_d, tqR_d] = nlsim(pvpcStiffness,u_d,sv_d,'rDelay',rDelay);
+tqI_d = nlsim(pvpcStiffness.elements{1,1},u_d,sv_d);
+tqR_d = nlsim(pvpcStiffness.elements{2,1},u_d,sv_d);
+tqT_d_hat = nlsim(pvpcStiffness,u_d,sv_d);
 
 %% Plot predicted output against measured output, as well as the intrinsic and reflex torques
 tqT_d = decimate_kian(output,decimation);
@@ -96,7 +100,13 @@ title(sprintf('Reflex torque contribution to total torque, VAF = %0.1f%%',v.data
 xlabel('time (s)');
 
 %% Plot the identified PV Hammerstein system of reflex pathway
-figure;
+%-- As a 3D plot; i.e. function of both input and SV
 PVH_r = pvpcStiffness.elements{2,1};
-plot(PVH_r,'n_bins_input',50,'n_bins_sv',50)
+PVH_r.elements = PVH_r.elements(1,3:4); %-- Excluding the derivative and delay from plotting
+figure;
+plot(PVH_r,'n_bins_input',50,'n_bins_sv',40)
 
+%-- As a 2D plot at specific values (or snapshots) of SV
+sv_values = min(sv_d.dataSet):0.1:max(sv_d.dataSet);
+figure;
+plot(PVH_r,'n_bins_input',50,'n_bins_sv',40,'sv_values',sv_values)

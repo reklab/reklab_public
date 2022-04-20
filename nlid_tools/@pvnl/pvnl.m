@@ -47,21 +47,37 @@ classdef pvnl < pvm  % pvnl is a subclass of pvm
         function plot(sys,varargin)
             options={{'n_bins_input' 40 'number of bins for a grid on input'} ...
                      {'n_bins_sv' 40 'number of bins for a grid on SV'} ...
+                     {'sv_values' nan 'SV values for which to observe the identified system'} ...
             };
+        
             if arg_parse(options,varargin)
                 return
             end
-            
-            plot(sys.elements,'n_bins_input',n_bins_input,'n_bins_sv',n_bins_sv);
-            xlabel('Input');  
-            ylabel('SV'); 
-            zlabel('Nonlinearity Output');
-            title('PV Static NL');
+                                  
+            if isnan(sv_values)
+                plot(sys.elements,'n_bins_input',n_bins_input,'n_bins_sv',n_bins_sv);
+                xlabel('Input');  
+                ylabel('SV'); 
+                zlabel('Nonlinearity Output');
+                title('PV Static NL');
+            else
+                plot(sys.elements,'n_bins_input',n_bins_input,'n_bins_sv',n_bins_sv,'sv_values',sv_values);
+                xlabel('Input');
+                ylabel('Nonlinearity Output');
+                nSVs = length(sv_values);
+                sv_legends = cell(1,nSVs);
+                for i = 1:nSVs
+                    sv_legends{1,i} = ['SV=',num2str(sv_values(i))];
+                end
+                legend(sv_legends);
+            end
         end
         
         %% Function to simulate a static PVNL model
-        function y = nlsim(sys, z, varargin)
-            
+        function yp = nlsim(sys, u, sv, varargin)
+            PVNL = sys.elements;
+            model.static_nl = PVNL.coeffsStruct;
+            yp = pvnlSim(model,u,sv);
         end
         
         %% Function to identify a static PVNL model from data (To be developed)
@@ -73,3 +89,73 @@ classdef pvnl < pvm  % pvnl is a subclass of pvm
     end %--> End of methods
 end     %--> End of classdef
 
+%% 1. PV-NL simulation function
+function yp = pvnlSim(model,u,rho)
+
+%=== Reading data parameters
+ts = u.domainIncr;
+fs = 1/ts;
+nSamples = length(u.dataSet);
+
+%=== Reading model parameters
+static_nl = model.static_nl;
+
+avg_i = static_nl.inputNormalization(1);
+rng_i = static_nl.inputNormalization(2);
+
+avg_rho = static_nl.svNormalization(1);
+rng_rho = static_nl.svNormalization(2);
+
+alpha = static_nl.coeffs;
+n = static_nl.inputExpOrder;
+p = static_nl.svExpOrder;
+
+%-- The parameters of LPV static NL in matrix alpha must be ordered as [inputExpOrder,svExpOrder]
+[inputExpOrder,svExpOrder] = size(alpha);
+if svExpOrder ~=p+1
+    disp('The expansion order of SV does not match the number of columns in alpha!')
+    yp = [];
+end
+
+switch static_nl.useZerothInpExp
+    case 'no'
+        if inputExpOrder ~= n
+            disp('The expansion order of input does not match the number of rows in alpha!')
+            yp = [];
+            return;
+        end
+    case 'yes'
+        if inputExpOrder ~= n+1
+            disp('The expansion order of input does not match the number of rows in alpha!')
+            yp = [];
+            return;
+        end
+end
+
+%++ Normalizing the input and scheduling variable
+u_n = (u.dataSet - avg_i)*2/rng_i;
+rho_n = (rho.dataSet - avg_rho)*2/rng_rho;
+
+%++ Chebychev Basis Exapnsions of normalized Input and SV
+Gn = multi_tcheb(u_n,n); 
+if strcmp(static_nl.useZerothInpExp,'no')
+    Gn = Gn(:,2:end);
+end
+
+Gp = multi_tcheb(rho_n,p);
+
+%++ Generating the output of the LPV static NL, z
+z = zeros(nSamples,1);
+for k = 1:nSamples
+    sumZ = 0;
+    for i = 1:size(Gn,2)
+        for j = 1:size(Gp,2)
+            sumZ = sumZ + alpha(i,j)*Gn(k,i)*Gp(k,j); 
+        end
+    end
+    z(k,1) = sumZ;
+end
+
+yp = nldat(z,'domainIncr',ts);
+
+end
