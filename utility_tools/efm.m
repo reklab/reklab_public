@@ -141,11 +141,19 @@ classdef efm < nltop
             
         end
         
-        function efmStruct= efm2struct ( e )
+        function efmStruct= efm2struct ( e, doConvertSegdat )
+            if nargin < 2
+                doConvertSegdat = false;
+            end
             fieldList=fieldnames(e);
             for i=1:length(fieldList)
                 curField=fieldList{i};
                 efmStruct.(curField)=get(e,curField);
+            end
+            if doConvertSegdat
+                for j=1:length(e.signals)
+                    efmStruct.signals(j).segdat=segdat2struct(e.signals(j).segdat);
+                end
             end
         end
         
@@ -510,6 +518,14 @@ classdef efm < nltop
             T.processDate=datetime;
             sqlwrite(ctgConn,'CTGstatus', T);
         end
+
+        function e = saveFile (EFM, path)
+            %disp(['Saving ' EFM.GUID ' to path ' path]);
+            efmStruct=efm2struct(EFM, true);
+            save([path '\\' EFM.GUID], 'efmStruct');
+        end
+        
+
         function SS = stats(EFM)
             % chanStats = emEFMstats(EFM) - compute important statistics of a EM EFM file
             % input:
@@ -649,7 +665,7 @@ classdef efm < nltop
                 end
             end
         end
-        
+
         function multiPlot (g)
             % multiPlot (g) - loads and plots multiple EFM files in the same window
             % g = cell array of guids to compare

@@ -63,7 +63,15 @@ classdef segdat<nldat
                e(iSeg).type='SEGDAT';
             end
          end
-            
+         
+         function segdatStruct= segdat2struct ( S )
+            fieldList=fieldnames(S);
+            for i=1:length(fieldList)
+                curField=fieldList{i};
+                segdatStruct.(curField)=get(S,curField);
+            end
+            segdatStruct.parameterSet=getParamValStruct(S.parameterSet);
+        end
         
         
         function C = corirf(S, fncType,varargin)
