@@ -252,6 +252,12 @@ classdef efm < nltop
             
         end
         
+        function s = getSegdat(eIn, measure)
+            e=getMeasure(eIn, measure);
+            s= e.signals.segdat;
+        end
+            
+        
         
         function eInter = intersect ( eIn, mhrFlag)
             % intersect returns interection of signal in signal list
