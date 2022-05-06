@@ -40,6 +40,80 @@ classdef efm < nltop
             EFMout.signals=sigOut;
         end
         
+        function EFMout = separateFHRSensors (EFMin)
+            % sigOut = emEFMCombineSensors (sigIn) 
+            % - put fECG and doppler segments into separate signals
+            % - assumes that combineSensors has been called to generate
+            %   sensor comments in segdat.segInfo
+            %
+            if isempty(strfind(EFMin.comment, 'EFMCombineSensors'))
+                error('combineSensors has not been applied');
+            end
+            versionNum='1.0';
+            DIM1 = 1;
+            EFMout=EFMin;
+            sigIn=EFMin.signals;
+            sigOut = sigIn;
+            measureList= {'HR1' 'HR2'};
+            sensorList = {'external', 'FECG'};
+            nMeasure=length(measureList);
+
+            for kSensor = 1:length(sensorList)
+                disp(sprintf('Processing sensor %s', sensorList{kSensor}));
+                segdatOut = [];
+                for iMeasure=1:nMeasure
+                    disp(sprintf('Processing measure %s', measureList{iMeasure}));
+                    jSignal = find(strcmp(measureList{iMeasure},{sigIn.measure}));
+                    sigIn(jSignal)
+                    sigIn(jSignal).segdat
+                    sigIn(jSignal).segdat.segInfo
+
+                    iSensor=[];
+                    for kSensor2 = 1:length(sensorList)
+                        iSensor=[iSensor contains(sigIn(jSignal).sensor, sensorList{kSensor2})];
+                    end
+                    if iSensor(kSensor)
+                        if sum(iSensor) > 1
+                            % signal has a mixture of sensors, so separate them
+                            if (length(sigIn(jSignal).segdat.segInfo) ~= length(sigIn(jSignal).segdat.domainStart))
+                                disp(sprintf('%s-%s: mixed signal with merge', EFMin.GUID,measureList{iMeasure}));
+                            end
+
+                            allSegmentI = find(contains(sigIn(jSignal).segdat.segInfo, sensorList{kSensor}))
+                            for lSegment = allSegmentI
+                                if isempty(segdatOut)
+                                    segdatOut = segdat(segGet(sigIn(jSignal).segdat,lSegment))
+                                else
+                                    segdatOut = cat(DIM1, segdatOut, segdat(segGet(sigIn(jSignal).segdat,lSegment)));
+                                end
+                            end
+                        else
+                            % signal has only current sensor, so add it
+                            %disp(sprintf('%s: single sensor signal', EFMin.GUID))
+                            if (length(sigIn(jSignal).segdat.segInfo) ~= length(sigIn(jSignal).segdat.domainStart))
+                                disp(sprintf('%s-%s: single signal with merge', EFMin.GUID,measureList{iMeasure}));
+                            end
+                            if isempty(segdatOut)
+                                segdatOut = sigIn(jSignal).segdat;
+                            else
+                                segdatOut = cat(DIM1, segdatOut, sigIn(jSignal).segdat);
+                            end
+                        end
+                    end
+                end
+                if ~isempty(segdatOut)
+                    iOutSignal = length(sigOut)+1;
+                    sigOut(iOutSignal).segdat = segdatOut;
+                    sigOut(iOutSignal).measure = sensorList{kSensor};
+                    sigOut(iOutSignal).monitor = sensorList{kSensor};
+                    sigOut(iOutSignal).sensor = sensorList{kSensor};
+                end
+            end
+            EFMout.signals = sigOut;
+            EFMout.comment= [EFMin.comment '; emSeparateFHRSensors ' versionNum];
+            EFMout.createDate=date;
+        end
+        
         function S=coverage2CTG (e, CTG, reprocessFlag)
             ctgConn=CTG.connection;
             if nargin<3
