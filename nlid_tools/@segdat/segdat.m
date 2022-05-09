@@ -3,7 +3,7 @@ classdef segdat<nldat
     properties
         segInfo ={};
         parameterSet
-        
+
     end
     methods
         function S = segdat (a,varargin)
@@ -28,9 +28,9 @@ classdef segdat<nldat
             else
                 set (S,{a varargin{:}});
             end
-            
+
         end
-        
+
         function N=seg4domain (S, domainVal)
             % Return segment mumber associated with a domain Value
             dStart=S.domainStart;
@@ -39,33 +39,33 @@ classdef segdat<nldat
             N=find((domainVal-dStart)>=delta & (domainVal-dEnd)<=delta);
         end
         function C=cor(S,varargin)
-            C=corirf(S,'cor',varargin{:}); 
+            C=corirf(S,'cor',varargin{:});
         end
-         function I=irf(S,varargin)
-            I=corirf(S,'irf',varargin{:}); 
-         end
-        
-        
-         function e= segdat2eseq (S, domainStart)
-             % e= segdat2eseq (S, domainStart)
-             % domainstart for sequence data (seconds); 
+        function I=irf(S,varargin)
+            I=corirf(S,'irf',varargin{:});
+        end
+
+
+        function e= segdat2eseq (S, domainStart)
+            % e= segdat2eseq (S, domainStart)
+            % domainstart for sequence data (seconds);
             e=eseq;
             nSeg=segCount(S);
             for iSeg=1:nSeg
-               curSeg=segGet(S,iSeg);
-               curDomain=domain(curSeg);
-               curIdx=idx4domain(domainStart, S.domainIncr, curDomain);
-               e(iSeg).domainStart=domainStart;
-               e(iSeg).domainIncr=S.domainIncr;
-               e(iSeg).startIdx=min(curIdx);
-               e(iSeg).endIdx=max(curIdx); 
-               e(iSeg).nSamp=length(curSeg);
-               e(iSeg).type='SEGDAT';
+                curSeg=segGet(S,iSeg);
+                curDomain=domain(curSeg);
+                curIdx=idx4domain(domainStart, S.domainIncr, curDomain);
+                e(iSeg).domainStart=domainStart;
+                e(iSeg).domainIncr=S.domainIncr;
+                e(iSeg).startIdx=min(curIdx);
+                e(iSeg).endIdx=max(curIdx);
+                e(iSeg).nSamp=length(curSeg);
+                e(iSeg).type='SEGDAT';
             end
-         end
-            
-        
-        
+        end
+
+
+
         function C = corirf(S, fncType,varargin)
             % segdatCor - overlaid correlation function for segdat objecs
             %   Detailed explanation goes here
@@ -74,40 +74,40 @@ classdef segdat<nldat
                 error('nlags must be specified for cor on segdat objects');
             else
                 nLags=varargin{iLag+1};
-            end   
+            end
             nSeg=segCount(S);
             C={};
             iCnt=0;
             for iSeg=1:nSeg
                 curSeg=segGet(S,iSeg);
-                curLen=length(curSeg); 
+                curLen=length(curSeg);
                 if curLen>2*nLags+1
                     switch fncType
                         case 'cor'
                             cTemp=cor(curSeg, varargin);
                         case 'irf'
-                             cTemp=irf(curSeg, varargin);
+                            cTemp=irf(curSeg, varargin);
                         otherwise
                             error(['Bad fncType':  fncType])
                     end
-                            
-                iCnt=iCnt+1;
-                if iCnt==1,
-                    C=cTemp;
-                else
-                    C=C+cTemp;
-                end
+
+                    iCnt=iCnt+1;
+                    if iCnt==1,
+                        C=cTemp;
+                    else
+                        C=C+cTemp;
+                    end
                 else
                     disp(['Segment ' num2str(iSeg) ' to0 short not included']);
                 end
             end
             if iCnt>0
                 C=C./iCnt;
-            set(C,'comment',fncType);
+                set(C,'comment',fncType);
             else
             end
         end
-        
+
         function sDelay = delay (S, nDelay)
             % delay all segemnts of S by nDelay samples
             sDelay=S;
@@ -120,15 +120,12 @@ classdef segdat<nldat
                     dataSet=curData;
                 else
                     dataSet=cat(1,dataSet,curData);
-                
-            end
+
+                end
             end
             set(sDelay,'dataSet', dataSet);
         end
-        
-        
-        
-        
+
         function plot(S)
             colors=colororder;
             if (size(S,2)==1) && ((size(S,3)==1))
@@ -142,14 +139,14 @@ classdef segdat<nldat
                     sSeg=segGet(S,i);
                     plot(sSeg)
                 end
-                
+
             else
                 sTmp=nldat(S);
                 plot(sTmp);
             end
         end
-        
-        
+
+
         function sOut = segBreak (sIn, segNum, iBreak)
             %  sOut = segBreak (sIn, segNum, iBreak)
             %           break a segment into two pieces
@@ -169,7 +166,7 @@ classdef segdat<nldat
             set(sOut,'onsetPointer',newOnsetPointer);
             set(sOut,'segLength',newSegLength);
         end
-        
+
         function Z = segCat (Z1, Z2, varargin)
             % Concatonate segdat objects - only for dim 1.
             % In case of overlap the output is given by Z2
@@ -180,7 +177,7 @@ classdef segdat<nldat
                     Z=segCat(Z,varargin{jArg});
                 end
             else
-                
+
                 domainIncr=Z1.domainIncr;
                 if Z2.domainIncr ~= domainIncr
                     error('DomainIncrements are not the same');
@@ -212,16 +209,16 @@ classdef segdat<nldat
                 Z=segdat(n1);
             end
         end
-        
+
         function dEnd =domainEnd (sIn)
             % Returns end domain values for segments in a segdat object
             domainStart=sIn.domainStart;
             segLen=get(sIn,'segLength');
             dEnd=domainStart+(segLen-1)*sIn.domainIncr;
         end
-        
-        
-        
+
+
+
         function Z = intersect (Z1, Z2)
             % Determine intersection between two segdat objects
             % Returns an empty variable if the intersection is emmptk
@@ -251,15 +248,15 @@ classdef segdat<nldat
             n2New=n2(ptr2);
             Z=cat(2,n1New,n2New);
         end
-        
-        
-        
+
+
+
         function n = segCount(S)
             % reuturns number of segments in a segdat object
             onsetPointer=get(S,'onsetPointer');
             n=length(onsetPointer);
         end
-        
+
         function N = segGet(S,segNum)
             % Return segment of segdat object as a nldat object
             N=nldat;
@@ -278,7 +275,7 @@ classdef segdat<nldat
             N.comment=(['Segment ' num2str(segNum) '  of ' S.comment ]);
             N.domainStart=S.domainStart(segNum);
         end
-        
+
         function segPlot (S)
             % plot segdat object
             nSeg= segCount(S);
@@ -292,8 +289,8 @@ classdef segdat<nldat
                 ylabel(S.chanNames{iChan});
             end
         end
-        
-        
+
+
         function d =domain(S)
             % Overlaid domain function for segdat objects;
             nSeg=segCount(S);
@@ -306,11 +303,11 @@ classdef segdat<nldat
                 end
             end
         end
-        
-        
-        
-        
-        
+
+
+
+
+
         function out = decimate(data,decimation_ratio)
             errorcheck(data);
             [~,nchan,~] =size(data);
@@ -336,37 +333,49 @@ classdef segdat<nldat
                     if length(curSeg)<24,
                         disp(['Segment ' num2str(j)  ' too short. Dropping']);
                     else
-                      jOut=jOut+1;  
-                    d_temp = decimate(curSeg,decimation_ratio);
-                    onsetpointer_new(jOut) = pointer;
-                    seglength_new(jOut) = length(d_temp);
-                    d(onsetpointer_new(jOut):onsetpointer_new(jOut)+seglength_new(jOut)-1,i) = d_temp;
-                    pointer = pointer + seglength_new(jOut);
+                        jOut=jOut+1;
+                        d_temp = decimate(curSeg,decimation_ratio);
+                        onsetpointer_new(jOut) = pointer;
+                        seglength_new(jOut) = length(d_temp);
+                        d(onsetpointer_new(jOut):onsetpointer_new(jOut)+seglength_new(jOut)-1,i) = d_temp;
+                        pointer = pointer + seglength_new(jOut);
                     end
                 end
             end
             set(out,'dataSet',d,'onsetPointer',onsetpointer_new,'segLength',seglength_new);
         end
-        
+
         function out = ddt(data)
-            errorcheck(data);
-            nSeg=segCount(data);
+             errorcheck(data);
+             out=data;
+             newDataSet=[];
+            [nSamp,nChan,nReal]=size(data);
+            for iChan=1:nChan,
+             curData=data;
+             curData.chanNames=data.chanNames{iChan};
+             curData.dataSet=data.dataSet(:,iChan); 
+            nSeg=segCount(curData);
+            xdt=nldat;
             for iSeg=1:nSeg
-                xTmp=segGet(data,iSeg);
+                xTmp=segGet(curData,iSeg);
                 xdt=ddt(xTmp);
                 if iSeg==1,
-                    out=segdat(xdt);
+                    curOut=segdat(xdt);
                 else
-                    out=segCat(out,xdt);
+                    curOut=segCat(curOut,xdt);
                 end
             end
+            newDataSet=cat(2, newDataSet,curOut.dataSet);
+            end
+            out.dataSet=newDataSet;
+            out.comment='ddt';
         end
-        
+
         function sOut =filter (sIn, varargin)
             % length(epochIn)+1) - Filter a segdat object
-            % Filters each segmenet separately. 
+            % Filters each segmenet separately.
             % sIn - segdat object
-            % vrargin - 
+            % vrargin -
             %     I - impulse repsonse of filter
             %     B,A - filter characteristics
             arg1=varargin{1};
@@ -384,18 +393,19 @@ classdef segdat<nldat
                     sOut=segCat(sOut,curFilt);
                 end
             end
+          
         end
-        
+
         function [ fullEpochs, shortEpochs]= getEpochs ( S, epochLen)
             % [ fullEpochs, partialEpochs]= getEpochs ( S, epochLength fullEpochs=segdat; set(fullEpochs,'domainIncr',S.domainIncr);)
-            % Break a segdat object into contiguous epochs of length =epochLen 
+            % Break a segdat object into contiguous epochs of length =epochLen
             % fullEpochs - segdat object containing epochs of length= epochLen
             % shortEpochs - segdat object containing epochs of length< epochLen
             % length=epochLen
             fullEpochs=[];
             shortEpochs=[];
-            
-            
+
+
             nSeg=segCount(S);
             for iSeg=1:nSeg
                 curSeg=segGet(S,iSeg);
@@ -408,10 +418,10 @@ classdef segdat<nldat
                         fullEpochs=segdat.helperCat(fullEpochs, curSeg(iStart:iEnd));
                     end
                 end
-                
+
             end
         end
-        
+
         function sOut = medfilt1 (sIn, varargin)
             nSeg=segCount(sIn);
             for iSeg=1:nSeg,
@@ -424,12 +434,12 @@ classdef segdat<nldat
                 end
             end
         end
-        
-        
+
+
         function out = nldat(data)
             % returns concatonated segments as a nldat object with separations filled with
             % nan for missing data
-            
+
             errorcheck(data);
             [~,nchan,~] =size(data);
             onsetPointer = get(data,'onsetPointer');
@@ -453,8 +463,8 @@ classdef segdat<nldat
                 'domainIncr',data.domainIncr,'domainName',data.domainName,'domainStart',domainStart, ...
                 'domainValues',nan,'comment',data.comment);
         end
-        
-        
+
+
         function v = vaf(data1,data2)
             [~,nchan1,~] =size(data1);
             [~,nchan2,~] =size(data2);
@@ -465,8 +475,8 @@ classdef segdat<nldat
             d2 = nldat(data2.dataSet);
             v = vaf(d1,d2);
         end
-        
-        
+
+
         function errorcheck(data)
             dataset = get(data,'dataSet');
             [~,nchan,~] = size(data);
@@ -495,13 +505,13 @@ classdef segdat<nldat
             %                 end
             %
             %             end
-            
+
         end
-        
-        
+
+
         function sCat = cat (DIM,S1,S2)
-            
-            
+
+
             if DIM==1,
                 % Concatonate two segdat objects
                 [nSamp,nChan,nReal]=size(S1);
@@ -565,7 +575,7 @@ classdef segdat<nldat
                         end
                     end
                 end
-                
+
                 sCat=S1;
                 sCat.domainStart=domainStart;
                 sCat.dataSet=dataSet;
@@ -580,33 +590,33 @@ classdef segdat<nldat
             end
         end
     end
-    
-    
-    methods (Static)   
-        
+
+
+    methods (Static)
+
         function  epochOut = helperCat (epochIn, seg)
-                if isempty (epochIn)
-                    epochOut=segdat(seg);
-                else
-                    epochOut=epochIn;
-                    epochOut.domainStart=cat(2,epochIn.domainStart, seg.domainStart);
-                    epochOut.dataSet=cat(1,epochIn.dataSet, seg.dataSet);
-                    onsetPointer=get(epochIn,'onsetPointer');
-                    set(epochOut,'onsetPointer',cat(2,onsetPointer,length(epochIn)+1));
-                    segLength=get(epochOut,'segLength'); 
-                     set(epochOut,'segLength',cat(2,segLength,length(seg)));
-                end
-                
+            if isempty (epochIn)
+                epochOut=segdat(seg);
+            else
+                epochOut=epochIn;
+                epochOut.domainStart=cat(2,epochIn.domainStart, seg.domainStart);
+                epochOut.dataSet=cat(1,epochIn.dataSet, seg.dataSet);
+                onsetPointer=get(epochIn,'onsetPointer');
+                set(epochOut,'onsetPointer',cat(2,onsetPointer,length(epochIn)+1));
+                segLength=get(epochOut,'segLength');
+                set(epochOut,'segLength',cat(2,segLength,length(seg)));
+            end
+
         end
-        
-        
-        
-        
-        
+
+
+
+
+
         function S=nl2seg(N, varName)
             % Convert an nldat object to a segdat using nans as segment separators;
             % S is empty if there is no valid data in N
-            
+
             [nSamp,nChan,nReal]=size(N);
             if nChan>1,
                 d=N.dataSet;
@@ -657,10 +667,10 @@ classdef segdat<nldat
                     newDataSet=cat(1,newDataSet, dataSet(e(ie).startIdx:e(ie).endIdx,:));
                 end
             end
-            
+
             S=segdat;
-            
-            
+
+
             if length(newDataSet)>0
                 set(S,'chanNames',N.chanNames, 'chanUnits',N.chanUnits, 'domainIncr',N.domainIncr, ...
                     'domainStart',domainStart,'domainValues',nan, 'dataSet', newDataSet, ...
@@ -670,7 +680,7 @@ classdef segdat<nldat
                 set(S,'dataSet',[]);
             end
         end
-        
+
         function S = randSeg(Z, minSegLen, maxSegLen, maxSegSpace)
             % randSeg - generate a random segdat from a nldat object
             % S = randSeg(Z, minSegLen, maxSegLen, maxSegSpace)
@@ -700,12 +710,12 @@ classdef segdat<nldat
                     S=cat(1,S,sTemp);
                 end
                 i=i+1;
-                
+
             end
         end
-        
-        
-        
+
+
+
     end
 end
 
