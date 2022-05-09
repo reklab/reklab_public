@@ -12,7 +12,6 @@ classdef nldat < nltop
         dataSet = NaN;
         dataSize = NaN;
     end
-    
     methods
         function d = nldat (z,varargin)
             if nargin ==0,
@@ -988,6 +987,14 @@ classdef nldat < nltop
             z.comment = ['REAL part of ' x.comment];
         end
         
+        function y = resample (x,p,q);
+            y=x;
+            xd=double(x);
+            xr=resample(xd,p,q);
+            y.dataSet=xd;
+            y.domainIncr=x.domainIncr*q/p;
+        end
+
         function y = reshape (x, nsamp, nchan, nreal)
             % overlaid reshape for nldat objects
             if nargin < 4,
@@ -1138,7 +1145,7 @@ classdef nldat < nltop
             % USAGE	: y = smo(x,nSmooth)
             %	x	: input
             %	nSmooth: number of times x should be smoothed
-            % See priovate function for detals
+            % See private function for detals
             
             if nargin==2,
                 DIM=1;
