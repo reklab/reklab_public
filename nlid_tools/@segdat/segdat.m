@@ -177,7 +177,6 @@ classdef segdat<nldat
                     Z=segCat(Z,varargin{jArg});
                 end
             else
-
                 domainIncr=Z1.domainIncr;
                 if Z2.domainIncr ~= domainIncr
                     error('DomainIncrements are not the same');
@@ -510,7 +509,12 @@ classdef segdat<nldat
 
 
         function sCat = cat (DIM,S1,S2)
-
+            % overlaid segdat function for segdat objects
+            if isa(S2,'nldat')
+                S2=segdat(S2);
+            elseif ~isa(S2,'segdat')
+                error('objects to be concatonated must both be segdat')
+            end
 
             if DIM==1,
                 % Concatonate two segdat objects
