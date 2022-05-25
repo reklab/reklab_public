@@ -127,22 +127,30 @@ classdef segdat<nldat
         end
 
         function plot(S)
+            [nSamp,nChan,nReal]=size(S);
             colors=colororder;
-            if (size(S,2)==1) && ((size(S,3)==1))
-                S_nldat=nldat(S);
+              numSegment = segCount(S);
+            if (nChan==1 && nReal==1)
+               
                 % plot(S_nldat)
                 hold on
-                numSegment = segCount(S);
-                onsetPointer = get(S,'onsetPointer');
-                segLength = get(S,'segLength');
                 for i = 1 : numSegment
                     sSeg=segGet(S,i);
                     plot(sSeg)
                 end
+                hold off
 
-            else
-                sTmp=nldat(S);
-                plot(sTmp);
+            elseif nChan>1
+                for iChan=1:nChan
+                    subplot (nChan, 1,iChan)
+                    hold on
+                for iSeg = 1 : numSegment
+                    sSeg=segGet(S,iSeg);
+                    plot(sSeg(:,iChan))
+                    title(S.comment)
+                end
+                hold off
+                end
             end
         end
 
