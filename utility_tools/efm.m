@@ -40,6 +40,80 @@ classdef efm < nltop
             EFMout.signals=sigOut;
         end
         
+        function EFMout = separateFHRSensors (EFMin)
+            % sigOut = emEFMCombineSensors (sigIn) 
+            % - put fECG and doppler segments into separate signals
+            % - assumes that combineSensors has been called to generate
+            %   sensor comments in segdat.segInfo
+            %
+            if isempty(strfind(EFMin.comment, 'EFMCombineSensors'))
+                error('combineSensors has not been applied');
+            end
+            versionNum='1.0';
+            DIM1 = 1;
+            EFMout=EFMin;
+            sigIn=EFMin.signals;
+            sigOut = sigIn;
+            measureList= {'HR1' 'HR2'};
+            sensorList = {'external', 'FECG'};
+            nMeasure=length(measureList);
+
+            for kSensor = 1:length(sensorList)
+                disp(sprintf('Processing sensor %s', sensorList{kSensor}));
+                segdatOut = [];
+                for iMeasure=1:nMeasure
+                    disp(sprintf('Processing measure %s', measureList{iMeasure}));
+                    jSignal = find(strcmp(measureList{iMeasure},{sigIn.measure}));
+                    sigIn(jSignal)
+                    sigIn(jSignal).segdat
+                    sigIn(jSignal).segdat.segInfo
+
+                    iSensor=[];
+                    for kSensor2 = 1:length(sensorList)
+                        iSensor=[iSensor contains(sigIn(jSignal).sensor, sensorList{kSensor2})];
+                    end
+                    if iSensor(kSensor)
+                        if sum(iSensor) > 1
+                            % signal has a mixture of sensors, so separate them
+                            if (length(sigIn(jSignal).segdat.segInfo) ~= length(sigIn(jSignal).segdat.domainStart))
+                                disp(sprintf('%s-%s: mixed signal with merge', EFMin.GUID,measureList{iMeasure}));
+                            end
+
+                            allSegmentI = find(contains(sigIn(jSignal).segdat.segInfo, sensorList{kSensor}))
+                            for lSegment = allSegmentI
+                                if isempty(segdatOut)
+                                    segdatOut = segdat(segGet(sigIn(jSignal).segdat,lSegment))
+                                else
+                                    segdatOut = cat(DIM1, segdatOut, segdat(segGet(sigIn(jSignal).segdat,lSegment)));
+                                end
+                            end
+                        else
+                            % signal has only current sensor, so add it
+                            %disp(sprintf('%s: single sensor signal', EFMin.GUID))
+                            if (length(sigIn(jSignal).segdat.segInfo) ~= length(sigIn(jSignal).segdat.domainStart))
+                                disp(sprintf('%s-%s: single signal with merge', EFMin.GUID,measureList{iMeasure}));
+                            end
+                            if isempty(segdatOut)
+                                segdatOut = sigIn(jSignal).segdat;
+                            else
+                                segdatOut = cat(DIM1, segdatOut, sigIn(jSignal).segdat);
+                            end
+                        end
+                    end
+                end
+                if ~isempty(segdatOut)
+                    iOutSignal = length(sigOut)+1;
+                    sigOut(iOutSignal).segdat = segdatOut;
+                    sigOut(iOutSignal).measure = sensorList{kSensor};
+                    sigOut(iOutSignal).monitor = sensorList{kSensor};
+                    sigOut(iOutSignal).sensor = sensorList{kSensor};
+                end
+            end
+            EFMout.signals = sigOut;
+            EFMout.comment= [EFMin.comment '; emSeparateFHRSensors ' versionNum];
+            EFMout.createDate=date;
+        end
+        
         function S=coverage2CTG (e, CTG, reprocessFlag)
             ctgConn=CTG.connection;
             if nargin<3
@@ -141,11 +215,19 @@ classdef efm < nltop
             
         end
         
-        function efmStruct= efm2struct ( e )
+        function efmStruct= efm2struct ( e, doConvertSegdat )
+            if nargin < 2
+                doConvertSegdat = false;
+            end
             fieldList=fieldnames(e);
             for i=1:length(fieldList)
                 curField=fieldList{i};
                 efmStruct.(curField)=get(e,curField);
+            end
+            if doConvertSegdat
+                for j=1:length(e.signals)
+                    efmStruct.signals(j).segdat=segdat2struct(e.signals(j).segdat);
+                end
             end
         end
         
@@ -516,6 +598,14 @@ classdef efm < nltop
             T.processDate=datetime;
             sqlwrite(ctgConn,'CTGstatus', T);
         end
+
+        function e = saveFile (EFM, path)
+            %disp(['Saving ' EFM.GUID ' to path ' path]);
+            efmStruct=efm2struct(EFM, true);
+            save([path '\\' EFM.GUID], 'efmStruct');
+        end
+        
+
         function SS = stats(EFM)
             % chanStats = emEFMstats(EFM) - compute important statistics of a EM EFM file
             % input:
@@ -655,7 +745,7 @@ classdef efm < nltop
                 end
             end
         end
-        
+
         function multiPlot (g)
             % multiPlot (g) - loads and plots multiple EFM files in the same window
             % g = cell array of guids to compare
