@@ -122,23 +122,20 @@ for i = 1:nSeg
 
     % Find the first sample at/after the original start time of the segment
     % post-resampling
-    diffFront = new_time-time(1);
-    diffFront(diffFront < 0) = Inf;
-    [minDiff,trimF] = min(diffFront);
-
+   
+    trimF=min(find((new_time>=time(1))))
     % Trim the beginning of the data set
-    new_data(1:(trimF-1),:) = [];
-    new_time(1:(trimF-1),:) = [];
+%     new_data(1:(trimF-1),:) = [];
+%     new_time(1:(trimF-1),:) = [];
 
     % Find the first sample at/before the original end time of the segment
     % post-resampling
-    diffBack = time(end)-new_time;
-    diffBack(diffBack < 0) = Inf;
-    [minDiff,trimB] = min(diffBack);
+    
+    trimB=min(find(new_time>=max(time)))
 
     % Extract the portion of segment between [trimF,trimB]
-    new_data(trimB+1:end,:) = [];
-    new_time(trimB+1:end,:) = [];
+    new_data=new_data(trimF:trimB,:);
+    new_time=new_time(trimF:trimB,:);
  
     % Overwrite data in extracted segment
     seg_i.dataSet = new_data;
