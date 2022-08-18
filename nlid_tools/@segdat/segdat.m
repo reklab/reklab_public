@@ -31,133 +31,133 @@ classdef segdat<nldat
 
         end
 
-function Y = resampleSeg(X,fs,chan)
-% Definition: resamples the data set of a segdat object, one segment at a
-% time. Resampling is based on a specified channel containing the time
-% values, or the domain properties of the object itself. This function
-% resamples the entire data set.
-% Inputs:
-%   X = signal to be resampled (as a segdat object)
-%   fs = desired sampling frequency (Hz)
-%   chan = channel number containing the time values (optional -- if
-%   not specified, a vector of times will be created using the domain
-%   starts of each segment, the domain increments and the segment lengths)
-% Output:
-%   Y = resampled signal
+        function Y = resampleSeg(X,fs,chan)
+            % Definition: resamples the data set of a segdat object, one segment at a
+            % time. Resampling is based on a specified channel containing the time
+            % values, or the domain properties of the object itself. This function
+            % resamples the entire data set.
+            % Inputs:
+            %   X = signal to be resampled (as a segdat object)
+            %   fs = desired sampling frequency (Hz)
+            %   chan = channel number containing the time values (optional -- if
+            %   not specified, a vector of times will be created using the domain
+            %   starts of each segment, the domain increments and the segment lengths)
+            % Output:
+            %   Y = resampled signal
 
-% Extract pertinent information
-nSeg = segCount(X);
-domainIncr = X.domainIncr;
-comment = X.comment;
-chanNames = X.chanNames;
-chanUnits = X.chanUnits;
+            % Extract pertinent information
+            nSeg = segCount(X);
+            domainIncr = X.domainIncr;
+            comment = X.comment;
+            chanNames = X.chanNames;
+            chanUnits = X.chanUnits;
 
-% Read input arguments
-ts = 1/fs; % Sample time (sec.)
+            % Read input arguments
+            ts = 1/fs; % Sample time (sec.)
 
-for i = 1:nSeg
+            for i = 1:nSeg
 
-    seg_i = segGet(X,i); % Extract segment
-    seg_data = seg_i.dataSet; % Copy the data into a manipulable variable
+                seg_i = segGet(X,i); % Extract segment
+                seg_data = seg_i.dataSet; % Copy the data into a manipulable variable
 
-    % Establish the time vector
-    if ~exist('chan','var')
-        % If no channel number specified, create a vector of uniformly
-        % sampled times based on the start time and length of the segment
-        time = domain(seg_i); % Create an array to store the time values of the segment
-    else
-        time = seg_data(:,chan); % If a channel number was specified, use the times in that channel for resampling
-    end
+                % Establish the time vector
+                if ~exist('chan','var')
+                    % If no channel number specified, create a vector of uniformly
+                    % sampled times based on the start time and length of the segment
+                    time = domain(seg_i); % Create an array to store the time values of the segment
+                else
+                    time = seg_data(:,chan); % If a channel number was specified, use the times in that channel for resampling
+                end
 
-    % Check the uniformity of the segment data
-    dt = diff(time);
+                % Check the uniformity of the segment data
+                dt = diff(time);
 
-    if range(dt) > 1e-5    
-        display(['Note: segment ',num2str(i),' is non-uniformly sampled. Correcting data...']);
-    else
-        display(['Note: segment ',num2str(i),' is uniformly sampled.']);
-    end
+                if range(dt) > 1e-5
+                    display(['Note: segment ',num2str(i),' is non-uniformly sampled. Correcting data...']);
+                else
+                    display(['Note: segment ',num2str(i),' is uniformly sampled.']);
+                end
 
-    % Pad the front of the segment
-    nPad = 10; % Number of samples to be padded in front and back of segment
-    tFront = [time(1)-nPad*domainIncr:domainIncr:time(1)-domainIncr]';
-    padFront = zeros(nPad,size(seg_data,2));
-    for k = 1:nPad
-        padFront(k,:) = seg_data(1,:); 
-    end
+                % Pad the front of the segment
+                nPad = 10; % Number of samples to be padded in front and back of segment
+                tFront = [time(1)-nPad*domainIncr:domainIncr:time(1)-domainIncr]';
+                padFront = zeros(nPad,size(seg_data,2));
+                for k = 1:nPad
+                    padFront(k,:) = seg_data(1,:);
+                end
 
-    % Pad the end of the segment
-    tBack = [time(end)+domainIncr:domainIncr:time(end)+nPad*domainIncr]';
-    padBack = zeros(nPad,size(seg_data,2));
-    for k = 1:nPad
-        padBack(k,:) = seg_data(end,:); 
-    end
+                % Pad the end of the segment
+                tBack = [time(end)+domainIncr:domainIncr:time(end)+nPad*domainIncr]';
+                padBack = zeros(nPad,size(seg_data,2));
+                for k = 1:nPad
+                    padBack(k,:) = seg_data(end,:);
+                end
 
-    % Apply the padding to both the time vector and the segment data set
-    time_ext = [tFront;time;tBack];
-    seg_data_ext = [padFront;seg_data;padBack];
+                % Apply the padding to both the time vector and the segment data set
+                time_ext = [tFront;time;tBack];
+                seg_data_ext = [padFront;seg_data;padBack];
 
-    % If necessary, correct the time stamps in the segement data set
-    if exist('chan','var')
-        seg_data_ext(:,chan) = time_ext;
-    end
+                % If necessary, correct the time stamps in the segement data set
+                if exist('chan','var')
+                    seg_data_ext(:,chan) = time_ext;
+                end
 
-    % Resample the entire data set of the segment plus the padding
-    [new_data,new_time] = resample(seg_data_ext,time_ext,fs);
+                % Resample the entire data set of the segment plus the padding
+                [new_data,new_time] = resample(seg_data_ext,time_ext,fs);
 
-    % Smooth the resampled signal by applying a moving average filter
-    nMA = 2; % Window size of moving average filter (in sample points)
-    B = 1/nMA*ones(nMA,1); % Filter coefficients
-    new_data = filter(B,1,new_data);
-    % new_data = medfilt1(new_data);
+                % Smooth the resampled signal by applying a moving average filter
+                nMA = 2; % Window size of moving average filter (in sample points)
+                B = 1/nMA*ones(nMA,1); % Filter coefficients
+                new_data = filter(B,1,new_data);
+                % new_data = medfilt1(new_data);
 
-    % Round the time stamps to integer multiples of the new sampling time
-    new_time = ts*round(new_time/ts);
+                % Round the time stamps to integer multiples of the new sampling time
+                new_time = ts*round(new_time/ts);
 
-    % If the time vector channel was specified, replace the channel values
-    % with the new time vector
-    if exist('chan','var')
-        new_data(:,chan) = new_time;
-    end
+                % If the time vector channel was specified, replace the channel values
+                % with the new time vector
+                if exist('chan','var')
+                    new_data(:,chan) = new_time;
+                end
 
-    % Find the first sample at/after the original start time of the segment
-    % post-resampling
-   
-    trimF=min(find((new_time>=time(1))))
-    % Trim the beginning of the data set
-%     new_data(1:(trimF-1),:) = [];
-%     new_time(1:(trimF-1),:) = [];
+                % Find the first sample at/after the original start time of the segment
+                % post-resampling
 
-    % Find the first sample at/before the original end time of the segment
-    % post-resampling
-    
-    trimB=min(find(new_time>=max(time)))
+                trimF=min(find((new_time>=time(1))))
+                % Trim the beginning of the data set
+                %     new_data(1:(trimF-1),:) = [];
+                %     new_time(1:(trimF-1),:) = [];
 
-    % Extract the portion of segment between [trimF,trimB]
-    new_data=new_data(trimF:trimB,:);
-    new_time=new_time(trimF:trimB,:);
- 
-    % Overwrite data in extracted segment
-    seg_i.dataSet = new_data;
+                % Find the first sample at/before the original end time of the segment
+                % post-resampling
 
-    % Correct segment properties post-resampling
-    set(seg_i,'domainStart',new_time(1),'domainIncr',ts,'comment',comment,'chanNames',chanNames,'chanUnits',chanUnits);
+                trimB=min(find(new_time>=max(time)))
 
-    % Create a new segdat object or choose to link the segment to
-    % the current one
-    if i == 1       
-        Y = segdat(seg_i); % If this is the first segment, create the segdat object Y
-    else
-        Y = cat(1,Y,seg_i); % Otherwise, link the segment to Y
-    end
-    
-    display(['Segment ', num2str(i),' successfully resampled and saved.']);
+                % Extract the portion of segment between [trimF,trimB]
+                new_data=new_data(trimF:trimB,:);
+                new_time=new_time(trimF:trimB,:);
 
-end
+                % Overwrite data in extracted segment
+                seg_i.dataSet = new_data;
 
-end
+                % Correct segment properties post-resampling
+                set(seg_i,'domainStart',new_time(1),'domainIncr',ts,'comment',comment,'chanNames',chanNames,'chanUnits',chanUnits);
 
-% Last updated: 27-05-2022
+                % Create a new segdat object or choose to link the segment to
+                % the current one
+                if i == 1
+                    Y = segdat(seg_i); % If this is the first segment, create the segdat object Y
+                else
+                    Y = cat(1,Y,seg_i); % Otherwise, link the segment to Y
+                end
+
+                display(['Segment ', num2str(i),' successfully resampled and saved.']);
+
+            end
+
+        end
+
+        % Last updated: 27-05-2022
 
         function N=seg4domain (S, domainVal)
             % Return segment mumber associated with a domain Value
@@ -257,9 +257,9 @@ end
         function plot(S)
             [nSamp,nChan,nReal]=size(S);
             colors=colororder;
-              numSegment = segCount(S);
+            numSegment = segCount(S);
             if (nChan==1 && nReal==1)
-               
+
                 % plot(S_nldat)
                 hold on
                 for i = 1 : numSegment
@@ -272,12 +272,12 @@ end
                 for iChan=1:nChan
                     subplot (nChan, 1,iChan)
                     hold on
-                for iSeg = 1 : numSegment
-                    sSeg=segGet(S,iSeg);
-                    plot(sSeg(:,iChan))
-                    title(S.comment)
-                end
-                hold off
+                    for iSeg = 1 : numSegment
+                        sSeg=segGet(S,iSeg);
+                        plot(sSeg(:,iChan))
+                        title(S.comment)
+                    end
+                    hold off
                 end
             end
         end
@@ -481,26 +481,26 @@ end
         end
 
         function out = ddt(data)
-             errorcheck(data);
-             out=data;
-             newDataSet=[];
+            errorcheck(data);
+            out=data;
+            newDataSet=[];
             [nSamp,nChan,nReal]=size(data);
             for iChan=1:nChan,
-             curData=data;
-             curData.chanNames=data.chanNames{iChan};
-             curData.dataSet=data.dataSet(:,iChan); 
-            nSeg=segCount(curData);
-            xdt=nldat;
-            for iSeg=1:nSeg
-                xTmp=segGet(curData,iSeg);
-                xdt=ddt(xTmp);
-                if iSeg==1,
-                    curOut=segdat(xdt);
-                else
-                    curOut=segCat(curOut,xdt);
+                curData=data;
+                curData.chanNames=data.chanNames{iChan};
+                curData.dataSet=data.dataSet(:,iChan);
+                nSeg=segCount(curData);
+                xdt=nldat;
+                for iSeg=1:nSeg
+                    xTmp=segGet(curData,iSeg);
+                    xdt=ddt(xTmp);
+                    if iSeg==1,
+                        curOut=segdat(xdt);
+                    else
+                        curOut=segCat(curOut,xdt);
+                    end
                 end
-            end
-            newDataSet=cat(2, newDataSet,curOut.dataSet);
+                newDataSet=cat(2, newDataSet,curOut.dataSet);
             end
             out.dataSet=newDataSet;
             out.comment='ddt';
@@ -528,7 +528,7 @@ end
                     sOut=segCat(sOut,curFilt);
                 end
             end
-          
+
         end
 
         function [ fullEpochs, shortEpochs]= getEpochs ( S, epochLen)
@@ -729,7 +729,70 @@ end
                 error ('Dimensions >2 not support');
             end
         end
+
+        function out = subsref (N, S)
+
+            nTemp=N;
+            for i=1:length(S),
+                if strcmp(S(i).type,'.'),
+                    nTemp=get(nTemp,S(i).subs);
+                elseif strcmp(S(i).type,'()')
+
+                    oDom=domain(nTemp);
+                    d=nTemp.dataSet;
+                    dTemp=builtin('subsref', d, S(i));
+                    nTemp.dataSet=dTemp;
+                    sIndex = S(i).subs;
+                    % Fix DomainStart and DomainValues if necessary
+                    if isnumeric(sIndex{1}),
+                        nDom = oDom(sIndex{1});
+                        diffIndex=diff(sIndex{1});
+                        nTemp.domainStart=min(nDom);
+                        if ~isnan(nTemp.domainValues) | length(unique(diffIndex))>1,
+                            nTemp.domainValues=nDom;
+                        elseif max(diffIndex)>1,
+                            nTemp.domainIncr=nTemp.domainIncr*max(diffIndex);
+                        end
+                    end
+                    % Fix Channel Names
+                    if length(sIndex)>1,
+                        nTemp.chanNames = nTemp.chanNames(S(i).subs{2});
+                    end
+                    % Special handling for  segdat
+                    if strcmp(S(i).subs(1),':')
+                        return
+                    end
+
+                    onsetPointer=get(N,'onsetPointer');
+                    segLength=get(N,'segLength')
+                    nSeg=length(onsetPointer)
+                    segnum4sample=[];
+                    for iSeg=1:nSeg
+                        segnum4sample=cat(1,segnum4sample,iSeg*ones(segLength(iSeg),1))
+                    end
+                    oldDomainValues=domain(N);
+                    S(i).subs{2}=1;
+                    segNumNew=builtin('subsref', segnum4sample, S(i));
+                    newDomainValues=builtin('subsref', oldDomainValues, S(i));
+
+                    e=eseq.cseq2eseq(categorical(segNumNew));
+                    newOnsetPointer=[e.startIdx];
+                    newSegLength=[e.nSamp];
+                    newDomainStart(1,:)=newDomainValues(newOnsetPointer)
+
+                    set(nTemp,'onsetPointer',newOnsetPointer);
+                    set(nTemp,'segLength',newSegLength);
+                    set(nTemp,'domainStart',newDomainStart);
+
+
+                end
+            end
+
+            out = nTemp;
+        end
     end
+
+
 
 
     methods (Static)
