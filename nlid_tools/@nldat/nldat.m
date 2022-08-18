@@ -173,7 +173,7 @@ classdef nldat < nltop
             nOut.domainIncr=nIn.domainIncr/conversionFactor;
             nOut.domainStart=nOut.domainStart/conversionFactor;
             if ~isnan(nOut.domainValues)
-                nOut.domainValues=nOuut.domainValues/conversionFactor;
+                nOut.domainValues=nOut.domainValues/conversionFactor;
             end
         end
         
@@ -1371,43 +1371,13 @@ classdef nldat < nltop
                     if length(sIndex)>1,
                         nTemp.chanNames = nTemp.chanNames(S(i).subs{2});
                     end
-                    % Special handling for  segdat
-                    if isa(nTemp,'segdat')
-                        if ~strcmp(S(i).subs(1),':')
-                            % Update onsetPointer and SegLen
-                            nSamp=length(nTemp.dataSet);
-                            onsetPointer=get(nTemp,'onsetPointer');
-                            segLength=get(nTemp,'segLength');
-                           
-                            nSeg=length(onsetPointer)
-                            curLen=0;
-                            newPointer=[];
-                            newSegLength=[];
-
-                            for iSeg=1:nSeg,
-                                curLen=curLen+segLength(iSeg);
-                                if curLen>=nSamp
-                                     newPointer(iSeg)=onsetPointer(iSeg);
-                                     newSegLength(iSeg)=segLength(iSeg) -curLen+nSamp;
-                                     break
-                                else
-                                    newPointer(iSeg)=onsetPointer(iSeg);
-                                    newSegLength(iSeg)=segLength(iSeg);
-                                end
-                            end
-                            nSegNew=length(newPointer);
-                            set(nTemp,'onsetPointer',newPointer);
-                            set(nTemp,'segLength',newSegLength);
-                            set(nTemp,'domainStart',N.domainStart(1:nSegNew))
-
-                       
-                        end
+                    
                     end
                 end
                 
                 out = nTemp;
             end
-        end
+
         
         function [xval,yval]= stairs (x)
             % options not yet implements
