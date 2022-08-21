@@ -12,7 +12,6 @@ classdef nldat < nltop
         dataSet = NaN;
         dataSize = NaN;
     end
-    
     methods
         function d = nldat (z,varargin)
             if nargin ==0,
@@ -174,7 +173,7 @@ classdef nldat < nltop
             nOut.domainIncr=nIn.domainIncr/conversionFactor;
             nOut.domainStart=nOut.domainStart/conversionFactor;
             if ~isnan(nOut.domainValues)
-                nOut.domainValues=nOuut.domainValues/conversionFactor;
+                nOut.domainValues=nOut.domainValues/conversionFactor;
             end
         end
         
@@ -988,6 +987,14 @@ classdef nldat < nltop
             z.comment = ['REAL part of ' x.comment];
         end
         
+        function y = resample (x,p,q);
+            y=x;
+            xd=double(x);
+            xr=resample(xd,p,q);
+            y.dataSet=xd;
+            y.domainIncr=x.domainIncr*q/p;
+        end
+
         function y = reshape (x, nsamp, nchan, nreal)
             % overlaid reshape for nldat objects
             if nargin < 4,
@@ -1138,7 +1145,7 @@ classdef nldat < nltop
             % USAGE	: y = smo(x,nSmooth)
             %	x	: input
             %	nSmooth: number of times x should be smoothed
-            % See priovate function for detals
+            % See private function for detals
             
             if nargin==2,
                 DIM=1;
@@ -1364,17 +1371,13 @@ classdef nldat < nltop
                     if length(sIndex)>1,
                         nTemp.chanNames = nTemp.chanNames(S(i).subs{2});
                     end
-                    %Fix for segdat
-                    if isa(nTemp,'segdat')
-                        if ~strcmp(S(i).subs(1),':')
-                            error('sample extraction is not imlemented for the segdata class');
-                        end
+                    
                     end
                 end
                 
                 out = nTemp;
             end
-        end
+
         
         function [xval,yval]= stairs (x)
             % options not yet implements
