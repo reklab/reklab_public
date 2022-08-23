@@ -758,17 +758,17 @@ classdef segdat<nldat
                     if length(sIndex)>1,
                         nTemp.chanNames = nTemp.chanNames(S(i).subs{2});
                     end
-                    % Special handling for  segdat
                     if strcmp(S(i).subs(1),':')
+                         out = nTemp;
                         return
                     end
 
                     onsetPointer=get(N,'onsetPointer');
-                    segLength=get(N,'segLength')
-                    nSeg=length(onsetPointer)
+                    segLength=get(N,'segLength');
+                    nSeg=length(onsetPointer);
                     segnum4sample=[];
                     for iSeg=1:nSeg
-                        segnum4sample=cat(1,segnum4sample,iSeg*ones(segLength(iSeg),1))
+                        segnum4sample=cat(1,segnum4sample,iSeg*ones(segLength(iSeg),1));
                     end
                     oldDomainValues=domain(N);
                     S(i).subs{2}=1;
@@ -778,7 +778,7 @@ classdef segdat<nldat
                     e=eseq.cseq2eseq(categorical(segNumNew));
                     newOnsetPointer=[e.startIdx];
                     newSegLength=[e.nSamp];
-                    newDomainStart(1,:)=newDomainValues(newOnsetPointer)
+                    newDomainStart(1,:)=newDomainValues(newOnsetPointer);
 
                     set(nTemp,'onsetPointer',newOnsetPointer);
                     set(nTemp,'segLength',newSegLength);
