@@ -401,6 +401,9 @@ classdef segdat<nldat
             sStart=onsetPointer(segNum);
             sEnd=onsetPointer(segNum)+segLen(segNum)-1;
             N.dataSet=dataSet(sStart:sEnd,:);
+            if ~isnan(S.domainValues)
+                N.domainValues=S.domainValues(sStart:sEnd);
+            end
             set(N, 'chanNames', S.chanNames,'chanUnits',S.chanNames, 'domainIncr',S.domainIncr, ...
                 'domainName',S.domainName);
             N.comment=(['Segment ' num2str(segNum) '  of ' S.comment ]);
