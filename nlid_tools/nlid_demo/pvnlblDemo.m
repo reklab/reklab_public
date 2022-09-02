@@ -3,7 +3,7 @@ clearvars
 close all
 
 %% Add path to the NLID toolbox on your local system, where you have cloned or downloaded the NLID toolbox
-run 'S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\Source Code\NPNPVH Latest NLID\initPath'
+% run 'S:\Biomed\REKLAB\myStuff\esobha1\RA 2021\Source Code\NPNPVH Latest NLID\initPath'
 
 %% Load the identified model from Ehsan's implementation of the NPN-Hammerstein code
 load('.\sim_data\example_PVHSimData_IEEEAccess2022.mat','udotD','schedVar','tq','Ts','decimation',...
@@ -74,12 +74,12 @@ pvhSys = nlident(pvhSys,z,sv,'idMethod',pvhSys.idMethod,'decimation',decimation)
 
 %% Simulate the identified PV-Hammerstein model
 u = z(:,1);
-u_d = decimate_kian(u,decimation);
-sv_d = decimate_kian(sv,decimation);
+u_d = decimate(u,decimation);
+sv_d = decimate(sv,decimation);
 TQ_d_hat = nlsim(pvhSys,u_d,sv_d);
 
 %% Plot predicted output against measured output
-TQ_d = decimate_kian(TQ,decimation);
+TQ_d = decimate(TQ,decimation);
 figure;
 time = (0:length(TQ_d.dataSet)-1)*Ts*decimation;
 plot(time,TQ_d.dataSet); hold on; plot(time,TQ_d_hat.dataSet,'r'); legend('Measured','Predicted')
