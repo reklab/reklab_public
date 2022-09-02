@@ -89,18 +89,18 @@ title(sprintf('Identification VAF = %0.1f%%',v.dataSet))
 
 %% Plot the identified PV Hammerstein system
 figure;
-plot(pvhSys,'n_bins_input',50,'n_bins_sv',50)
+plot(pvhSys,'n_bins_input',50,'n_bins_sv',50); colormap('jet');
 
 %% Plot static NL mimo basis
 %++ Extracting SV Tchebychev polynomials from model.static_nl
 PVNL = pvhSys.elements{1,1};           
 figure;
-plot(PVNL,'n_bins_input',50,'n_bins_sv',50)
+plot(PVNL,'n_bins_input',50,'n_bins_sv',50); colormap('jet');
 
 %% Plot dynamic IRF mimo basis
 PVIRF = pvhSys.elements{1,2};  
 figure;
-plot(PVIRF,'n_bins_input',80,'n_bins_sv',50)
+plot(PVIRF,'n_bins_input',80,'n_bins_sv',50); colormap('jet');
 
 
 
