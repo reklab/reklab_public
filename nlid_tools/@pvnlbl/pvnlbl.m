@@ -214,9 +214,8 @@ classdef pvnlbl < pvm
                     use_vel_zeroth_exp = 'yes';
                     static_nl_init = []; 
                     
-                    [static_nl,h_r,yhat] = hammerstein_lpv_laguerre_v02(io,rho,wNL,wIRF,'irf_len_r',irf_len_r,'n',n,'p',p-1,'m',m,'q',q,'alfa',alfa,'max_iter',max_iter,...
+                    [static_nl,h_r] = hammerstein_lpv_laguerre_v02(io,rho,wNL,wIRF,'irf_len_r',irf_len_r,'n',n,'p',p-1,'m',m,'q',q,'alfa',alfa,'max_iter',max_iter,...
                                                                  'static_nl_param_init',static_nl_param_init,'use_vel_zeroth_exp',use_vel_zeroth_exp,'decimation_ratio',decimation,'static_nl_init',static_nl_init);
-                    sys.yp = yhat;
                                        
                     %% Setup the objects based on the identification results
                     %++ Extracting SV Tchebychev polynomials from static_nl and setup PVNL 
