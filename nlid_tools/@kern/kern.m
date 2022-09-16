@@ -142,7 +142,7 @@ classdef kern < nldat
             else
                 cc = ['smoothed ' cc];
             end
-            set(ks,'dataSet',kdat,'comment',cc);
+            set(ks,'dataSet',double(kdat),'comment',cc);
         end
         
         
