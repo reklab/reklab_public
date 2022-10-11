@@ -852,7 +852,7 @@ classdef segdat<nldat
             % Find start and end points of data
             segCnt=0;
             segStart=1;
-            nLen=length(dataSet);
+            [nLen, nChan]=size(dataSet);
             % Find start and end of segments
             c=categorical;
             c(1:nLen)='good';
