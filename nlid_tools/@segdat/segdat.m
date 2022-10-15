@@ -164,13 +164,15 @@ classdef segdat<nldat
         
         end
 
+       
         function N=seg4domain (S, domainVal)
             % Return segment mumber associated with a domain Value
             dStart=S.domainStart;
             dEnd=domainEnd(S);
-            delta=-S.domainIncr/2;
-            N=find((domainVal-dStart)>=delta & (domainVal-dEnd)<=delta);
+            delta=S.domainIncr/2;
+            N=find((domainVal-dStart)>=-delta & (domainVal-dEnd)<=delta);
         end
+        
         function C=cor(S,varargin)
             C=corirf(S,'cor',varargin{:});
         end
@@ -691,7 +693,7 @@ classdef segdat<nldat
                 valueVector(idx2,:)=s2Data;
                 catVector(idx2)='2';
                 idxIntersect=intersect(idx1,idx2);
-                if ~isempty(idxIntersect)  % Interesction
+                if ~isempty(idxIntersect)  % Interection of S1 & S2i
                     catVector(idxIntersect)='3';
                 end
                 e=eseq(catVector, domainStart,domainIncr); % Event sequences indicating what to output.
