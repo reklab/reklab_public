@@ -147,14 +147,14 @@ classdef segdat<nldat
         
         end
         
-        % Ensure the domain of the signal starts at time zero
-        domainStart = domainStart - domainStart(1);
+%         % Ensure the domain of the signal starts at time zero
+%         domainStart = domainStart - domainStart(1);
         
-        % If a channel of times was specified, ensure the time vector
-        % begins at time zero as well
-        if exist('chan','var')
-            y(:,chan) = y(:,chan) - y(1,chan);
-        end
+%         % If a channel of times was specified, ensure the time vector
+%         % begins at time zero as well
+%         if exist('chan','var')
+%             y(:,chan) = y(:,chan) - y(1,chan);
+%         end
 
         % Convert the data matrix to a segdat object
         Y = segdat(y);
