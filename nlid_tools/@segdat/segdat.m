@@ -31,7 +31,7 @@ classdef segdat<nldat
 
         end
 
-        function Y = resampleSeg(X,fs,chan)
+        function Y = resampleSeg(X,fs,options)
         % Definition: resamples the data set of a segdat object, one segment at a
         % time. Resampling is based on a specified channel containing the time
         % values, or the domain properties of the object itself. This function
@@ -44,6 +44,14 @@ classdef segdat<nldat
         %   starts of each segment, the domain increments and the segment lengths)
         % Output:
         %   Y = resampled signal
+
+        % Assign default values to optional variables
+        arguments
+            X segdat
+            fs double = 100
+            options.chan = []
+            options.printOut logical = false
+        end
         
         % Extract pertinent information
         nSeg = segCount(X);
@@ -57,21 +65,25 @@ classdef segdat<nldat
             seg_data = seg_i.dataSet; % Copy the data into a manipulable variable
         
             % Establish the time vector
-            if ~exist('chan','var')
+            if isempty(options.chan)
                 % If no channel number specified, create a vector of uniformly
                 % sampled times based on the start time and length of the segment
                 time = domain(seg_i); % Create an array to store the time values of the segment
             else
-                time = seg_data(:,chan); % If a channel number was specified, use the times in that channel for resampling
+                time = seg_data(:,options.chan); % If a channel number was specified, use the times in that channel for resampling
             end
         
             % Check the uniformity of the segment data
             dt = diff(time);
         
-            if range(dt) > 1e-5    
-                display(['Note: segment ',num2str(i),' is non-uniformly sampled. Correcting data...']);
+            if range(dt) > 1e-5
+                if options.printOut == true
+                    display(['Note: segment ',num2str(i),' is non-uniformly sampled. Correcting data...']);
+                end
             else
-                display(['Note: segment ',num2str(i),' is uniformly sampled.']);
+                if options.printOut == true
+                    display(['Note: segment ',num2str(i),' is uniformly sampled.']);
+                end
             end
         
             % Pad the front of the segment
@@ -94,8 +106,8 @@ classdef segdat<nldat
             seg_data_ext = [padFront;seg_data;padBack];
         
             % If necessary, correct the time stamps in the segement data set
-            if exist('chan','var')
-                seg_data_ext(:,chan) = time_ext;
+            if ~isempty(options.chan)
+                seg_data_ext(:,options.chan) = time_ext;
             end
         
             % Resample the entire data set of the segment plus the padding
@@ -103,8 +115,8 @@ classdef segdat<nldat
         
             % If the time vector channel was specified, replace the channel values
             % with the new time vector
-            if exist('chan','var')
-                new_data(:,chan) = new_time;
+            if ~isempty(options.chan)
+                new_data(:,options.chan) = new_time;
             end
         
             % Find the first sample at/after the original start time of the segment
@@ -143,18 +155,20 @@ classdef segdat<nldat
                 y = cat(1,y,new_data); % Otherwise, link the segment to the existing matrix
             end
             
-            display(['Segment ', num2str(i),' successfully resampled and saved.']);
-        
+            if options.printOut == true
+                display(['Segment ', num2str(i),' successfully resampled and saved.']);
+            end
+
         end
         
-        % Ensure the domain of the signal starts at time zero
-        domainStart = domainStart - domainStart(1);
+%         % Ensure the domain of the signal starts at time zero
+%         domainStart = domainStart - domainStart(1);
         
-        % If a channel of times was specified, ensure the time vector
-        % begins at time zero as well
-        if exist('chan','var')
-            y(:,chan) = y(:,chan) - y(1,chan);
-        end
+%         % If a channel of times was specified, ensure the time vector
+%         % begins at time zero as well
+%         if exist('chan','var')
+%             y(:,chan) = y(:,chan) - y(1,chan);
+%         end
 
         % Convert the data matrix to a segdat object
         Y = segdat(y);
