@@ -113,12 +113,9 @@ classdef segdat<nldat
             % Resample the entire data set of the segment plus the padding
             [new_data,new_time] = resample(seg_data_ext,time_ext,fs,10,30);
         
-            % If the time vector channel was specified, replace the channel values
-            % with the new time vector
-            if ~isempty(options.chan)
-                new_data(:,options.chan) = new_time;
-            end
-        
+            % Round the time stamps to integer multiples of the new sampling time
+            new_time = ts*round(new_time/ts);
+
             % Find the first sample at/after the original start time of the segment
             % post-resampling
             trimF=min(find((new_time>=time(1))));
@@ -136,12 +133,15 @@ classdef segdat<nldat
             % Extract the portion of segment between [trimF,trimB]
             new_data=new_data(trimF:trimB,:);
             new_time=new_time(trimF:trimB,:);
-        
+
+            % If the time vector channel was specified, replace the channel values
+            % with the new time vector
+            if ~isempty(options.chan)
+                new_data(:,options.chan) = new_time;
+            end
+
             % Update the vector of domain starts before rounding the increments
             domainStart(i) = new_time(1);
-        
-        %     % Round the time stamps to integer multiples of the new sampling time
-        %     new_data(:,2) = ts*round(new_data(:,2)/ts);
          
             % Create an array with features the resampled data and a row of NaNs to
             % designate a segment break
