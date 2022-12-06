@@ -31,6 +31,24 @@ classdef segdat<nldat
 
         end
 
+
+        function g = findGaps(S)
+            % g = findGaps(S) finds gaps in a segdat object
+            % g.gapStart - time gps starts
+            % g.gapLen - length of gap
+            iStart=get(S,'onsetPointer');
+            segLen=get(S,'segLength');
+            iEnd = iStart+segLen-1;             
+            dv=domain(S);
+            gStart=dv(iEnd(1:end-1));
+            gEnd=dv(iStart(2:end));
+            g.gapLen=gEnd-gStart;
+            g.gapStart=gStart;
+
+        end
+
+            % 
+
         function Y = resampleSeg(X,fs,options)
         % Definition: resamples the data set of a segdat object, one segment at a
         % time. Resampling is based on a specified channel containing the time
