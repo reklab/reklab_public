@@ -37,8 +37,12 @@ classdef segdat<nldat
             % g.gapStart - time gap starts
             % g.gapEnd - time gap ends
             % g.gapLen - length of gap
+            [nRow,nCol]=size(S);
+            if nCol>1
+                error ('fingaps only works for segdat objects with one chanel');
+            end
             N=nldat(S);
-            c=categorical
+            c=categorical;
             c(1:length(N))='Nogap';
             i=find(isnan(N.dataSet));
             c(i)='Gap';
@@ -425,6 +429,8 @@ classdef segdat<nldat
             n1New=n1(ptr1,:);
             n2New=n2(ptr2,:);
             Z=cat(2,n1New,n2New);
+            Z=segdat(Z);
+            Z.comment='Intersection';
         end
 
 
