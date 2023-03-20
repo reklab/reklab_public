@@ -366,7 +366,7 @@ classdef polynom < nltop
                             p=generate_laguerre_basis(length(x),sys.polyOrder, alfa);
                             yout=p*sys.polyCoef;
                         case 'interp1'
-                            yout=interp1(sys.polyCoef(:,1),sys.polyCoef(:,2),x,interpMethod)
+                            yout=interp1(sys.polyCoef(:,1),sys.polyCoef(:,2),x,interpMethod);
                     end
                     Y(:,:,iReal)=yout;
                     
