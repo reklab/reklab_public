@@ -10,7 +10,7 @@ function [Z,M,  zFull] = nlid_sim (option,U,varargin)
 %	option 	= system type
 %       LP1 - firat order  low pass
 %       HP1 - first order high pass
-%       L1 - one-sided low pass filter
+%       L1 - one-sided low pass filter[z,
 %       H1 - seocond-order high pass
 %       H2 - Bessel high pass
 %       L2 - second-order low pass
@@ -75,7 +75,8 @@ set(I1,'dataSet',irf1,'domainIncr',domain_incr);
 I2=irf;set(I2,'dataSet',irf2,'domainIncr',domain_incr);
 P2=polynom;
 set(P2,'polyType','power','polyCoef',[10 25 10 ]');
-P3=polynom('polyType','power','polyCoef',[0 50 -10 5]');
+ud=double(U); 
+P3=polynom('polyType','power','polyCoef',[0 50 -10 5]', 'polyRange', [ min(ud) max(ud)]);
 
 
 %  And the coefficients of the Nonlinearity are...
@@ -131,8 +132,15 @@ switch option
         disp('ln')
         X = nlsim(I1,U);                % filter with the first L
         Y=abs(X);
-        comment='LN Threshold data set';
-        
+        M=lnbl;
+        x=double(X);
+        xMax=unique(max(x));
+        xMin=unique(min(x));
+        xCoef=[xMin 0 xMax]';
+        yCoef=[0 0 xMax]';
+        p=polynom('polyType','interp1', 'polyCoef', cat(2,xCoef,yCoef),'polyRange', [xMin xMax]);
+        set(M,'elements', {I1 p});
+        comment='LNRECT';
     case 'LN2'
         x = nlsim(I1,U);
         Y= nlsim(P2,x);
