@@ -129,6 +129,7 @@ switch option
         % LN
         
     case 'LNRECT'
+        % Linear system followed by full wave rectifier
         disp('ln')
         X = nlsim(I1,U);                % filter with the first L
         Y=abs(X);
@@ -137,10 +138,24 @@ switch option
         xMax=unique(max(x));
         xMin=unique(min(x));
         xCoef=[xMin 0 xMax]';
-        yCoef=[0 0 xMax]';
+        yCoef=[abs(xMin) 0 xMax]';
         p=polynom('polyType','interp1', 'polyCoef', cat(2,xCoef,yCoef),'polyRange', [xMin xMax]);
         set(M,'elements', {I1 p});
         comment='LNRECT';
+     case 'NLRECT'
+        % Full wave rectifier
+        absU=abs(U);
+        Y = nlsim(I1,absU);                % filter with the first ;
+        M=lnbl;
+        u=double(absU);
+
+        uMax=unique(max(u));
+        uMin=-uMax;
+        xCoef=[uMin 0 uMax]';
+        yCoef=[uMax 0 uMax]';
+        p=polynom('polyType','interp1', 'polyCoef', cat(2,xCoef,yCoef),'polyRange', [uMin uMax]);
+        set(M,'elements', {p I1});
+        comment='NLRECT';
     case 'LN2'
         x = nlsim(I1,U);
         Y= nlsim(P2,x);
@@ -177,10 +192,6 @@ switch option
         comment='NL Quadratic data set';
         %LNL
     case 'LNL'
-        
-        
-        
-        
         x=nlsim(I1,U);
         z=nlsim(P3,x);
         Y=nlsim(I2,z);
@@ -200,11 +211,13 @@ switch option
         Y=nlsim(P3,U);
         M=P3;
     case 'STATIC_LINEAR'
-        Y=5*U;
-        M='Linear';
+        M=polynom;
+        set(M,'polyType','power','polyOrder',1,'polyRange',[-10 10],'polyCoef',[ 0 1]);
+        Y=nlsim(M,U);
     case 'CUBER'
-        Y=U*U*U
-        M='cube';
+        M=polynom;
+        set(M,'polyType','power','polyOrder',3,'polyRange',[-10 10],'polyCoef',[ 0 0 0 1]);
+        Y=nlsim(M,U);
     otherwise
         error (['Option not defined:' option]);
 end
