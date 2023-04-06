@@ -31,7 +31,7 @@ function [Z,M,  zFull] = nlid_sim (option,U,varargin)
 %       'delay_time' 0 'Output delay (sec))'} ...
 %       'domain_incr' .01 'Sampling increment (sec))'} ...
 %       'noise_level' 0 'Noise std/output STD'
-% $Revisions: %
+% $Revisions: 6 April 2023
 % Copyright 2003, Robert E Kearney and David T Westwick
 % This file is part of the nlid toolbox, and is released under the GNU
 % General Public License For details, see copying.txt and gpl.txt
@@ -56,7 +56,7 @@ else
     domain_incr=U.domainIncr;
 end
 if nargin==0 | isempty(option)
-    opts = { 'LP1' 'HP1'  'L1' 'L2'  'LNRect' 'LN2' 'LN3' 'N3L' 'N2L' ...
+    opts = { 'LP1' 'HP1'  'L1' 'L2'  'LNRect' 'LN2' 'LN3' 'N3L' 'N2L'  'NLRect'...
         'LNL' 'PC' 'POLY' 'Static_Linear' 'Cuber' 'N3HP'};
     o=menu('Option',opts);
     option=opts{o};
@@ -142,6 +142,7 @@ switch option
         p=polynom('polyType','interp1', 'polyCoef', cat(2,xCoef,yCoef),'polyRange', [xMin xMax]);
         set(M,'elements', {I1 p});
         comment='LNRECT';
+
      case 'NLRECT'
         % Full wave rectifier
         absU=abs(U);
