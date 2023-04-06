@@ -17,6 +17,7 @@ function [Z,M,  zFull] = nlid_sim (option,U,varargin)
 %       LNRECT - Wiener system - second order low-opass followed by full wave rectifier
 %       LN2 - Wiener system with quadratic nonlinearity
 %       LN3 - Wiener systems with cubic nonlinerity
+%       NLRECT - 
 %       N2L - Hammerstein system with quadratic nonlinearity
 %       N3L - Hammerstien system with cubic nonlinearity.
 %       N3HP - Hammerstein system:  cubic nonlinearity + HP filter
