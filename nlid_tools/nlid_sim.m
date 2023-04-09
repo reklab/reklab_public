@@ -10,13 +10,14 @@ function [Z,M,  zFull] = nlid_sim (option,U,varargin)
 %	option 	= system type
 %       LP1 - firat order  low pass
 %       HP1 - first order high pass
-%       L1 - one-sided low pass filter
+%       L1 - one-sided low pass filter[z,
 %       H1 - seocond-order high pass
 %       H2 - Bessel high pass
 %       L2 - second-order low pass
 %       LNRECT - Wiener system - second order low-opass followed by full wave rectifier
 %       LN2 - Wiener system with quadratic nonlinearity
 %       LN3 - Wiener systems with cubic nonlinerity
+%       NLRECT - 
 %       N2L - Hammerstein system with quadratic nonlinearity
 %       N3L - Hammerstien system with cubic nonlinearity.
 %       N3HP - Hammerstein system:  cubic nonlinearity + HP filter
@@ -31,7 +32,7 @@ function [Z,M,  zFull] = nlid_sim (option,U,varargin)
 %       'delay_time' 0 'Output delay (sec))'} ...
 %       'domain_incr' .01 'Sampling increment (sec))'} ...
 %       'noise_level' 0 'Noise std/output STD'
-% $Revisions: %
+% $Revisions: 6 April 2023
 % Copyright 2003, Robert E Kearney and David T Westwick
 % This file is part of the nlid toolbox, and is released under the GNU
 % General Public License For details, see copying.txt and gpl.txt
@@ -56,7 +57,7 @@ else
     domain_incr=U.domainIncr;
 end
 if nargin==0 | isempty(option)
-    opts = { 'LP1' 'HP1'  'L1' 'L2'  'LNRect' 'LN2' 'LN3' 'N3L' 'N2L' ...
+    opts = { 'LP1' 'HP1'  'L1' 'L2'  'LNRect' 'LN2' 'LN3' 'N3L' 'N2L'  'NLRect'...
         'LNL' 'PC' 'POLY' 'Static_Linear' 'Cuber' 'N3HP'};
     o=menu('Option',opts);
     option=opts{o};
@@ -75,7 +76,8 @@ set(I1,'dataSet',irf1,'domainIncr',domain_incr);
 I2=irf;set(I2,'dataSet',irf2,'domainIncr',domain_incr);
 P2=polynom;
 set(P2,'polyType','power','polyCoef',[10 25 10 ]');
-P3=polynom('polyType','power','polyCoef',[0 50 -10 5]');
+ud=double(U); 
+P3=polynom('polyType','power','polyCoef',[0 50 -10 5]', 'polyRange', [ min(ud) max(ud)]);
 
 
 %  And the coefficients of the Nonlinearity are...
@@ -128,11 +130,34 @@ switch option
         % LN
         
     case 'LNRECT'
+        % Linear system followed by full wave rectifier
         disp('ln')
         X = nlsim(I1,U);                % filter with the first L
         Y=abs(X);
-        comment='LN Threshold data set';
-        
+        M=lnbl;
+        x=double(X);
+        xMax=unique(max(x));
+        xMin=unique(min(x));
+        xCoef=[xMin 0 xMax]';
+        yCoef=[abs(xMin) 0 xMax]';
+        p=polynom('polyType','interp1', 'polyCoef', cat(2,xCoef,yCoef),'polyRange', [xMin xMax]);
+        set(M,'elements', {I1 p});
+        comment='LNRECT';
+
+     case 'NLRECT'
+        % Full wave rectifier
+        absU=abs(U);
+        Y = nlsim(I1,absU);                % filter with the first ;
+        M=lnbl;
+        u=double(absU);
+
+        uMax=unique(max(u));
+        uMin=-uMax;
+        xCoef=[uMin 0 uMax]';
+        yCoef=[uMax 0 uMax]';
+        p=polynom('polyType','interp1', 'polyCoef', cat(2,xCoef,yCoef),'polyRange', [uMin uMax]);
+        set(M,'elements', {p I1});
+        comment='NLRECT';
     case 'LN2'
         x = nlsim(I1,U);
         Y= nlsim(P2,x);
@@ -169,10 +194,6 @@ switch option
         comment='NL Quadratic data set';
         %LNL
     case 'LNL'
-        
-        
-        
-        
         x=nlsim(I1,U);
         z=nlsim(P3,x);
         Y=nlsim(I2,z);
@@ -192,11 +213,13 @@ switch option
         Y=nlsim(P3,U);
         M=P3;
     case 'STATIC_LINEAR'
-        Y=5*U;
-        M='Linear';
+        M=polynom;
+        set(M,'polyType','power','polyOrder',1,'polyRange',[-10 10],'polyCoef',[ 0 1]);
+        Y=nlsim(M,U);
     case 'CUBER'
-        Y=U*U*U
-        M='cube';
+        M=polynom;
+        set(M,'polyType','power','polyOrder',3,'polyRange',[-10 10],'polyCoef',[ 0 0 0 1]);
+        Y=nlsim(M,U);
     otherwise
         error (['Option not defined:' option]);
 end

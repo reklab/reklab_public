@@ -32,7 +32,7 @@ classdef polynom < nltop
             % add object  specific parameters
             p.parameterSet(1) =param('paramName','polyType','paramDefault','hermite', ...
                 'paramHelp','polynomial type',...
-                'paramType','select','paramLimits',{'hermite','power','tcheb' 'Bspline' 'laguerre'});
+                'paramType','select','paramLimits',{'hermite','power','tcheb' 'Bspline' 'laguerre' 'interp1'});
             p.parameterSet(2) =param('paramName','polyOrderSelectMode','paramDefault','auto',...
                 'paramHelp','order selection method',...
                 'paramType','select','paramLimits',{'auto','full','manual'});
@@ -95,6 +95,13 @@ classdef polynom < nltop
                                 % define it
                                 outPs(4) =param('paramName','alfa','paramDefault',.5,...
                                     'paramHelp','alpha parameter for Lagurre polynomials');
+                                outPS=outPs(1:4);
+                            case 'interp1'
+                                outPs=outPs(1);
+                                outPs(2) =param('paramName','interpMethod','paramDefault','linear', ...
+                                'paramHelp','Interpolation method',...
+                                 'paramType','select','paramLimits',{'linear','cubic','spline'});
+                                outPs=outPs(1:2);
                             otherwise
                                 outPs=outPs(1:3);
                         end
@@ -358,6 +365,8 @@ classdef polynom < nltop
                         case 'laguerre'
                             p=generate_laguerre_basis(length(x),sys.polyOrder, alfa);
                             yout=p*sys.polyCoef;
+                        case 'interp1'
+                            yout=interp1(sys.polyCoef(:,1),sys.polyCoef(:,2),x,interpMethod);
                     end
                     Y(:,:,iReal)=yout;
                     
@@ -511,6 +520,25 @@ classdef polynom < nltop
                     L=generate_laguerre_basis(length(x), polyOrderMax,alfa);
                     W=double(L);
                     polyOrderSelectMode='full'
+                case 'interp1'
+                    polyOrder=pin.polyOrder;
+                    x=double(z(:,1));
+                    [xs,is]=sort(x);
+                    y=double(z(:,2));
+                    ys=y(is);
+                    xMin=unique(min(xs));
+                    xMax=unique(max(xs));
+                    deltaX=(xMax-xMin)/polyOrder;
+                    curVal=xMin;
+                    coef=zeros(polyOrder,2);
+                    for i=1:polyOrder+1
+                        j=min(find(ge(xs,curVal)))
+                        curVal=curVal+deltaX;
+                        coef(i,1)=xs(j);
+                        coef(i,2)=ys(j);
+                    end
+                    set(p,'polyCoef',coef,'polyRange',[xMin xMax]);
+                    return
             end
             [Q,R] = qr(W,0);
             QtY = Q'*y;
