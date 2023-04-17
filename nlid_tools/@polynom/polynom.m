@@ -398,19 +398,32 @@ classdef polynom < nltop
             end
             
             if nin==1,
-                x=linspace(range(1),range(2))';
-                y=double(nlsim(p,x));
-                plot (x,y);
-                if nargin > 1,
-                    hold on
+                if strcmp(get(p,'polyType'),'interp1')
+                    xMin = p.polyCoef(1,1);
+                    xMax = p.polyCoef(end,1);
+                    x = linspace(xMin,xMax)';
+                    y = double(nlsim(p,x));
+                    plot(x,y);
+
+                    title(p.comment);
+                    xlabel('input');
+                    ylabel('output');
+
+                else
+                    x=linspace(range(1),range(2))';
+                    y=double(nlsim(p,x));
+                    plot (x,y);
+                    if nargin > 1,
+                        hold on
+                        
+                        plot (z(:,1).dataSet, z(:,2).dataSet,'r.');
+                        hold off
+                    end
                     
-                    plot (z(:,1).dataSet, z(:,2).dataSet,'r.');
-                    hold off
+                    title(p.comment);
+                    xlabel('input');
+                    ylabel('output');
                 end
-                
-                title(p.comment);
-                xlabel('input');
-                ylabel('output');
             elseif nin==2,
                 x=linspace(range(1,1), range(2,1))';
                 y=linspace(range(1,2), range(2,2))';
