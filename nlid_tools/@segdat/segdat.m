@@ -572,7 +572,7 @@ classdef segdat<nldat
                 if isa(arg1,'irf')
                     curFilt=nlsim(arg1,curSeg);
                 else
-                    curFilt=filter(curSeg,varargin);
+                    curFilt=filter(curSeg,varargin{1},varargin{2});
                 end
                 if iSeg==1,
                     sOut=segdat(curFilt);
