@@ -102,10 +102,10 @@ classdef nlm < nltop
         function plot (n, nV, nH,nSub)
             %  plot an nlm moodel: plot (n, nv, nh, nSub)
             % n - nm model
-            % optional parameters (must specify all or nonee
+            % optional parameters (must specify all or none
             % nv - number of vertical panels in plot
             % nh - number of horiontal pannels in plot 
-            % nSub - subplot por elements in n
+            % nSub - subplot for elements in n
               e=n.elements;
             [nout,nin]=size(e);
             nElement=nout+nin-1;
@@ -113,7 +113,7 @@ classdef nlm < nltop
                 case 1
                     nV=nout;
                     nH=nin;
-                    nSub=1:nElement;
+                    nSub=nV*nH;
                 case 4
                     if length(nSub) ~=nElement
                         error ('nSub muust equal the number of elements in the model');
@@ -126,9 +126,11 @@ classdef nlm < nltop
             % SISO Series element
             [np,ns]=size(e);
             ifig=gcf;
+            k=0;
             for i=1:np,
                 for j=1:ns
-                    subplot (nV,nH,nSub((i-1)*ns+j));
+                    k=k+1;
+                    subplot (nV,nH,k);
                     p=e{i,j};
                     p.comment= [p.comment ];
                     plot (p);
@@ -140,7 +142,7 @@ classdef nlm < nltop
         
         
         
-        
+ 
         function [npath,nel, nReal]= size (d)
             % overloaded size function for nlm.
             % npath - number of parallel paths
