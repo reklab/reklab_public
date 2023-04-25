@@ -1,4 +1,4 @@
-function v = vaf(y,ye)
+var(function v = vaf(y,ye)
 % vaf        Compute the percentage Variance Accounted For (VAF)
 %            between two signals. the VAF is calculated as:
 %                         variance(y-ye)
