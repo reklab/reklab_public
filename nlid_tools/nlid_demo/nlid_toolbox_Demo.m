@@ -12,10 +12,10 @@ properties(nldat)
 methods(nldat)
 %% Show help for one method for  for a class
 help nldat/plot
-%% Show help summary for all methods for a class nldat
+%% Show help summary for all methods for class nldat
 disp('Display help on all methods for a class') 
 nlid_help('nldat');
-%% nldat class - data class
+%% nldat class - data classcd('
 % Create a nldat vector
 x=randn(5000,1);
 X=nldat(x); % Convert real to nldat
@@ -90,12 +90,11 @@ plot (Z);
 methods(nldat);
 mean(Z)
 mean(Z2)
-mean(Z3)
-%%
+mean(Z3)%%
 
 
 %%   pdf - probabilty distribution function class for NLID toolbox
-%% Compute and plot probability distribution from nldat object
+% Compute and plot probability distribution from nldat object
 pX = pdf(X);
 clf; plot(pdf(X));
 pX=pdf(X,'nBins',20,'pdfType','Frequency');
