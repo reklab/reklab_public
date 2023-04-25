@@ -247,23 +247,28 @@ classdef efm < nltop
             %          - measure may be the full name or just the start. An
             %          error occurs more than one meaaure start with the
             %          same name. 
-            % Generate an error if a specified measure is not found.
+            % Returns an empty value an error if a specified measure is not found.
             if ~iscell(measure)
                 measure={measure};
             end
             nMeasure=length(measure);
-            eSig=eIn;
+            eSig=efm;
             sig=eIn.signals;
             measureList={sig.measure};
             ptr=[];
+            jMeasure=0;
             for iMeasure=1:nMeasure,
                 curPtr=find(startsWith(measureList, measure{iMeasure}));
-                if isempty (curPtr)
-                    error (['Measure not found:' measure{iMeasure}]);
-                elseif length(curPtr)>1
+                
+                if length(curPtr)>1
                     error(['Multiple measures starting wiht: '  measure{iMeasure}])
                 end
-                ptr(iMeasure)=curPtr;
+                if isempty (curPtr)
+                    disp (['Measure not found:' measure{iMeasure}]);
+                else
+                    jMeasure=jMeasure+1;
+                    ptr(jMeasure)=curPtr;
+                end
             end
             signal=eIn.signals(ptr);
             eSig.signals=signal;
