@@ -10,7 +10,7 @@ classdef pvnlbl < pvm
     %        IEEE Access, vol. 10, pp. 6348-6362, 11 Jan. 2022, DOI: 10.1109/ACCESS.2022.3141704
     
     properties
-
+    
     end
     
     methods
@@ -226,8 +226,8 @@ classdef pvnlbl < pvm
                                                    'polyOrder',static_nl.svExpOrder,...
                                                    'polyType','tcheb');                             
                     end
-                    rho_d = decimate_kian(rho,decimation);
-                    i_d = decimate_kian(z(:,1),decimation);
+                    rho_d = decimate(rho,decimation); 
+                    i_d = decimate(z(:,1),decimation);
                      
                     min_sv = min(rho_d.dataSet); max_sv = max(rho_d.dataSet);
                     min_u = min(i_d.dataSet); max_u = max(i_d.dataSet);
@@ -398,9 +398,9 @@ input = z(:,1);
 output = z(:,2);
 
 %% Data Decimation for Identification
-input = decimate_kian(input,decimation_ratio,decimate_option);
-output = decimate_kian(output,decimation_ratio,decimate_option);
-rho = decimate_kian(rho,decimation_ratio,decimate_option);
+input = decimate(input,decimation_ratio); 
+output = decimate(output,decimation_ratio); 
+rho = decimate(rho,decimation_ratio); 
 nsamp = size(rho.dataSet,1);
 
 %% Normalizing the input of the static NL of the Hammerstein system 

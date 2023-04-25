@@ -172,9 +172,11 @@ classdef efm < nltop
             if epochStart>0,
                 error ('epochStart must beless than zero');
             end
+           
             if ischar(measure)
                 measure={measure};
             end
+
             epochStart=epochStart*60;
             epochLen=epochLen*60;
             nSig=length(measure);
@@ -368,9 +370,7 @@ classdef efm < nltop
             nChan=length(EFM.signals);
             % Determine a comomon start end end time
             for iChan=1:nChan,
-
                 d=domain(EFM.signals(iChan).segdat);
-
                 startTime(iChan)=min(d)/3600;
                 endTime(iChan)=max(d)/3600;
             end

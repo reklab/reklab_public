@@ -89,7 +89,7 @@ classdef nlbl < nlm
         
         function sys= set(sys, varargin)
             sysname=inputname(1); 
-            % Set method first so that parameters are proerly defined
+            % Set method first so that parameters are properly defined
             iMethod=find(strcmp(varargin,'idMethod')); 
             if ~isempty(iMethod),
                 if length(varargin)>=iMethod+1,
