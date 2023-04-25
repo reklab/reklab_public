@@ -157,7 +157,7 @@ classdef eseq
             
         function h=line(e)
             [c,d]=cseq(e);
-            line(d,c);
+            h=line(d,c);
             
         end
         
@@ -172,8 +172,10 @@ classdef eseq
     
     methods (Static)
         function event =cseq2eseq(cSeq, domainStart, domainIncr)
-            %catSignal2Events - convert a categorical sequence  to event sequence
+            %  event =cseq2eseq(cSeq, domainStart, domainIncr) - convert a categorical sequence  to event sequence
             % Input: cSig - categorical signal
+            % domainStart 
+            % domainIncr
             % output
             % event - structure with fields
             % event.type
