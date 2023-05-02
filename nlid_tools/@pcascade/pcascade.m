@@ -96,7 +96,7 @@ classdef pcascade < nlm
         
         
         function pc = nlident (pc,z,  varargin)
-            % Estimate  an pcascade - parallel cascade mode
+            % Estimate an pcascade - parallel cascade mode
             
             if nargin < 2,
                 disp('nlident takes two inputs for pcascade objects: pcasacde, Z' );
@@ -156,7 +156,7 @@ classdef pcascade < nlm
                 P = getParamValStruct(pc.parameterSet);
                 
                 pcPath = lnbl;
-                set(pcPath{1},'nLags',P.nLags)
+                set(pcPath{1},'nLags',P.nLags);
                 set(pcPath{2},'polyOrderMax',P.polyOrderMax, ...
                     'polyOrderSelectMode','auto');
                 % try a first-order pathway
