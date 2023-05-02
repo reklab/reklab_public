@@ -166,6 +166,13 @@ classdef segdat<nldat
                     new_data(:,options.chan) = new_time;
                 end
 
+                % If after trimming, there is no data left in the segment,
+                % skip this segment
+                if isempty(new_time)
+                    domainStart(i) = nan;
+                    continue;
+                end
+
                 % Update the vector of domain starts before rounding the increments
                 domainStart(i) = new_time(1);
 
@@ -195,6 +202,9 @@ classdef segdat<nldat
             %         if exist('chan','var')
             %             y(:,chan) = y(:,chan) - y(1,chan);
             %         end
+
+            % Remove NaNs from vector of domain starts
+            domainStart = domainStart(~isnan(domainStart));
 
             % Convert the data matrix to a segdat object
             Y = segdat(y);
