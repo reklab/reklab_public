@@ -154,11 +154,19 @@ classdef efm < nltop
 
         end
 
-        function efmStruct= efm2struct ( e )
+        function efmStruct= efm2struct ( e, doConvertSegdat )
+            if nargin < 2
+                doConvertSegdat = false;
+            end
             fieldList=fieldnames(e);
             for i=1:length(fieldList)
                 curField=fieldList{i};
                 efmStruct.(curField)=get(e,curField);
+            end
+            if doConvertSegdat
+                for j=1:length(e.signals)
+                    efmStruct.signals(j).segdat=segdat2struct(e.signals(j).segdat);
+                end
             end
         end
 
@@ -259,6 +267,7 @@ classdef efm < nltop
             measureList={sig.measure};
             ptr=[];
             for iMeasure=1:nMeasure,
+<<<<<<< Updated upstream
                 curPtr=find(startsWith(measureList, measure{iMeasure}));
                 if isempty (curPtr)
                     error (['Measure not found:' measure{iMeasure}]);
@@ -270,6 +279,31 @@ classdef efm < nltop
             signal=eIn.signals(ptr);
             eSig.signals=signal;
 
+=======
+                curPtr=find(strcmp(measure{iMeasure},measureList));
+                if isempty (curPtr)
+                    %error (['Measure not found:' measure{iMeasure}]);
+                    continue
+                end
+                %ptr(iMeasure)=curPtr;
+                ptr = [ptr curPtr];
+            end
+            if isempty(ptr)
+                measure
+                disp('Measures not found:');
+                eSig=[];
+                return
+            end
+                
+                signal=eIn.signals(ptr);
+                eSig.signals=signal;
+            
+        end
+        
+        function s = getSegdat(eIn, measure)
+            e=getMeasure(eIn, measure);
+            s= e.signals.segdat;
+>>>>>>> Stashed changes
         end
 
 
