@@ -267,19 +267,6 @@ classdef efm < nltop
             measureList={sig.measure};
             ptr=[];
             for iMeasure=1:nMeasure,
-<<<<<<< Updated upstream
-                curPtr=find(startsWith(measureList, measure{iMeasure}));
-                if isempty (curPtr)
-                    error (['Measure not found:' measure{iMeasure}]);
-                elseif length(curPtr)>1
-                    error(['Multiple measures starting wiht: '  measure{iMeasure}])
-                end
-                ptr(iMeasure)=curPtr;
-            end
-            signal=eIn.signals(ptr);
-            eSig.signals=signal;
-
-=======
                 curPtr=find(strcmp(measure{iMeasure},measureList));
                 if isempty (curPtr)
                     %error (['Measure not found:' measure{iMeasure}]);
@@ -294,16 +281,13 @@ classdef efm < nltop
                 eSig=[];
                 return
             end
-                
-                signal=eIn.signals(ptr);
-                eSig.signals=signal;
-            
+            signal=eIn.signals(ptr);
+            eSig.signals=signal;
         end
         
         function s = getSegdat(eIn, measure)
             e=getMeasure(eIn, measure);
             s= e.signals.segdat;
->>>>>>> Stashed changes
         end
 
 
