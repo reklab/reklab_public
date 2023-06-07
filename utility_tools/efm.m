@@ -154,11 +154,19 @@ classdef efm < nltop
 
         end
 
-        function efmStruct= efm2struct ( e )
+        function efmStruct= efm2struct ( e, doConvertSegdat )
+            if nargin < 2
+                doConvertSegdat = false;
+            end
             fieldList=fieldnames(e);
             for i=1:length(fieldList)
                 curField=fieldList{i};
                 efmStruct.(curField)=get(e,curField);
+            end
+            if doConvertSegdat
+                for j=1:length(e.signals)
+                    efmStruct.signals(j).segdat=segdat2struct(e.signals(j).segdat);
+                end
             end
         end
 
@@ -260,21 +268,24 @@ classdef efm < nltop
             ptr=[];
             jMeasure=0;
             for iMeasure=1:nMeasure,
-                curPtr=find(startsWith(measureList, measure{iMeasure}));
-                
-                if length(curPtr)>1
-                    error(['Multiple measures starting wiht: '  measure{iMeasure}])
-                end
-                if isempty (curPtr)
-                    disp (['Measure not found:' measure{iMeasure}]);
-                else
-                    jMeasure=jMeasure+1;
-                    ptr(jMeasure)=curPtr;
-                end
+                curPtr=find(strcmp(measure{iMeasure},measureList));
+ 
+                %ptr(iMeasure)=curPtr;
+                ptr = [ptr curPtr];
+            end
+            if isempty(ptr)
+                measure
+                disp('Measures not found:');
+                eSig=[];
+                return
             end
             signal=eIn.signals(ptr);
             eSig.signals=signal;
-
+        end
+        
+        function s = getSegdat(eIn, measure)
+            e=getMeasure(eIn, measure);
+            s= e.signals.segdat;
         end
 
 
