@@ -160,6 +160,12 @@ classdef segdat<nldat
                 new_data=new_data(trimF:trimB,:);
                 new_time=new_time(trimF:trimB,:);
 
+%                 % If, by some error, the resampled values at the start or
+%                 % end of the segment are NaN, remove them
+%                 k = find(~isnan(new_data(:,2)) | new_data(:,2)==inf | new_data(:,2)==-inf);
+%                 new_data=new_data(k,:);
+%                 new_time=new_time(k,:);
+
                 % If the time vector channel was specified, replace the channel values
                 % with the new time vector
                 if ~isempty(options.chan)
@@ -176,7 +182,7 @@ classdef segdat<nldat
                 % Update the vector of domain starts before rounding the increments
                 domainStart(i) = new_time(1);
 
-                % Create an array with features the resampled data and a row of NaNs to
+                % Create an array which features the resampled data and a row of NaNs to
                 % designate a segment break
                 new_data = [new_data; nan(1,size(new_data,2))];
 
