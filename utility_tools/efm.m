@@ -85,7 +85,7 @@ classdef efm < nltop
 
 
         function C = coverage(e, epochLen)
-            % Determine coverage of signals in e
+            % Determine coverage of signals in efm object by epoch
             % Epoch length - length of epoch in minutes
             if nargin==1,
                 epochLen=20;
@@ -257,7 +257,7 @@ classdef efm < nltop
             %          - measure may be the full name or just the start. An
             %          error occurs more than one meaaure start with the
             %          same name. 
-            % Returns an empty value an error if a specified measure is not found.
+            % Returns an empty value and a error if a specified measure is not found.
             if ~iscell(measure)
                 measure={measure};
             end
@@ -268,7 +268,7 @@ classdef efm < nltop
             ptr=[];
             jMeasure=0;
             for iMeasure=1:nMeasure,
-                curPtr=find(strcmp(measure{iMeasure},measureList));
+                curPtr=find(startsWith(measure{iMeasure},measureList));
  
                 %ptr(iMeasure)=curPtr;
                 ptr = [ptr curPtr];
@@ -627,8 +627,15 @@ classdef efm < nltop
             end
         end
 
-
-
+        function  S= signalList (sys)
+            % Returns a cvell array of signals in an EFM file
+            S={};
+            s=sys.signals;
+            nSig=length(s);
+            for iSig=1:nSig
+                S(iSig)= {s(iSig).measure};
+            end
+        end
     end
 
     methods(Static)
