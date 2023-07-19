@@ -262,20 +262,20 @@ classdef efm < nltop
                 measure={measure};
             end
             nMeasure=length(measure);
-            eSig=efm;
+            eSig=eIn;
             sig=eIn.signals;
             measureList={sig.measure};
             ptr=[];
             jMeasure=0;
             for iMeasure=1:nMeasure,
-                curPtr=find(startsWith(measure{iMeasure},measureList));
+                curPtr=find(startsWith(measureList,measure{iMeasure}));
  
                 %ptr(iMeasure)=curPtr;
                 ptr = [ptr curPtr];
             end
             if isempty(ptr)
-                measure
-                disp('Measures not found:');
+%                 measure
+%                 disp('Measures not found:');
                 eSig=[];
                 return
             end
@@ -623,7 +623,8 @@ classdef efm < nltop
             s=sys.signals;
             nSig=length(s);
             for iSig=1:nSig
-                disp(['Signal ' num2str(iSig) ':' s(iSig).measure]);
+                disp(['Signal(' num2str(iSig) '):' s(iSig).measure]);
+                disp(s(iSig));
             end
         end
 
