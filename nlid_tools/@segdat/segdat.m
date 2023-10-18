@@ -179,7 +179,7 @@ classdef segdat<nldat
                     continue;
                 end
 
-                % Update the vector of domain starts before rounding the increments
+                % Update the vector of domain starts
                 domainStart(i) = new_time(1);
 
                 % Create an array which features the resampled data and a row of NaNs to
