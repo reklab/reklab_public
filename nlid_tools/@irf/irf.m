@@ -102,6 +102,23 @@ classdef irf < kern
                 'domainName','Hz');
         end
         
+        function [beta, irfEst]=fitKBI (I, beta0)
+            % I -= irf to fit
+            % beta0 - initial parameter estimates [ k b i];
+            % beta - estimated parameters and properties
+            % irfEst - estimated IRF function
+            x=domain(I)';
+            y=double(I);
+            beta=fitnlm(x,y,@fkbiFnc, beta0)
+            irfTmp=fkbiFnc(beta.Coefficients.Estimate,x);
+            irfEst=I;
+            set(irfEst,'dataSet',irfTmp,'comment','IRF estimate');   
+            clf; 
+            plot(I);
+            h=line(irfEst);
+            set(h,'color','r');
+        end
+
         function I = irf2 (I, varargin  )
             % Generate a second order IRF with gain, damping and natural
             % freuquency
