@@ -96,7 +96,7 @@ classdef eseq
             eOut=e(i);
         end
 
-        function eInter = intersect (e1,e2);
+        function eInter = intersect (e1,e2)
             % return events where e1 and e2  are of the same type and intersect
             % assumes that e1 and e2 are in increaeing time and msut have
             % same domainStart and domainIcrc=
@@ -123,7 +123,7 @@ classdef eseq
                             eInter(iInter,1).domainIncr=e1.domainIncr;
                             eInter(iInter,1).startIdx=max(e1CurStart, e2CurStart);
                             eInter(iInter,1).endIdx=min(e1CurEnd,e2CurEnd);
-                            eInter(iInter,1).nSamp=  eInter(iInter,1).endIdx - eInter(iInter,1).startIdx +1
+                            eInter(iInter,1).nSamp=  eInter(iInter,1).endIdx - eInter(iInter,1).startIdx +1;
                             eInter(iInter,1).type=e1Cur.type;
                         end
                     end

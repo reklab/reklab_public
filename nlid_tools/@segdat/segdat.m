@@ -142,6 +142,10 @@ classdef segdat<nldat
                 % Round the time stamps to integer multiples of the new sampling time
                 new_time = ts*round(new_time/ts);
 
+                % Round the original times as well to select suitable trim
+                % points
+                time = ts*round(time/ts);
+
                 % Find the first sample at/after the original start time of the segment
                 % post-resampling
                 trimF=min(find((new_time>=time(1))));
@@ -179,7 +183,7 @@ classdef segdat<nldat
                     continue;
                 end
 
-                % Update the vector of domain starts before rounding the increments
+                % Update the vector of domain starts
                 domainStart(i) = new_time(1);
 
                 % Create an array which features the resampled data and a row of NaNs to
