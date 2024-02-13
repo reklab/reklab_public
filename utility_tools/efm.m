@@ -364,7 +364,7 @@ classdef efm < nltop
             for iChan=1:nChan,
                 curEFM=EFM.signals(iChan).segdat;
                 set(curEFM, 'domainIncr',curEFM.domainIncr/3600, 'domainName','Hours', ...
-                    'domainStart', curEFM.domainStart/3600);
+                    'domainStart', curEFM.domainStart/3600, 'domainValues',curEFM.domainValues/3600.);
                 subplot (nChan,1,iChan);
                 plot(curEFM);
                 titleStr=strrep([EFM.signals(iChan).measure ' ' EFM.signals(iChan).sensor  ...
@@ -372,7 +372,7 @@ classdef efm < nltop
                 title(titleStr);
                 
                 set(gca,'xlim',[startTime endTime]);
-                ylabel(EFM.signals(iChan).measure)
+         %       ylabel(EFM.signals(iChan).measure)
                 xlabel('');
             end
             xlabel('Hours');
@@ -383,7 +383,8 @@ classdef efm < nltop
         function sigOut = repair (sigIn, nBadMax, nInterp)
             %% sigOut = repair (sigIn, nBadMax, nInterp)
             % repair an efm object by interpolating missing/bad values.
-            %  Long Periods of bad/missing data result in creation of segment.
+            %  Long Periods of bad/missing data result in creation of
+            %  segment.x=
             %
             % nBadmMax [50]  - maxmimum number of sequential bad samples to interpolate.
             % nInterp [5]   - Number of points before and after bad segmenet to use for interpolation
