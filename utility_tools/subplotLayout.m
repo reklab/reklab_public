@@ -13,8 +13,11 @@ elseif nSig<=8
 elseif nSig<=12
     nH=3;
     nV=4;
-else
-    nH=5;
+elseif nSig<=16
+    nH=4;
     nV=4;
+else
+    nH=ceil(sqrt(nSig));
+    nV=ceil(nSig/nH);
 end
 end
