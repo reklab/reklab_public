@@ -31,7 +31,7 @@ p=nl.elements{1,1};
 maxOrderNLE=p.polyOrderMax;
 set(invi,'nSides',2,'nLags',nLagLE,'irfPseudoInvMode','auto');
 
-set(i,'nSides',nSides','nLags',nLagLE,'irfPseudoInvMode','auto');
+%set(i,'nSides',nSides','nLags',nLagLE,'irfPseudoInvMode','auto');
 flag=1;
 h_final=nan;
 while flag,
