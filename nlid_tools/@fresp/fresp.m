@@ -22,7 +22,7 @@ classdef fresp < nldat
                 'paramHelp','Detrend (linear/mean/none' , ...
                 'paramType','string', 'paramLimits',{ 'linear' 'mean' 'none'});
             
-            I.comment='IRF Model';
+            I.comment='Frequency Response Model';
             if nargin==0;
                 return
             elseif nargin==1,
