@@ -1,5 +1,8 @@
 function i=nlblDemo(i)
-% test of NLBL  identification
+% Demo of NLBL  identification
+% Note that to set the paramters of the nonlinear and linear elements you
+% must extract the elemnet from the nlbl, change the paramter, and then add
+% it back to the nlbl. This is demosntrated below.
 %% hk - method
 clear all
 sys = 'N2L'
@@ -7,12 +10,10 @@ disp('hk - test');
 [z,m]=nlid_sim (sys);
 NHK=nlbl;
 set(NHK,'idMethod','hk','displayFlag',true,'threshNSE',.001);
-% Set umber of lags in IRF
-i=NHK{1,2};
-set(i,'nLags',50);
-NHK{1,2}=i;
-
-
+% Set IRF parameters through the second element in the nlbl; 
+i=NHK{1,2}; % Get the linear element
+set(i,'nLags',50,'irfPseudoInvMode' , 'manual') % Set its parameters; 
+NHK{1,2}=i; % Restore the modifed linear element to the nlbl object. 
 
 NHK=nlident(NHK,z);
 figure(1); plot(NHK); 
@@ -25,7 +26,20 @@ disp('nlbl identificaton using sls');
 NSLS=nlbl;
 set(NSLS,'idMethod','sls', 'nIterMax', 10, 'displayFlag',true, ...
     'nIterMax', 100);
-NSLS=nlident(NSLS,z);figure (1)
+
+% To set the parameters used to identify the IRF in the IRF elemebnt of
+% nlbl.
+%
+i=NSLS{1,2} % retrieve IRF element
+set(i,'irfPseudoInvMode' , 'auto')  % Set the parameters
+NSLS{1,2}=i; % Add it back to the nlbl block. 
+% SEt the maximum order for the polynomimal 
+n=NSLS{1,1}; 
+set(n,'polyOrderMax',5)
+NSLS{1,1}=n;
+
+
+NSLS=nlident(NSLS,z);
 figure(3);
 plot (NSLS) ;
 figure(4);
