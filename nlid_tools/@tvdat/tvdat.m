@@ -37,6 +37,13 @@ classdef tvdat < nldat
         end
         
         function plot(TV)
+            % Handle special case where these is only one realization
+            [nSamp, nSig, nReal]=size(TV);
+            if nReal==1,
+                plot(nldat(TV));
+                return
+            end
+
             Z=squeeze(TV.dataSet);
             X=TV.domainValues;
             Y=TV.realDomainValues;
@@ -44,6 +51,18 @@ classdef tvdat < nldat
             xlabel(TV.realDomainName);
             ylabel(TV.domainName); 
         end
+
+         function mesh(TV)
+            Z=squeeze(TV.dataSet);
+            X=TV.domainValues;
+            Y=TV.realDomainValues;
+            mesh(Y',X',Z);
+            xlabel(TV.realDomainName);
+            ylabel(TV.domainName); 
+            view(2);
+            colorbar
+        end
+            
             
         
         
