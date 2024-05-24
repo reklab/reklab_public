@@ -1188,12 +1188,13 @@ classdef nldat < nltop
             % varargout [3} = Tc;
             % nldat wrapper for spectrogram
             % Note that the f,t outputs are returned as aprt of S
-            optionList= { { 'window' [] 'window to divide the signal into sgements'} ...
+            defaultWindowLen=floor(length(N)/8);
+            optionList= { { 'windowlen' defaultWindowLen 'window to divide the signal into sgements'} ...
                 {'noverlap' [] 'number of samples of overlap between sgements'} ...
                 {'nfft' [] 'numberof DFT points'} };
             flag=arg_parse(optionList, varargin);
             fSamp=1/N.domainIncr;
-            [s,f,t,p,Fc,Tc]=spectrogram(N.dataSet,window,noverlap,nfft,fSamp);
+            [s,f,t,p,Fc,Tc]=spectrogram(N.dataSet,windowlen,noverlap,nfft,fSamp);
             [nrow,ncol]=size(s);
             s1=reshape(s,nrow,1,ncol);
             S=tvdat(s1);
@@ -1371,7 +1372,11 @@ classdef nldat < nltop
                     if length(sIndex)>1,
                         nTemp.chanNames = nTemp.chanNames(S(i).subs{2});
                     end
-                    
+                    % Fix realDomainValues if necessary
+                    if isa(N,'tvdat') & isnumeric(sIndex{3})
+                        nTemp.realDomainValues=nTemp.realDomainValues(S(i).subs{3});
+                    end
+
                     end
                 end
                 
