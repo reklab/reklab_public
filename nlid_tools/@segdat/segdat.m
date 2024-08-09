@@ -241,15 +241,15 @@ classdef segdat<nldat
             end
          end
          
-         function segdatStruct= segdat2struct ( S )
+         function segdatStruct= segdat2struct (S)
             fieldList=fieldnames(S);
             for i=1:length(fieldList)
                 curField=fieldList{i};
                 segdatStruct.(curField)=get(S,curField);
             end
             segdatStruct.parameterSet=getParamValStruct(S.parameterSet);
-        end
-        
+         end
+                
         function C = corirf(S, fncType,varargin)
             % segdatCor - overlaid correlation function for segdat objecs
             %   Detailed explanation goes here
@@ -981,7 +981,18 @@ classdef segdat<nldat
             end
         end
 
+        function S = struct2segdat (segdatStruct)
+            S=segdat;          
+            set(S,'onsetPointer',segdatStruct.parameterSet.onsetPointer);
+            set(S,'segLength',segdatStruct.parameterSet.segLength);
 
+            fieldList=fieldnames(S);
+            fieldList=setdiff(fieldList, {'parameterSet'});
+            for i=1:length(fieldList)
+                curField=fieldList{i};
+                set(S,curField,segdatStruct.(curField));
+            end
+        end
 
     end
 end
