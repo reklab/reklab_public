@@ -679,7 +679,7 @@ classdef efm < nltop
 
         function e = loadFile (fileName, doConvertSegdat)
             if nargin < 2
-                doConvertSegdat = false;
+                doConvertSegdat = true;
             end
             % e = loadFile (fileName)
             % load an efm file
