@@ -617,16 +617,15 @@ classdef segdat<nldat
             nSeg=segCount(S);
             for iSeg=1:nSeg
                 curSeg=segGet(S,iSeg);
-                curSegLen=length(curSeg);
-                for iStart=1:epochLen:curSegLen
-                    iEnd= iStart+epochLen-1;
-                    if iEnd>curSegLen
-                        shortEpochs=segdat.helperCat(shortEpochs, curSeg(iStart:curSegLen,:));
-                    else
-                        fullEpochs=segdat.helperCat(fullEpochs, curSeg(iStart:iEnd,:));
+                curSegLen=size(curSeg,1);
+                    for iStart=1:epochLen:curSegLen
+                        iEnd= iStart+epochLen-1;
+                        if iEnd>curSegLen
+                            shortEpochs=segdat.helperCat(shortEpochs, curSeg(iStart:curSegLen,:));
+                        else
+                            fullEpochs=segdat.helperCat(fullEpochs, curSeg(iStart:iEnd,:));
+                        end
                     end
-                end
-
             end
         end
 
