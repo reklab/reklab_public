@@ -192,7 +192,7 @@ classdef eseq
             if iscell(cSeq),
                 n=length(cSeq);
                 for i=1:n,
-                    e=cseq2eseq(cSeq{i}, i);
+                    e=eseq.cseq2eseq(cSeq{i}, i);
                     event{i,1}=e;
                 end
             else
