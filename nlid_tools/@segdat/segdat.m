@@ -1,3 +1,4 @@
+
 classdef segdat<nldat
     %Segmented nldat object
     properties
