@@ -681,15 +681,18 @@ classdef efm < nltop
         end
 
 
-        function e = loadFile (fileName)
+        function e = loadFile (fileName, doConvertSegdat)
+            if nargin < 2
+                doConvertSegdat = true;
+            end
             % e = loadFile (fileName)
             % load an efm file
-            load(fileName)
+            load(fileName);
             if exist('efmStruct')
-                e=efm.struct2efm(efmStruct);
+                e=efm.struct2efm(efmStruct, doConvertSegdat);
             elseif exist('EFM')
                 if isstruct(EFM),
-                    e=efm.struct2efm(EFM);
+                    e=efm.struct2efm(EFM, doConvertSegdat);
                 elseif isa(EFM,'efm')
                     e=EFM;
                 else
@@ -998,7 +1001,10 @@ classdef efm < nltop
             end
         end
 
-        function e= struct2efm ( efmStruct )
+        function e= struct2efm (efmStruct, doConvertSegdat)
+            if nargin < 2
+                doConvertSegdat = false;
+            end
             e=efm;
             if isempty(efmStruct)
                 e.comment='No data';
@@ -1007,6 +1013,11 @@ classdef efm < nltop
                 for i=1:length(fieldList)
                     curField=fieldList{i};
                     set(e,curField,efmStruct.(curField));
+                end
+                if doConvertSegdat && ~isempty(efmStruct.signals)
+                    for j=1:length(efmStruct.signals)
+                        e.signals(j).segdat = segdat.struct2segdat(efmStruct.signals(j).segdat);
+                    end
                 end
             end
         end
