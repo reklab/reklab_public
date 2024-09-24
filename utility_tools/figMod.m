@@ -40,7 +40,7 @@ options = { {'axis_line_width' 1.5 'Width of axes lines'} ...
       {'tick_label_size' NaN 'font size for tick labels'}...
       {'ticklength' NaN 'length of ticks'} ...
       {'title_size' NaN 'INT font size for title'}...
-      {'title_font' NaN 'STRING - font name for title'}...
+      {'title_font' 'Arial' 'STRING - font name for title'}...
       {'title_xpos' NaN 'title x position '}...
       {'title_ypos' NaN 'title y position'}...
       {'title_offset' NaN 'title offset'}...
@@ -136,15 +136,15 @@ if (~isnan(page_layout)),
       height=533;
       paperpos=[.9 .5 10.1 7.2];
    elseif strcmp(page_layout,'slide'),
-      width=800;
-      height=600;
+      width=1600;
+      height=900;
       paperpos=[.9 .5 10 7.5];
       page_orient='landscape';    
    else 
       error (['fig_mod: bad layout option:' page_layout])
    end
-   pnew(1)=max( 100);
-   pnew(2)=max(100);
+   pnew(1)=200;;
+   pnew(2)=200;;
    pnew(3)=width;
    pnew(4)=height;
    set (gcf,  'windowstyle','normal', 'position', pnew, ...
@@ -266,9 +266,9 @@ if (~isnan(title_size)),
       set(get(h,'Title'),'color',title_color);
    end    
    if (~isnan(label_size)),
-      set(get(h,'xlabel'),'Fontsize',label_size,'FontName','times');
-      set( get(h,'ylabel'), 'Fontsize',label_size,'fontname','times');
-      set( get(h,'zlabel'), 'Fontsize',label_size,'fontname','times')
+      set(get(h,'xlabel'),'Fontsize',label_size,'FontName',title_font);
+      set( get(h,'ylabel'), 'Fontsize',label_size,'fontname',title_font);
+      set( get(h,'zlabel'), 'Fontsize',label_size,'fontname',title_font)
       
    end  
    %
@@ -324,7 +324,7 @@ if ~isnan(xlabel_pos),
                %              set(h,'color',[1 1 1]);
             % end
             if ~isnan(line_color),
-                   set(ha(hi),'color',line_color)
+                  % set(ha(hi),'color',line_color)
 
             end
             
