@@ -375,8 +375,12 @@ classdef efm < nltop
         end
 
 
-        function plot (EFM)
+        function plot (EFM, nh, nv)
             % emEFMPlot - plot a EFdata set
+            if nargin==1
+                nh=1;
+                nv=length(EFM.signals);
+            end
             clf;
             nChan=length(EFM.signals);
             % Determine a comomon start end end time
@@ -393,7 +397,7 @@ classdef efm < nltop
                 curEFM=EFM.signals(iChan).segdat;
                 set(curEFM, 'domainIncr',curEFM.domainIncr/3600, 'domainName','Hours', ...
                     'domainStart', curEFM.domainStart/3600);
-                subplot (nChan,1,iChan);
+                subplot (nv,nh,iChan);
                 plot(curEFM);
                 titleStr=strrep([EFM.signals(iChan).measure ' ' EFM.signals(iChan).sensor  ...
                     ' ' EFM.signals(iChan).monitor],'_','\_');
@@ -697,28 +701,32 @@ classdef efm < nltop
         function multiPlot (g)
             % multiPlot (g) - loads and plots multiple EFM files in the same window
             % g = cell array of guids to compare
-            % currently only works for two guids
-            e1=efm.loadGUID(g{1});
-            e2=efm.loadGUID(g{2});
-            % compare multile EFM files
-            measureList={'HR2' 'UA'};
-            for i=1:2,
-                curMeasure=measureList{i};
-                m1=nldat(getMeasure(e1,curMeasure));
-                m2=nldat(getMeasure(e2,curMeasure));
-                subplot (2,1,i);
-                if length(m1.dataSet)>0
-                    h=line(m1); set(h,'color','b');
-                end
-                if length(m2.dataSet)>0
-                    h=line(m2);
-                    set(h,'color','r');
-                end
-                title(curMeasure);
-                if i==1,
-                    legend(g);
+            %
+            colorList={'r' 'g' 'b'}
+            nFile=length(g);
+            iPlot=0;
+            for iFile=1:nFile
+                e1=efm.loadGUID(g{iFile});
+
+                % compare multiple EFM files
+                measureList={'HR2' 'UA'};
+                for iMeasure=1:2,
+                    curMeasure=measureList{iMeasure};
+                    cm=nldat(getMeasure(e1,curMeasure));
+                    cm=changeDomain(cm,'seconds2hours')
+                    iPlot=iPlot+1;
+
+                    subplot (nFile,2,iPlot);
+                    if length(cm.dataSet)>0
+                        h=line(cm); set(h,'color',colorList{iFile});
+                        title([curMeasure  ':' num2str(iFile)]);
+                    end
+
+
                 end
             end
+
+            drawnow
         end
 
         function  EFM=readFile (fileName, sensorsToIgnore)
