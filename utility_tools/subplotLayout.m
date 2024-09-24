@@ -1,8 +1,12 @@
 function [nH,nV]=subplotLayout (nSig)
+% [nH,nV]=subplotLayout (nSig)
 % Select subplot layout for mulutiple plots
-if nSig<=4
+if nSig<=2
     nH=1;
     nV=nSig;
+elseif nSig<=4
+    nH=2;
+    nV=2;
 elseif nSig<=6
     nH=2;
     nV=3;
