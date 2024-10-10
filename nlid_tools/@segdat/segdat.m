@@ -227,13 +227,15 @@ classdef segdat<nldat
 
         
 
+       
         function N=seg4domain (S, domainVal)
             % Return segment mumber associated with a domain Value
             dStart=S.domainStart;
             dEnd=domainEnd(S);
-            delta=-S.domainIncr/2;
-            N=find((domainVal-dStart)>=delta & (domainVal-dEnd)<=delta);
+            delta=S.domainIncr/2;
+            N=find((domainVal-dStart)>=-delta & (domainVal-dEnd)<=delta);
         end
+        
         function C=cor(S,varargin)
             C=corirf(S,'cor',varargin{:});
         end
@@ -258,10 +260,17 @@ classdef segdat<nldat
                 e(iSeg).nSamp=length(curSeg);
                 e(iSeg).type='SEGDAT';
             end
-        end
-
-
-
+         end
+         
+         function segdatStruct= segdat2struct (S)
+            fieldList=fieldnames(S);
+            for i=1:length(fieldList)
+                curField=fieldList{i};
+                segdatStruct.(curField)=get(S,curField);
+            end
+            segdatStruct.parameterSet=getParamValStruct(S.parameterSet);
+         end
+                
         function C = corirf(S, fncType,varargin)
             % segdatCor - overlaid correlation function for segdat objecs
             %   Detailed explanation goes here
@@ -751,7 +760,7 @@ classdef segdat<nldat
                 valueVector(idx2,:)=s2Data;
                 catVector(idx2)='2';
                 idxIntersect=intersect(idx1,idx2);
-                if ~isempty(idxIntersect)  % Interesction
+                if ~isempty(idxIntersect)  % Interection of S1 & S2i
                     catVector(idxIntersect)='3';
                 end
                 e=eseq(catVector, domainStart,domainIncr); % Event sequences indicating what to output.
@@ -992,7 +1001,18 @@ classdef segdat<nldat
             end
         end
 
+        function S = struct2segdat (segdatStruct)
+            S=segdat;          
+            set(S,'onsetPointer',segdatStruct.parameterSet.onsetPointer);
+            set(S,'segLength',segdatStruct.parameterSet.segLength);
 
+            fieldList=fieldnames(S);
+            fieldList=setdiff(fieldList, {'parameterSet'});
+            for i=1:length(fieldList)
+                curField=fieldList{i};
+                set(S,curField,segdatStruct.(curField));
+            end
+        end
 
     end
 end

@@ -1,34 +1,34 @@
 classdef efm < nltop
     % efm - class for  manipulation of efm signals
     %   Detailed explanation goes here
-    
+
     properties
         GUID = 'GUID'
         sourceFile= 'fileName'
         createDate=datetime;
         signals = struct ('measure','','sensor','','monitor','monitor', 'segdat',segdat);
-        
+
     end
-    
+
     methods
         function e = efm()
             %UNTITLED2 Construct an instance of this class
             %   Detailed explanation goes here
-            
+
         end
         function EFMout = combineSensors (EFMin)
             % sigOut = emEFMCombineSensors (sigIn) - comnbine signals from different
             % sensors
-            %   Detailed explanation goes here
+            %   Combine Hr1 and HR2 into a single Hr2 signale
             versionNum='1.02';
             EFMout=EFMin;
             sigIn=EFMin.signals;
-            measureList= {'HR1' 'HR2' 'MHR' 'UA'};
+            measureList= {'HR' 'MHR' 'UA'};
             nMeasure=length(measureList);
             kOut=0;
             sigOut=sigIn(1);
             for iMeasure=1:nMeasure,
-                jMeasure=find(strcmp(measureList{iMeasure},{sigIn.measure}));
+                jMeasure=find(startsWith({sigIn.measure},measureList{iMeasure}));
                 nSeg4Measure=length(jMeasure);
                 if nSeg4Measure>0,
                     kOut=kOut+1;
@@ -39,7 +39,7 @@ classdef efm < nltop
             EFMout.createDate=date;
             EFMout.signals=sigOut;
         end
-        
+
         function S=coverage2CTG (e, CTG, reprocessFlag)
             ctgConn=CTG.connection;
             if nargin<3
@@ -53,7 +53,7 @@ classdef efm < nltop
             GUID=e.GUID;
             S=struct;
             for iChan=1:nChan
-                
+
                 for iSamp=1:nSamp
                     if cVal(iSamp,iChan)>0
                         jSamp=jSamp+1;
@@ -64,7 +64,7 @@ classdef efm < nltop
                     end
                 end
             end
-            
+
             % Check to see if records exist for this GUID
             % only execute if reprocessing
             if reprocessFlag,
@@ -82,24 +82,37 @@ classdef efm < nltop
                 sqlwrite(ctgConn,'signalCoverage',T);
             end
         end
-        
-        
+
+
         function C = coverage(e, epochLen)
-            % Determine coverage of signals in e
+            % Determine coverage of signals in efm object by epoch
             % Epoch length - length of epoch in minutes
             if nargin==1,
                 epochLen=20;
             end
-            
+
             startTime=-12*60*60; % in seconds
             endTime=-0.25;
             domainIncr=0.25;
             nSamp4Epoch=epochLen*60/domainIncr;
+            nSec4Epoch=epochLen*60;
             refDomain=[startTime:domainIncr:endTime]';
             nSamp=length(refDomain);
             refSig=-ones(nSamp,1);
             nSig=length(e.signals);
             for iSig=1:nSig,
+                curSig=e.signals(iSig).segdat;
+                dStart=curSig.domainStart;
+                nEpoch=floor(dStart(1)/nSec4Epoch);
+                startTime=nEpoch*nSec4Epoch;
+                % in seconds
+                endTime=-0.25;
+                domainIncr=0.25;
+                nSamp4Epoch=epochLen*60/domainIncr;
+                refDomain=[startTime:domainIncr:endTime]';
+                nSamp=length(refDomain);
+                refSig=-ones(nSamp,1);
+                nSig=length(e.signals);
                 curSig=e.signals(iSig).segdat;
                 curMeasure=e.signals(iSig).measure;
                 chanName{iSig}=curMeasure;
@@ -109,7 +122,7 @@ classdef efm < nltop
                 curSig=refSig;
                 curSig(curIDX)=double(curNL);
                 % find nans
-                
+
                 iBad=find(isnan(curSig));
                 curSig(iBad)=-1;
                 if strcmp(curMeasure,'UA'),
@@ -126,36 +139,44 @@ classdef efm < nltop
                     C(iCount,iSig)=100*(nSamp4Epoch-k)/nSamp4Epoch;
                 end
                 C=nldat(C);
-                set(C,'chanNames',chanName, 'domainIncr', epochLen, 'domainStart',-12*60, ...
+                set(C,'chanNames',chanName, 'domainIncr', epochLen, 'domainStart',startTime/60, ...
                     'domainName', 'Epoch start (Minutes)','chanUnits',{' perCent'}, ...
                     'comment',[ e.GUID ': Signal coverage per epoch']);
-                
+
             end
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
         end
-        
-        function efmStruct= efm2struct ( e )
+
+        function efmStruct= efm2struct ( e, doConvertSegdat )
+            if nargin < 2
+                doConvertSegdat = false;
+            end
             fieldList=fieldnames(e);
             for i=1:length(fieldList)
                 curField=fieldList{i};
                 efmStruct.(curField)=get(e,curField);
             end
+            if doConvertSegdat
+                for j=1:length(e.signals)
+                    efmStruct.signals(j).segdat=segdat2struct(e.signals(j).segdat);
+                end
+            end
         end
-        
+
         function EE=epoch(E, measure,epochStart, epochLen)
             % EE=epoch(E, measure,epochStart, epochLen)
             % Return an epoch of one or more measues in an EFM file
             % measure - cell arry of measures to return
             % epochStart - start time of epoch (minutes)
             % epochLen - length of epoch in (minutes)
-            % EE - nldat containing signals 
+            % EE - nldat containing signals
             if epochStart>0,
                 error ('epochStart must beless than zero');
             end
@@ -176,15 +197,15 @@ classdef efm < nltop
             epochEnd=epochStart+epochLen-domainIncr;
             epochDomain=epochStart:domainIncr:epochEnd;
             epochIdx=idx4domain(tMin,domainIncr,epochDomain);
-            
+
             for iSig=1:nSig,
                 iMeasure=find(strcmp(measure{iSig},mList));
                 if  isempty(iMeasure),
                     error(['Measure not found:' measure{iSig}]);
                 end
-                
+
                 seg=E.signals(iMeasure).segdat;
-                
+
                 tempX=nan(length(idx),1);
                 segNL=nldat(seg);
                 segD=domain(segNL);
@@ -195,7 +216,7 @@ classdef efm < nltop
             EE=segNL;
             set(EE,'dataSet',epochData,'domainStart',epochStart,'chanNames',measure, 'comment', ...
                 ['epoch from: ' E.GUID]);
-            
+
         end
         function l = signalEQ(e1,e2)
             % test for equality of sginals in two efm files
@@ -223,17 +244,20 @@ classdef efm < nltop
                 l=true';
             end
         end
-        
-        
-        
-        
-        
+
+
+
+
+
         function eSig = getMeasure (eIn, measure )
             % getMeasure (eIn, measure) - returns one or more signal from an efm
             % object
             % eIn - inout efm objvect
             % measure - cell array of one or more measures to return
-            % Generate an error if a specified measure is not found. 
+            %          - measure may be the full name or just the start. An
+            %          error occurs more than one meaaure start with the
+            %          same name. 
+            % Returns an empty value and a error if a specified measure is not found.
             if ~iscell(measure)
                 measure={measure};
             end
@@ -242,25 +266,29 @@ classdef efm < nltop
             sig=eIn.signals;
             measureList={sig.measure};
             ptr=[];
+            jMeasure=0;
             for iMeasure=1:nMeasure,
-            curPtr=find(strcmp(measure{iMeasure},measureList));
-            if isempty (curPtr)
-                error (['Measure not found:' measure{iMeasure}]);
+                curPtr=find(startsWith(measureList,measure{iMeasure}));
+ 
+                %ptr(iMeasure)=curPtr;
+                ptr = [ptr curPtr];
             end
-                ptr(iMeasure)=curPtr;
+            if isempty(ptr)
+%                 measure
+%                 disp('Measures not found:');
+                eSig=[];
+                return
             end
-                signal=eIn.signals(ptr);
-                eSig.signals=signal;
-            
+            signal=eIn.signals(ptr);
+            eSig.signals=signal;
         end
         
         function s = getSegdat(eIn, measure)
             e=getMeasure(eIn, measure);
             s= e.signals.segdat;
         end
-            
-        
-        
+
+
         function eInter = intersect ( eIn, mhrFlag)
             % intersect returns interection of signal in signal list
             % Ein - input EFM object
@@ -280,7 +308,7 @@ classdef efm < nltop
                 disp('No HR signal');
                 return
             end
-                
+
             s2=getMeasure(eIn,'UA');
             if isempty(s2)
                 disp('No US signal');
@@ -291,7 +319,7 @@ classdef efm < nltop
                 eInter=[];
                 return
             end
-                
+
             eInter=efm;
             eInter.signals(1)=s1.signals;
             eInter.signals(1).segdat=segdat(zSeg(:,1));
@@ -314,11 +342,11 @@ classdef efm < nltop
                 eInter.signals(3).segdat=segdat(zSeg2(:,2));
                 eInter.comment='Intersection of HR2, UA, &MHR';
             end
-            
-            
+
+
         end
-        
-        
+
+
         function  N=nldat(E)
             % N=nldat(E) convert a EFM object to equivalent nldat objects
             % returns all signals from an EFM object as nldat object with
@@ -345,10 +373,14 @@ classdef efm < nltop
             N=nldat(newData,'domainStart',tMin,'domainIncr',domainIncr,'chanNames',chanNameList);
             set(N,'comment', ['nldat of:' E.GUID]);
         end
-        
-        
-        function plot (EFM)
+
+
+        function plot (EFM, nh, nv)
             % emEFMPlot - plot a EFdata set
+            if nargin==1
+                nh=1;
+                nv=length(EFM.signals);
+            end
             clf;
             nChan=length(EFM.signals);
             % Determine a comomon start end end time
@@ -359,18 +391,18 @@ classdef efm < nltop
             end
             startTime=min(startTime);
             endTime=max(endTime);
-            
-            
+
+
             for iChan=1:nChan,
                 curEFM=EFM.signals(iChan).segdat;
                 set(curEFM, 'domainIncr',curEFM.domainIncr/3600, 'domainName','Hours', ...
                     'domainStart', curEFM.domainStart/3600, 'domainValues',curEFM.domainValues/3600.);
-                subplot (nChan,1,iChan);
+                subplot (nv,nh,iChan);
                 plot(curEFM);
                 titleStr=strrep([EFM.signals(iChan).measure ' ' EFM.signals(iChan).sensor  ...
                     ' ' EFM.signals(iChan).monitor],'_','\_');
                 title(titleStr);
-                
+
                 set(gca,'xlim',[startTime endTime]);
          %       ylabel(EFM.signals(iChan).measure)
                 xlabel('');
@@ -378,8 +410,8 @@ classdef efm < nltop
             xlabel('Hours');
             streamer(EFM.GUID);
         end
-        
-        
+
+
         function sigOut = repair (sigIn, nBadMax, nInterp)
             %% sigOut = repair (sigIn, nBadMax, nInterp)
             % repair an efm object by interpolating missing/bad values.
@@ -398,7 +430,7 @@ classdef efm < nltop
             set(sigOut,'comment','efm.repair');
             nSig=length(sigIn.signals);
             for iSig=1:nSig
-                
+
                 curMeasure=sigIn.signals(iSig).measure;
                 curSig=sigIn.signals(iSig).segdat;
                 curSeg=nldat(curSig);
@@ -420,7 +452,7 @@ classdef efm < nltop
                 end
                 e=eseq.cseq2eseq(c);
                 % Find bad events
-                
+
                 % Convert 2 bad events separated by a short good event to one long bad
                 % event
                 iBad=find([e.type]=='bad');
@@ -439,7 +471,7 @@ classdef efm < nltop
                 e=eseq.cseq2eseq(c);
                 iBad=find([e.type]=='bad');
                 nBad=length(iBad);
-                
+
                 %% interpolate values for short bad events
                 for jBad=1:nBad   % Loop for bad events in seq
                     kBad=iBad(jBad);
@@ -450,7 +482,7 @@ classdef efm < nltop
                     xSpline=cat(2,iFront,iEnd);
                     xInterp=iBstart:iBend;
                     if e(kBad).nSamp<nBadMax % short bad event so interpolate
-                        
+
                         % Handle specal cases
                         %  Bad event is at end of record so set to nans
                         if any(xSpline>curSegLen) | any(xSpline<1)
@@ -468,14 +500,14 @@ classdef efm < nltop
                 sigOut.signals(iSig).segdat=newSegDat;
             end
         end
-        
-        
-        
-        
-        
-        
-        
-        function  save (EFM,  EFMtype, CTG )
+
+
+
+
+
+
+
+        function  save (EFM,  EFMtype, CTG, processComment )
             % emEFMsave (EFM, saveDir, EFMtype, conn)
             % save EFM to saveDir. If file already exists it is overwritten
             %
@@ -488,17 +520,17 @@ classdef efm < nltop
                 cmd1=['!mkdir ' dirName];
                 eval(cmd1);
             end
-            
+
             %saveLocation='X:\output\';
             ctgConn=CTG.connection;
-            
-            
+
+
             disp(['Saving: ' saveLocation]);
             efmStruct=efm2struct(EFM);
             save(GUID, 'efmStruct');
             cmd=['!move /Y ' GUID '.mat ' saveLocation ];
             eval(cmd);
-            
+
             % Update database with results
             % Check to see if record(s) exists for this phase, if so delete it
             sql=['select * from CTGstatus where processPhase=' '''' EFMtype '''' ...
@@ -515,6 +547,7 @@ classdef efm < nltop
             T.processPhase={EFMtype};
             T.processVersion={EFM.comment};
             T.processDate=datetime;
+            T.processComment={processComment};
             sqlwrite(ctgConn,'CTGstatus', T);
         end
         function SS = stats(EFM)
@@ -533,8 +566,8 @@ classdef efm < nltop
             %  nDropEvent - number of dropout Events
             %  dropOutLength
             %  Quantiles - 50,75 and 9% quantiles of dropoutl lenghts
-            
-            
+
+
             %% Segment statistics
             chanStats=struct;
             SS=struct;
@@ -563,10 +596,10 @@ classdef efm < nltop
                 SS.signal(iChan).pctBad=pctBad;
                 SS.signal(iChan).nBadEvent=nBadEvent;
                 %
-                
-                
+
+
                 for iSeg=1:nSeg,
-                    
+
                     SS.signal(iChan).segment(iSeg).segNum=iSeg;
                     curSeg=segGet(XS,iSeg);
                     curData=double(curSeg);
@@ -584,71 +617,83 @@ classdef efm < nltop
                     SS.signal(iChan).segment(iSeg).pctBad=pctBad;
                     SS.signal(iChan).segment(iSeg).nBadEvent=nBadEvent;
                     %
-                    
+
                 end
             end
-            
+
         end
-        
+
         function disp(sys)
             builtin('disp',sys);
             s=sys.signals;
             nSig=length(s);
             for iSig=1:nSig
-                disp(['Signal ' num2str(iSig) ':' s(iSig).measure]);
-            end    
+                disp(['Signal(' num2str(iSig) '):' s(iSig).measure]);
+                disp(s(iSig));
+            end
         end
-       
-        
-           
+
+        function  S= signalList (sys)
+            % Returns a cvell array of signals in an EFM file
+            S={};
+            s=sys.signals;
+            nSig=length(s);
+            for iSig=1:nSig
+                S(iSig)= {s(iSig).measure};
+            end
+        end
     end
-    
+
     methods(Static)
-        
+
         function e = loadGUID (GUID, EFMtype, CTG)
             %  e = loadGUID (GUID, EFMtype) load an EFM file for a GUID
             % GUID - guid of file to load
-            % EFMtype - type of EFM file ('combined'/'repair'); 
+            % EFMtype - type of EFM file ('combined'/'repair');
             %
-            
+
             if nargin==1,
                 EFMtype='combined';
             end
             if strcmp(EFMtype,'repair'),
-                 S=patternsStatus(CTG,GUID);
-                 if isempty(S)
-                     i=[];
-                 else
-                 i=find( strcmp( 'EFM from PatternsMerge',S.status_str));
-                 end
-                 if isempty(i)
-                     disp(['GUID not found: ' GUID]);
-                      e=[];
-                      return
-                 else
-                 fileLocation=S.dest_file{i};
-                 end
-            else                             
+                S=patternsStatus(CTG,GUID);
+                if isempty(S)
+                    i=[];
+                else
+                    i=find( strcmp( 'EFM from PatternsMerge',S.status_str));
+                end
+                if isempty(i)
+                    disp(['GUID not found: ' GUID]);
+                    e=[];
+                    return
+                else
+                    fileLocation=S.dest_file{i};
+                end
+            else
                 fileLocation= efm.getLocation(EFMtype,GUID);
             end
             if ~exist(fileLocation),
                 disp(['File not found: ' fileLocation]);
                 e=[];
             else
-            e=efm.loadFile(fileLocation);
+                e=efm.loadFile(fileLocation);
             end
-            
+
         end
-        
-        
-        function e = loadFile (fileName)
+
+
+        function e = loadFile (fileName, doConvertSegdat)
+            if nargin < 2
+                doConvertSegdat = true;
+            end
+            % e = loadFile (fileName)
             % load an efm file
-            load(fileName)
+            load(fileName);
             if exist('efmStruct')
-                e=efm.struct2efm(efmStruct);
+                e=efm.struct2efm(efmStruct, doConvertSegdat);
             elseif exist('EFM')
                 if isstruct(EFM),
-                    e=efm.struct2efm(EFM);
+                    e=efm.struct2efm(EFM, doConvertSegdat);
                 elseif isa(EFM,'efm')
                     e=EFM;
                 else
@@ -656,34 +701,38 @@ classdef efm < nltop
                 end
             end
         end
-        
+
         function multiPlot (g)
             % multiPlot (g) - loads and plots multiple EFM files in the same window
             % g = cell array of guids to compare
-            % currently only works for two guids
-            e1=efm.loadGUID(g{1});
-            e2=efm.loadGUID(g{2});
-            % compare multile EFM files
-            measureList={'HR2' 'UA'};
-            for i=1:2,
-                curMeasure=measureList{i};
-                m1=nldat(getMeasure(e1,curMeasure));
-                m2=nldat(getMeasure(e2,curMeasure));
-                subplot (2,1,i);
-                if length(m1.dataSet)>0
-                    h=line(m1); set(h,'color','b');
-                end
-                if length(m2.dataSet)>0
-                    h=line(m2);
-                    set(h,'color','r');
-                end
-                title(curMeasure);
-                if i==1,
-                    legend(g);
+            %
+            colorList={'r' 'g' 'b'}
+            nFile=length(g);
+            iPlot=0;
+            for iFile=1:nFile
+                e1=efm.loadGUID(g{iFile});
+
+                % compare multiple EFM files
+                measureList={'HR2' 'UA'};
+                for iMeasure=1:2,
+                    curMeasure=measureList{iMeasure};
+                    cm=nldat(getMeasure(e1,curMeasure));
+                    cm=changeDomain(cm,'seconds2hours')
+                    iPlot=iPlot+1;
+
+                    subplot (nFile,2,iPlot);
+                    if length(cm.dataSet)>0
+                        h=line(cm); set(h,'color',colorList{iFile});
+                        title([curMeasure  ':' num2str(iFile)]);
+                    end
+
+
                 end
             end
-        end   
-        
+
+            drawnow
+        end
+
         function  EFM=readFile (fileName, sensorsToIgnore)
             % function  [ZS]=emEFMreadFile (fileName)
             % Read in a compressed EFM csv file, parse it, return values
@@ -702,7 +751,7 @@ classdef efm < nltop
             if nargin==1,
                 sensors2Ignore= {'INOP' 'No_Trans' 'No-Trans'}; % List of sensors to ignore
             end
-            versionNum='2.00]';
+            versionNum='2.01]';
             f=unzip(fileName,pwd);
             i=max(strfind(fileName,'\'));
             GUID=fileName(i+1:end);
@@ -733,7 +782,7 @@ classdef efm < nltop
             monitorCol=4;
             sensorCol=5;
             readingCol=6;
-            
+
             %% parse channel information
             X=struct('T',[]);
             chanNameCol=2;
@@ -785,12 +834,12 @@ classdef efm < nltop
                         diffValCnt=0;       %Count of duplicate time samples with different values;
                         doubleNullCnt=0 ;  % Count of dubpcate time samples where both are null
                         %
-                        
+
                         %% Handle Duplicate Times if they exist
                         dt=diff(curTimeVal);
                         iDuplicate=find(dt==0);
                         nDuplicate=length(iDuplicate);
-                        
+
                         if nDuplicate>0,
                             duplicateSampleTimes=curTimeVal(iDuplicate);;
                             % disp([num2str(nDuplicate) ' duplicate time samples exist']);
@@ -800,7 +849,7 @@ classdef efm < nltop
                                 iNext=iCur+1;
                                 curSampleValid=~isnan(curSampVal(iCur)) & ~isempty(curSampVal(iCur));
                                 nextSampleValid=  ~isnan(curSampVal(iNext)) & ~isempty(curSampVal(iNext));
-                                
+
                                 % Cuurent  value is a valid entry - drop the next one
                                 if curSampleValid & ~nextSampleValid
                                     iDrop=cat(1,iDrop,iNext);
@@ -825,30 +874,30 @@ classdef efm < nltop
                             curSampVal(iDrop)=[];
                             curTimeVal(iDrop)=[];
                         end
-                        
+
                         %% Get rid of remaining samples with nans
                         iNan=find(isnan(curSampVal));
                         nEmpty=length(iNan);
-                        
+
                         if length(iNan)>0,
                             emptySampleTimes=curTimeVal(iNan);
                             % disp([ num2str(length(iNan)) ' empty samples exist']);
                             curSampVal(iNan)=[];
                             curTimeVal(iNan)=[];
                         end
-                        
+
                         if length(curSampVal)>0,
                             if ismember(curSensor,sensorsToIgnore),
                                 disp(['Ignoring sensor:' curSensor]);
-                                
+
                             else
-                                
+
                                 Z=nldat(curSampVal,'domainValues',-curTimeVal,'chanNames', ...
                                     {curChanName},'domainIncr',.25,'comment',[GUID ':' curMonitor]);
-                                
+
                                 ZStmp=segdat(Z);
                                 nSeg=segCount(ZStmp);
-                                segIno={};
+                                segInfo={}; % Mis-spelled in V2.0 resultinng in extraneous entries in come cases
                                 for i=1:nSeg;
                                     segInfo{i}=[curSensor '-' curMonitor];
                                 end
@@ -878,38 +927,56 @@ classdef efm < nltop
             EFM=efm.struct2efm(ZS);
         end
         function sOut = sigCombine (sIn)
+            % combine signals of the same variable from different
+            % sensor
             nSig=length(sIn);
             if nSig==1,
                 sOut=sIn;
                 return
             end
-            
+
             % Determine which signals are high quality
             % sort so high quaility monitors come last
             sensorList={sIn(:).sensor};
             [sensorListSorted, iSort]=sort(sensorList);
             iSort=flip(iSort);
             sortedSensors=sensorList(iSort);
-            sSort=sIn(iSort);
-            
-            sOut=sSort(1);
-            sCat=sSort(1).segdat;
-            
-            for iSig=2:nSig,
-                sCat=cat(sCat,sSort(iSig).segdat);
+
+            %% Sepcial handling when combined H1 ansd H2
+            for i=1:nSig
+                if contains(sIn(i).measure,'HR')
+                    sIn(i).sensor= [ sIn(i).measure '_' sIn(i).sensor]; % HR1 or HR2 to sensor
+                    % add H1 or HR2 to segIfo
+                    curSegDat=sIn(i).segdat;
+                    segInfo=curSegDat.segInfo;
+                    nSeg=length(segInfo);
+                    for j=1:nSeg
+                        segInfo{j}=strrep([ sIn(i).measure '_' segInfo{j}],' ','');
+                    end
+                    sIn(i).segdat.segInfo=segInfo;
+                end
             end
-            sensorList=sSort(1).sensor;
+            sSort=sIn(iSort);
+            sOut=sSort(1);
+
+            % Concatonate signals
+            sCat=sSort(1).segdat;
+
+            for iSig=2:nSig,
+                sCat=cat(1,sCat,sSort(iSig).segdat);
+            end
+            sensorList=[sSort(1).measure '_' sSort(1).sensor];
             monitorList=sSort(1).monitor;
             for i=2:nSig,
-                sensorList=[ sensorList '&' sSort(i).sensor];
+                sensorList=[ sensorList '&' sSort(i).measure '_' sSort(i).sensor];
                 monitorList=[ monitorList '&' sSort(i).monitor];
             end
             sOut.sensor=sensorList;
             sOut.monitor=monitorList;
             sOut.segdat=sCat;
         end
-        
-        
+
+
         function [ nBad, pctBad, nBadEvent] =badDataStats (curMeasure, curData)
             % baddata  stats
             localMeasure=curMeasure{1:2};
@@ -934,8 +1001,11 @@ classdef efm < nltop
                 pctBad=100*nBad/length(curData);
             end
         end
-        
-        function e= struct2efm ( efmStruct )
+
+        function e= struct2efm (efmStruct, doConvertSegdat)
+            if nargin < 2
+                doConvertSegdat = false;
+            end
             e=efm;
             if isempty(efmStruct)
                 e.comment='No data';
@@ -945,15 +1015,20 @@ classdef efm < nltop
                     curField=fieldList{i};
                     set(e,curField,efmStruct.(curField));
                 end
+                if doConvertSegdat && ~isempty(efmStruct.signals)
+                    for j=1:length(efmStruct.signals)
+                        e.signals(j).segdat = segdat.struct2segdat(efmStruct.signals(j).segdat);
+                    end
+                end
             end
         end
-        
-     
-        
+
+
+
         function [d,g,f]=efmDir (folder, subFolderFlag)
             % [d,g]=efmDir (folder)
             % Returns directory and GUID information for efm files in
-            % foler and subfiler
+            % folder and subfiler
             % d - directory information
             % g - cell array of GUIDs
             % f - full fileame
@@ -981,7 +1056,7 @@ classdef efm < nltop
             end
             disp(['Folder: ' folder ' has  ' num2str(length(n)) ' mat files']);
         end
-        
+
         function d = getLocation(option, spec )
             % efm.getLocaion (optin,spec) returns directory location
             % options are:
@@ -989,7 +1064,7 @@ classdef efm < nltop
             % getLocation('combined') - base directory for combined dEFM files
             % getLocation('raw', N) - directory for raw data set N
             % getLocaton('repair') direcotry for patterns repaired data set
-            % 
+            %
             %
             baseDir= 'X:\';
             switch option
@@ -1007,12 +1082,13 @@ classdef efm < nltop
                         d=[ baseDir 'processing\combined\'];
                     elseif nargin==2
                         guid=char(spec);
-                        
                         subDir=guid(1:2);
                         d=[ baseDir 'processing\combined\' subDir '\' guid '.mat'];
                     end
                 case 'raw'
                     d=[baseDir 'aprilresults\'];
+                case 'rerun'
+                    d=[baseDir 'processing\rerun']
                 otherwise
                     error (['Option not defined:' option])
             end
@@ -1030,20 +1106,20 @@ classdef efm < nltop
             % Validate eading against raw data
             for iFile= 1:nFile,
                 fileName=fileList{iFile};
-                
-                
+
+
                 %% Get Raw Data
-                
+
                 R = efm.readFile(fileName);
-                
+
                 %% Get trace dsata and read in
-                
+
                 i=max(strfind(fileName,'\'));
                 GUID=fileName(i+1:end);
                 j=strfind(GUID,'.');
                 GUID=GUID(1:j-1);
                 T=readtable([GUID '.csv']);
-                
+
                 %% Compare signals
                 nSig=length(R.signals);
                 for iSig=1:nSig
@@ -1056,7 +1132,7 @@ classdef efm < nltop
                     curT=-T.deltaInMillisecs(iCur)/(1000);
                     figure(iSig);clf
                     plot(curSig.segdat);
-                    
+
                     h=line(curT,curReading); set(h,'color','k');
                     title([ GUID ' ' curSig.measure ' ' curSig.sensor ' ' curSig.monitor]);
                 end

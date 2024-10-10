@@ -359,6 +359,7 @@ classdef nldat < nltop
         
         function y= changeDomain (x,changeType)
             % change domain from seconds to hours
+            % changeType [seconds2hours/hours2seconds
             y=x;
             switch lower(changeType),
                 case 'seconds2hours'
