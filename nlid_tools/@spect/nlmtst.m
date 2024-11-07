@@ -19,7 +19,13 @@ function s = nlmtst(S);
            s=spect(x,'nFFT',nFFT,'confidenceLevel',.95);
            disp(s)
            figure(2)
+           subplot (3,1,1)
            plotConfidence(s);
+           subplot (3,1,2);
+           plotConfidence(s,'semilog');
+           subplot (3,1,3);
+           plotConfidence (s,'loglog');
+
 
             
             % Test cross spectrA
