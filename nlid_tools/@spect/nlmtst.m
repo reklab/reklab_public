@@ -13,10 +13,17 @@ function s = nlmtst(S);
                 subplot (2,2,i);
                 plot(s); set (gca,'xlim',[0 50],'ylim',[0 .06]);
                 title (['NFFT=' num2str(nFFT)])
-            end
+           end
+
+           %% Test conifdence oevels
+           s=spect(x,'nFFT',nFFT,'confidenceLevel',.95);
+           disp(s)
+           figure(2)
+           plotConfidence(s);
+
             
             % Test cross spectrA
-            figure(2);
+            figure(3);
             subplot (2,2,1);
             s=spect(x);
             plot(s); set (gca,'xlim',[0 50]);
