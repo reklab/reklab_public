@@ -113,6 +113,53 @@ classdef nldat < nltop
             sys.comment=[sys.comment  ';abs'];
             
         end
+
+        function sysOut= fftAbs (sys)
+            % compute one-side magnitude of fft
+            [nSamp,nChan,nReal]=size(sys);
+            if nChan>1
+                error ('multiple channels not yet supported')
+            end
+            if nReal>1
+                error ('multiple realizations not yet supprted')
+            end
+            Y=double(sys);
+            L=length(sys);
+            P2 = abs(Y/L);
+            P1 = P2(1:L/2+1);
+            P1(2:end-1) = 2*P1(2:end-1);
+            sysOut=sys;
+            sysOut.dataSet=P1;
+            sysOut.domainStart=0;
+            sysOut.comment='One sided FFT magnitude';
+            sysOut.chanNames={'FFT Magnitude'};
+        
+        end
+
+         
+
+        function sysOut= fftAngle (sys)
+            % compute one-side magnitude of fft
+            [nSamp,nChan,nReal]=size(sys);
+            if nChan>1
+                error ('multiple channels not yet supported')
+            end
+            if nReal>1
+                error ('multiple realizations not yet supprted')
+            end
+            Y=double(sys);
+            L=length(sys);
+            P2 = angle(Y/L);
+            P1 = P2(1:L/2+1);
+            
+            sysOut=sys;
+            sysOut.dataSet=P1;
+            sysOut.domainStart=0;
+            sysOut.comment='One sided FFT phase';
+            sysOut.chanNames={'FFT Phase'};
+            sysOut.chanUnits={'rad'};
+        end
+
         
         function z = angle(x);
             z=x;
@@ -482,7 +529,7 @@ classdef nldat < nltop
             z=x;
             z.domainIncr= 1/(nFFT*x.domainIncr);
             set(z,'comment','FFT');
-            z.domainStart=0;
+            z.domainStart=-1/(2*x.domainIncr);;
             z.domainName='Frequency Hz';
             for ichan=1:nchan,
                 for ireal=1:nreal,
