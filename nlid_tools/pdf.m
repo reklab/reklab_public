@@ -57,8 +57,8 @@ classdef pdf  < nldat
                     xMin=(min(x));
                     xMax=(max(x));
                     xRange=xMax-xMin;
-                    if xRange==0,
-                        xRange=1;
+                    if xRange< 1e-10;,
+                       xRange=1;
                     end
                     
                     delX=xRange/(nBins-1);
@@ -189,7 +189,8 @@ classdef pdf  < nldat
                 % C is an analytical PDF -- plot it normally
                 h=stem(x,c);
                 set(h,'color',linecolor, 'linewidth',linewidth)
-                ylabel(pdfType);
+                ylabel(pdfType);dbup
+
             elseif strcmp(plotmode,'add')
                 h=line(x,c);
                 set(h,'color',linecolor,'linewidth',linewidth);
