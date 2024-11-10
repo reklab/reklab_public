@@ -144,10 +144,17 @@ classdef spect < nldat
 
         end
 
-        function plotConfidence (S, plotType)
+        function h=plotConfidence (S, plotType, plotColor)
             % Plot spectrum with upper and lower confidence bounds
             % Plot Type can be linear, semilog, loglog
-            if nargin==1,
+            %Inputs:  S - spectrum to plot
+            % plotType - type of plot (['linear' 'semilog' 'loglog'
+            % plotColor - 
+            % h= cell arrau of pointers to the three lines. 
+            if nargin<2
+                plotColor='r';
+            end
+            if nargin==1 | isempty(plotType)
                 plotType='linear';
             end
             assign(S.parameterSet); 
@@ -172,7 +179,10 @@ classdef spect < nldat
 
                
 
-            plot(x,S.dataSet)
+            h1= plot(x,S.dataSet(:,1),'color',plotColor);
+            h2=line(x,S.dataSet(:,2)); set(h2,'Color',plotColor,'LineStyle', '--');
+            h3=line(x,S.dataSet(:,3)); set(h3,'Color',plotColor,'LineStyle', '--');
+            h =  {h1 h2 h3};
             legend(S.chanNames);
             xlabel(S.domainName);
             ylabel(S.chanUnits);

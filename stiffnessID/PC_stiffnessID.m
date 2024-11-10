@@ -4,7 +4,7 @@ function [hIntrinsic, mReflex, nlmStiff, VAFT, VAFi, VAFr, tqI, tqR, tqT]= PC_st
 % Uses: PC_StiffnessID (z,'?') to set optional parmeter name value pairs
 % V01-02 REK
 % Optional argume name/value pairs are:
-% 
+% w
 % Define options, default values and help 
 options={{'reflex_id_method' 'sls' 'method for identification of reflex pathway [hk; sls rect]'} ...
         {'decimation_ratio' 10 'ratio to decimate data bt'} ...

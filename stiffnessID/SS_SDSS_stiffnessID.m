@@ -34,6 +34,7 @@ if arg_parse(options,varargin);
 reflexPathID = 1;%Set to 1 to identify the reflex pathway
 ts = get(z,'domainIncr');
 segmentOnsetPointer = get(z,'onsetPointer');
+segmentDomainStart=get(z,'domainStart')
 inputSegmentOnsetPointer = segmentOnsetPointer (:)
 outputSegmentOnsetPointer = segmentOnsetPointer (:);
 segmentLength = get(z,'segLength');
@@ -59,6 +60,7 @@ if length(find(N<1))>1
 end
 segmentOnsetPointer(N<1) = [];
 segmentLength(N<1) = [];
+segmentDomainStart(N<1)=[];
 N(N<1) = [];
 if ~isempty(N)
     endpointer = segmentOnsetPointer + segmentLength - 1;
@@ -183,12 +185,25 @@ if ~isempty(N)
         intrinsic = irf('nSides',2,'dataSet',intrinsic/ts,'domainIncr',ts,'domainStart',-intrinsicIRF_Length*ts,'comment','Intrinsic IRF','chanNames','IRF');
         tqI_res = torqueSegments - tqI;
         tqI_res = tqI_res - mean(tqI_res);
-        velocitySegments = segdat(velocitySegments,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',0.01);
-        reflexTorqueSegments = segdat(tqI_res,'onsetPointer',switch_time(1:end-1),'segLength',segLength,'domainIncr',0.01);
+        onSetPointer=switch_time(1:end-1)
+        velocitySegments = segdat(velocitySegments,'onsetPointer',onSetPointer,'segLength',segLength,'domainIncr',0.01);
+        reflexTorqueSegments = segdat(tqI_res,'onsetPointer',onSetPointer,'segLength',segLength,'domainIncr',0.01);
         zReflex = cat(2,velocitySegments,reflexTorqueSegments);
-        reflex = nlbl(zReflex,'idMethod','subspace','nDelayInput',floor(delayinput/ts),...
-            'maxOrderNLE',maxordernle,'threshNSE',threshold,'hankleSize',hanklesize, ...
-            'orderSelectMethodLE','preset','orderLE',2);
+         reflex=nlbl('idMethod','subspace','inputDelay',floor(delayinput/ts),'threshNSE',threshold) ;
+        zReflex.domainStart=segmentDomainStart;
+        e=reflex.elements
+        N=e{1};
+        set(N,'polyOrderMax',maxordernle)
+        L=e{2}
+        set(L,'orderSelect','preset', 'hankleSize',hanklesize,'order',2)
+        e{1}=N;
+        e{2}=L;
+        set(reflex,'elements',e)
+        zReflex=nldat(zReflex.dataSet);
+        reflex = nlbl(reflex,zReflex);
+%         'idMethod','subspace','inputDelay',floor(delayinput/ts),...
+%             'maxOrderNLE',maxordernle,'threshNSE',threshold,'hankleSize',hanklesize, ...
+%             'orderSelectMethodLE','preset','orderLE',2);
         if ~isempty(reflex{2}.A)
             zReflex.domainStart=(zReflex.onsetPointer-1)*zReflex.domainIncr; 
                 tqR = nlsim(reflex,zReflex);
