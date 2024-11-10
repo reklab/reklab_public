@@ -145,11 +145,13 @@ classdef spect < nldat
         end
 
         function h=plotConfidence (S, plotType, plotColor)
+            %  h=plotConfidence (S, plotType, plotColor)
             % Plot spectrum with upper and lower confidence bounds
             % Plot Type can be linear, semilog, loglog
             %Inputs:  S - spectrum to plot
             % plotType - type of plot (['linear' 'semilog' 'loglog'
-            % plotColor - 
+            % plotColor -
+            % Outputs: 
             % h= cell arrau of pointers to the three lines. 
             if nargin<2
                 plotColor='r';
